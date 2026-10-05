@@ -1,0 +1,21 @@
+{
+  "id": "elder_fern",
+  "name": "Elder Fern",
+  "conversations": [
+    { "when": "!met_fern", "lines": [
+      { "speaker": "Elder Fern", "text": "Ah, there you are, little sprout! The Rootway inside the Great Hollow Oak is humming again." },
+      { "speaker": "Elder Fern", "text": "The river portal is awake. Mother Gloop has been sloshing about over there. Off you hop!" },
+      { "speaker": "Elder Fern", "text": "Remember: press jump in the air to jump again. Three times, if you're brave.", "set": "met_fern" }
+    ]},
+    { "when": "world_01_complete & !seeds_quest_started", "lines": [
+      { "speaker": "Elder Fern", "text": "You popped Mother Gloop? The whole village heard the splat!" },
+      { "speaker": "Elder Fern", "text": "Bring me any Glimmer Seeds you find. Mossbrook could use some colour.", "set": "seeds_quest_started" }
+    ]},
+    { "when": "seeds>=1", "lines": [
+      { "speaker": "Elder Fern", "text": "Every Glimmer Seed you bring home blooms into something lovely. Look at the flower beds!" }
+    ]},
+    { "when": "", "lines": [
+      { "speaker": "Elder Fern", "text": "Mind the river. Water is the only blue that bites." }
+    ]}
+  ]
+}

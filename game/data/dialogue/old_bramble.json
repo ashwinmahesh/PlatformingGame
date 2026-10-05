@@ -1,0 +1,16 @@
+{
+  "id": "old_bramble",
+  "name": "Old Bramble",
+  "conversations": [
+    { "when": "world_01_complete", "lines": [
+      { "speaker": "Old Bramble", "text": "The Glimmerbrook arch is in full bloom. Walk in any time you fancy a replay." }
+    ]},
+    { "when": "!met_bramble", "lines": [
+      { "speaker": "Old Bramble", "text": "I keep the Rootway. Each archway opens on a different world." },
+      { "speaker": "Old Bramble", "text": "That one leads to Glimmerbrook Wilds. The others? Not yet...", "set": "met_bramble" }
+    ]},
+    { "when": "", "lines": [
+      { "speaker": "Old Bramble", "text": "Walk into the swirling pool to travel. A tip: Plunge onto the spotted mushrooms." }
+    ]}
+  ]
+}

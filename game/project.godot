@@ -1,0 +1,70 @@
+; Engine configuration file.
+; Input actions are registered at startup by res://scripts/core/input_setup.gd (plan §9.6),
+; so the map is reproducible from code and can be remapped at runtime.
+
+config_version=5
+
+[application]
+
+config/name="Sproutblade"
+config/description="A cozy 3D platformer: triple jump, a sword that keeps you airborne, and slimes."
+run/main_scene="res://scenes/ui/title.tscn"
+config/features=PackedStringArray("4.7", "Forward Plus")
+
+[autoload]
+
+Events="*res://scripts/core/events.gd"
+Settings="*res://scripts/core/settings.gd"
+Progress="*res://scripts/core/progress.gd"
+Telemetry="*res://scripts/core/telemetry.gd"
+AudioDirector="*res://scripts/core/audio_director.gd"
+Router="*res://scripts/core/router.gd"
+DevTools="*res://scripts/core/dev_tools.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=2
+gdscript/warnings/unsafe_property_access=1
+gdscript/warnings/unsafe_method_access=1
+gdscript/warnings/unsafe_cast=1
+gdscript/warnings/unsafe_call_argument=1
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/window_width_override=1600
+window/size/window_height_override=900
+window/size/resizable=true
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/vsync/vsync_mode=1
+
+[layer_names]
+
+3d_physics/layer_1="world"
+3d_physics/layer_2="player_body"
+3d_physics/layer_3="enemy_body"
+3d_physics/layer_4="player_hurtbox"
+3d_physics/layer_5="enemy_hurtbox"
+3d_physics/layer_6="player_attack"
+3d_physics/layer_7="enemy_attack"
+3d_physics/layer_8="interact"
+3d_physics/layer_9="hazard"
+3d_physics/layer_10="camera_blocker"
+3d_physics/layer_11="pickup"
+3d_physics/layer_12="bounce"
+3d_physics/layer_13="reflectable"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+common/physics_ticks_per_second=60
+common/physics_interpolation=true
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=2
+environment/defaults/default_clear_color=Color(0.749, 0.902, 1, 1)
+lights_and_shadows/directional_shadow/size=4096

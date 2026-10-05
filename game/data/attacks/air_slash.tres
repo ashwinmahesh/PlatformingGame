@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="AttackDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"air_slash"
+startup = 4
+active = 5
+recovery = 10
+damage = 1
+lunge = 0.0
+combo_open = -1
+hitstop = 3
+knockback = 0.8
+radius = 1.05
+reach = 0.8
+is_air = true
+sfx = &"slash"

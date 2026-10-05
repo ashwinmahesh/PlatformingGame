@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="AttackDef" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/attack_def.gd" id="1"]
+[ext_resource type="Resource" path="res://data/attacks/spin_finisher.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"slash_2"
+startup = 5
+active = 4
+recovery = 14
+damage = 1
+lunge = 0.4
+combo_open = 8
+next = ExtResource("2")
+hitstop = 3
+knockback = 1.0
+radius = 0.95
+reach = 0.95
+is_air = false
+sfx = &"slash"

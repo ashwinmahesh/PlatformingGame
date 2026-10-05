@@ -1,0 +1,13 @@
+{
+  "id": "pip",
+  "name": "Pip",
+  "conversations": [
+    { "when": "!met_pip", "lines": [
+      { "speaker": "Pip", "text": "Bet you can't beat me across the rooftops!" },
+      { "speaker": "Pip", "text": "Step on the start ring by my hut, then reach the flag on the big red roof. I'll time you.", "set": "met_pip" }
+    ]},
+    { "when": "", "lines": [
+      { "speaker": "Pip", "text": "The start ring is right by my hut. Go go go!" }
+    ]}
+  ]
+}

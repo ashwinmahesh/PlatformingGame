@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WorldDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_01"
+display_name = "Glimmerbrook Wilds"
+scene_path = "res://scenes/levels/w1/glimmerbrook.tscn"
+entrance_spawn = &"w1_entrance"
+arena_exit_spawn = &"w1_arena_exit"
+spawn_ids = Array[StringName]([&"w1_entrance", &"w1_cp_stump", &"w1_cp_clearing", &"w1_cp_far_bank", &"w1_cp_lily_gate", &"w1_arena_exit"])
+seed_ids = Array[StringName]([&"w1_seed_fernway", &"w1_seed_clearing", &"w1_seed_river"])
+first_clear_heart_containers = 1

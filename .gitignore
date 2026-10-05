@@ -1,0 +1,6 @@
+# Godot cache and generated output (plan §7.6: never commit .godot/)
+game/.godot/
+captures/
+builds/
+*.tmp
+.DS_Store
