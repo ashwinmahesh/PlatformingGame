@@ -11,6 +11,7 @@ const KNOWN_FLAGS: Array[StringName] = [&"seeds_quest_started", &"met_fern", &"m
 const WORLD_DEFS: Array[WorldDef] = [
 	preload("res://data/worlds/world_01.tres"),
 	preload("res://data/worlds/world_02.tres"),
+	preload("res://data/worlds/world_03.tres"),
 ]
 const RETRY_SECONDS := 30.0
 

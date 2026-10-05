@@ -1,0 +1,14 @@
+{
+  "id": "sandy",
+  "name": "Sandy",
+  "conversations": [
+    { "when": "world_03_complete", "lines": [
+      { "speaker": "Sandy", "text": "You knocked the Rumble Golem flat! The whole canyon felt it. My tea did too." }
+    ]},
+    { "when": "", "lines": [
+      { "speaker": "Sandy", "text": "Welcome to Sunscorch Canyon! Mind the quicksand, it's slower than a sleepy cactus." },
+      { "speaker": "Sandy", "text": "Three Star Shards open the Golem Gate to the south: one on the mesas, one past the quicksand, one in the old ruins." },
+      { "speaker": "Sandy", "text": "Oh, and if you ever learn to make fire... those thorny brambles hide all sorts of things." }
+    ]}
+  ]
+}

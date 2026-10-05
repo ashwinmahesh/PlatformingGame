@@ -1,0 +1,88 @@
+extends TestCase
+## Every world in Progress.WORLD_DEFS (Build 4/5): its scene loads cleanly, every spawn, Glimmer
+## Seed and Star Shard its data names is really placed, and its goal exists. Boss worlds built on
+## BossWorld are then played to victory (teaching their ability) with no watchdog trips.
+
+
+func before_each() -> void:
+	Progress.new_game()
+
+
+func _load(w: WorldDef, spawn: StringName) -> Level:
+	Router.pending_spawn = spawn
+	var lvl := (load(w.scene_path) as PackedScene).instantiate() as Level
+	add_child(lvl)
+	await ticks(3)
+	return lvl
+
+
+func test_every_world_is_complete_and_consistent() -> void:
+	for w in Progress.WORLD_DEFS:
+		var lvl := await _load(w, w.entrance_spawn)
+		check(lvl.player != null, "%s: hero spawned" % w.id)
+		for sp in w.spawn_ids:
+			check(lvl.spawns.has(sp), "%s: spawn %s exists" % [w.id, sp])
+		var seeds: Array[StringName] = []
+		var shards: Array[StringName] = []
+		for n in lvl.find_children("*", "", true, false):
+			if n is Pickup:
+				var pk := n as Pickup
+				if pk.kind == Pickup.Kind.SEED:
+					seeds.append(pk.seed_id)
+				elif pk.kind == Pickup.Kind.SHARD:
+					shards.append(pk.seed_id)
+			elif n is TreasureChest and (n as TreasureChest).seed_id != &"":
+				seeds.append((n as TreasureChest).seed_id)
+		for s in w.seed_ids:
+			check(s in seeds, "%s: seed %s is placed" % [w.id, s])
+		check_eq(seeds.size(), w.seed_ids.size(), "%s: no extra seeds" % w.id)
+		for s in w.shard_ids:
+			check(s in shards, "%s: shard %s is placed" % [w.id, s])
+		if w.goal == &"star":
+			check(not lvl.find_children("*", "GoalStar", true, false).is_empty(), "%s: a Grand Star waits" % w.id)
+		else:
+			check(lvl.get("boss") != null, "%s: a boss waits" % w.id)
+		await ticks(120)
+		check(lvl.player.state != Player.State.DEAD, "%s: standing at the entrance is safe" % w.id)
+		lvl.queue_free()
+		await ticks(3)
+
+
+func test_boss_worlds_play_to_victory() -> void:
+	for w in Progress.WORLD_DEFS:
+		if w.goal != &"boss" or w.id == &"world_01":
+			continue
+		var lvl := await _load(w, w.entrance_spawn)
+		var bw := lvl as BossWorld
+		check(bw != null, "%s: built on BossWorld" % w.id)
+		if bw == null:
+			continue
+		var learned: Array[StringName] = []
+		var on_learn := func(a: StringName) -> void: learned.append(a)
+		Events.ability_learned.connect(on_learn)
+		var p := lvl.player
+		p.respawn_at(bw.arena_center + Vector3(0.0, 0.05, -6.0))
+		p.invuln_left = 9999.0
+		await ticks(3)
+		check(bw.fight_started, "%s: walking into the arena starts the fight" % w.id)
+		var boss := bw.boss
+		var hits := 0
+		for i in 9000:
+			await ticks(1)
+			p.invuln_left = 9999.0
+			if p.global_position.distance_to(bw.arena_center) > bw.arena_radius:
+				p.respawn_at(bw.arena_center + Vector3(0.0, 0.05, -6.0))
+			if boss.weak_open and boss.weak_invuln <= 0:
+				hits += boss.apply_weak_hit()
+			if boss.hp <= 0:
+				break
+		check_eq(boss.hp, 0, "%s: %s defeated" % [w.id, boss.boss_name])
+		check_eq(hits, boss.max_hp, "%s: one hit per opening" % w.id)
+		check_eq(boss.watchdog_trips, 0, "%s: no watchdog trips" % w.id)
+		await ticks(2)
+		check(Progress.is_world_complete(w.id), "%s: victory committed" % w.id)
+		check(w.ability in learned, "%s: clearing it teaches %s" % [w.id, w.ability])
+		check(p.has_ability(w.ability), "%s: the hero can now use %s" % [w.id, w.ability])
+		Events.ability_learned.disconnect(on_learn)
+		lvl.queue_free()
+		await ticks(3)

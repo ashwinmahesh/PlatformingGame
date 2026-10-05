@@ -26,6 +26,10 @@ func state_name() -> String:
 	return S.keys()[state]
 
 
+func visual_root() -> Node3D:
+	return _body
+
+
 func build_body() -> void:
 	_body = Node3D.new()
 	add_child(_body)

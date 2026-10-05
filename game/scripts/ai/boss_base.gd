@@ -61,6 +61,11 @@ func build_body() -> void:
 	pass
 
 
+## The node holding the boss's meshes (scaled for squash and the defeat wobble).
+func visual_root() -> Node3D:
+	return self
+
+
 func tick_state() -> void:
 	pass
 
@@ -194,7 +199,8 @@ func _physics_process(_delta: float) -> void:
 		return
 	if _defeat_ticks >= 0:
 		_defeat_ticks += 1
-		scale = Vector3.ONE * (1.0 + float(_defeat_ticks) / DEFEAT_TICKS * 0.4) + Vector3(sin(_defeat_ticks * 0.8), -sin(_defeat_ticks * 0.8), sin(_defeat_ticks * 0.8)) * 0.06
+		# Wobble the drawn body only: Jolt can't scale the hit areas non-uniformly.
+		visual_root().scale = Vector3.ONE * (1.0 + float(_defeat_ticks) / DEFEAT_TICKS * 0.4) + Vector3(sin(_defeat_ticks * 0.8), -sin(_defeat_ticks * 0.8), sin(_defeat_ticks * 0.8)) * 0.06
 		if _defeat_ticks >= DEFEAT_TICKS:
 			Fx.confetti(get_parent(), global_position + Vector3.UP * body_cy)
 			AudioDirector.play(&"boss_pop")

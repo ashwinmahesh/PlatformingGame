@@ -34,6 +34,10 @@ func state_name() -> String:
 	return S.keys()[state]
 
 
+func visual_root() -> Node3D:
+	return _body
+
+
 func _fur(parent: Node3D, r: float, pos: Vector3, color: StringName = &"foam") -> MeshInstance3D:
 	var s := SphereMesh.new()
 	s.radius = r

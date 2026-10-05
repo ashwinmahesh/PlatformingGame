@@ -626,3 +626,82 @@ static func stall(parent: Node, pos: Vector3, yaw: float, stripe: StringName = &
 		g.height = 0.3
 		Kit.mesh_instance(root, g, Kit.mat(goods[i % goods.size()], 0.01), Vector3(-1.2 + i * 0.4, 1.25, 0.1 * (i % 2)))
 	return root
+
+
+# --- Desert pieces (Build 5, Sunscorch Canyon) ----------------------------------------------------
+
+static func cactus_mesh(height: float, variant: int) -> ArrayMesh:
+	var key := "cactus|%.1f|%d" % [height, variant]
+	if _meshes.has(key):
+		return _meshes[key]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(key)
+	var st := _begin()
+	var r := clampf(height * 0.13, 0.4, 1.6)
+	var lo := vcol(&"leaf_dark")
+	var hi := vcol(&"kelp")
+	var prof: Array[Vector2] = [Vector2(r * 0.9, 0.0), Vector2(r, height * 0.1), Vector2(r, height * 0.85), Vector2(r * 0.75, height * 0.97), Vector2(0.0, height + r * 0.1)]
+	var pc: Array[Color] = [lo, lo.lerp(hi, 0.3), hi, hi, hi]
+	_lathe(st, Transform3D.IDENTITY, prof, pc, 12, false, 0.08, variant)
+	for side: float in [-1.0, 1.0]:
+		if variant % 2 == 1 and side > 0.0:
+			continue
+		var y0 := height * rng.randf_range(0.35, 0.55)
+		var out := r * 2.2
+		var elbow := Transform3D(Basis(Vector3.FORWARD, side * PI * 0.5), Vector3(side * r * 0.6, y0, 0.0))
+		var arm: Array[Vector2] = [Vector2(r * 0.55, 0.0), Vector2(r * 0.6, out)]
+		var ac: Array[Color] = [hi, hi]
+		_lathe(st, elbow, arm, ac, 10)
+		var up_h := height * rng.randf_range(0.25, 0.4)
+		var up: Array[Vector2] = [Vector2(r * 0.6, 0.0), Vector2(r * 0.6, up_h * 0.85), Vector2(r * 0.4, up_h * 0.98), Vector2(0.0, up_h + 0.1)]
+		var uc: Array[Color] = [hi, hi, hi, hi]
+		_lathe(st, Transform3D(Basis(), Vector3(side * (r * 0.6 + out), y0 - r * 0.6, 0.0)), up, uc, 10)
+		_sphere(st, Transform3D(Basis(), Vector3(side * (r * 0.6 + out), y0 - r * 0.6, 0.0)), r * 0.6, hi, hi, 1.0, 6, 10)
+	for i in 5:
+		var a := float(i) / 5.0 * TAU
+		var xf := Transform3D(Basis(Vector3.UP, -a) * Basis(Vector3.FORWARD, -0.3), Vector3(cos(a) * r * 0.35, height + r * 0.1, sin(a) * r * 0.35))
+		_sphere(st, xf, r * 0.35, vcol(&"candy_pink", 0.9), vcol(&"candy_pink"), 0.4, 5, 8)
+	_sphere(st, Transform3D(Basis(), Vector3(0.0, height + r * 0.2, 0.0)), r * 0.18, vcol(&"gold"), vcol(&"gold"), 0.7, 5, 8)
+	var mesh := st.commit()
+	_meshes[key] = mesh
+	return mesh
+
+
+## A giant storybook cactus (pink flower on top). Trunk collision only.
+static func cactus(parent: Node, pos: Vector3, height: float = 5.0, collide: bool = true) -> Node3D:
+	height = snappedf(height, 0.5)
+	var mi := _place(parent, cactus_mesh(height, absi(hash(pos)) % VARIANTS), pos, fposmod(pos.x * 1.3, TAU), 1.0)
+	if collide:
+		var body := Kit.static_body(mi, Vector3(0.0, height * 0.5, 0.0), Layers.WORLD)
+		var c := CylinderShape3D.new()
+		c.radius = clampf(height * 0.13, 0.4, 1.6)
+		c.height = height
+		Kit.add_shape(body, c)
+	return mi
+
+
+## A striped hot-air balloon to hang over a basket platform (decoration only).
+static func balloon(parent: Node3D, top: Vector3, colors: Array[StringName]) -> void:
+	var key := "balloon|%s" % [colors]
+	if not _meshes.has(key):
+		var st := _begin()
+		var prof: Array[Vector2] = []
+		var pc: Array[Color] = []
+		for i in 11:
+			var t := float(i) / 10.0
+			var ang := lerpf(-PI * 0.42, PI * 0.5, t)
+			prof.append(Vector2(cos(ang) * 2.2 * (1.0 - 0.25 * (1.0 - t)), 2.6 + sin(ang) * 2.4))
+			pc.append(vcol(colors[i % colors.size()]))
+		prof[10] = Vector2(0.0, 5.0)
+		_lathe(st, Transform3D.IDENTITY, prof, pc, 18)
+		_meshes[key] = st.commit()
+	var mi := _place(parent, _meshes[key], top + Vector3(0.0, 2.2, 0.0), 0.0, 1.0)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	for i in 4:
+		var a := float(i) / 4.0 * TAU + PI * 0.25
+		var rope := CylinderMesh.new()
+		rope.top_radius = 0.04
+		rope.bottom_radius = 0.04
+		rope.height = 3.0
+		var r := Kit.mesh_instance(parent, rope, Kit.mat(&"bark_dark"), top + Vector3(cos(a) * 1.75, 1.45, sin(a) * 1.75))
+		r.rotation = Vector3(sin(a) * 0.2, 0.0, -cos(a) * 0.2)

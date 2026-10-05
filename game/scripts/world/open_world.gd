@@ -137,6 +137,42 @@ func ramp(start_local: Vector3, length: float, rise: float, w: float, color: Str
 	return b
 
 
+## A little hut with one doorway (hidden areas). The door is &"break" (a cracked wall: 3 slashes
+## or a Plunge), &"bramble" (Fireball) or &"gate" (opened by a puzzle). Inside is P(base_local).
+## Returns the door.
+func alcove(base_local: Vector3, yaw: float, color: StringName, door: StringName = &"break") -> Node3D:
+	var root := Node3D.new()
+	root.position = P(base_local)
+	root.rotation.y = Y(yaw)
+	add_child(root)
+	var top := top_of(color)
+	var layers := Layers.WORLD | Layers.CAMERA_BLOCKER
+	Kit.block(root, Vector3(0.0, 4.0, -2.5), Vector3(6.0, 4.0, 1.0), color, layers, top)
+	Kit.block(root, Vector3(-2.5, 4.0, 0.0), Vector3(1.0, 4.0, 6.0), color, layers, top)
+	Kit.block(root, Vector3(2.5, 4.0, 0.0), Vector3(1.0, 4.0, 6.0), color, layers, top)
+	Kit.block(root, Vector3(0.0, 5.0, 0.3), Vector3(6.6, 1.0, 6.8), color, layers, top)
+	match door:
+		&"bramble":
+			var b := Bramble.new()
+			b.size = Vector3(4.0, 4.0, 1.0)
+			b.position = Vector3(0.0, 0.0, 2.5)
+			root.add_child(b)
+			return b
+		&"gate":
+			var g := VineGate.new()
+			g.width = 4.2
+			g.position = Vector3(0.0, 0.0, 2.6)
+			root.add_child(g)
+			g.set_closed.call_deferred(true)
+			return g
+	var w := BreakableWall.new()
+	w.size = Vector3(4.0, 4.0, 1.0)
+	w.color_name = color
+	w.position = Vector3(0.0, 0.0, 2.5)
+	root.add_child(w)
+	return w
+
+
 func water(center_local: Vector3, size: Vector2, depth: float = 5.0) -> Area3D:
 	var s := S(Vector3(size.x, 0.0, size.y))
 	return Kit.water(self, P(center_local), Vector2(s.x, s.z), depth)
