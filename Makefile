@@ -6,7 +6,7 @@ BLENDER ?= /Applications/Blender.app/Contents/MacOS/Blender
 G       := $(GODOT) --path game
 LOGCHK  := tools/logcheck.sh
 
-.PHONY: run import test loop lint check capture clip palette sfx music source-audio assets export-mac
+.PHONY: fetch-assets run import test loop lint check capture clip palette sfx music source-audio assets export-mac
 
 run:
 	$(G)
@@ -29,6 +29,9 @@ check: lint test
 # Window flashes on screen for a few seconds (rendering needs a real window).
 capture:
 	$(G) --resolution 1600x900 res://tools/capture/capture.tscn -- --scene=$(SCENE) --out=$(CURDIR)/captures/$(notdir $(basename $(SCENE)))
+
+fetch-assets:
+	tools/fetch_assets.sh
 
 palette:
 	python3 tools/gen_palette.py

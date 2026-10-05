@@ -4,3 +4,6 @@ captures/
 builds/
 *.tmp
 .DS_Store
+
+# Downloaded pack archives (re-fetch with `make fetch-assets`; see README)
+art/sourced/_dl/
