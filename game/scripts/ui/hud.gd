@@ -448,6 +448,12 @@ func _build_pause(root: Control) -> void:
 	inv.add_theme_color_override(&"font_color", Palette.INK)
 	inv.toggled.connect(func(on: bool) -> void: Settings.invert_y = on)
 	vb.add_child(inv)
+	var swap := CheckBox.new()
+	swap.text = "Move with arrow keys (camera on WASD)"
+	swap.button_pressed = Settings.arrows_move
+	swap.add_theme_color_override(&"font_color", Palette.INK)
+	swap.toggled.connect(func(on: bool) -> void: Settings.set_arrows_move(on))
+	vb.add_child(swap)
 	_button(vb, "Return to Mossbrook", func() -> void:
 		set_paused(false)
 		Progress.set_resume(Progress.HUB_SCENE, &"hub_rootway_exit")

@@ -16,11 +16,25 @@ const CAMERA_DISTANCE_MAX := 14.0
 var music_volume: float = 0.7
 var sfx_volume: float = 0.9
 var last_device_gamepad: bool = false
+## Ashwin: "player can switch a setting to instead use arrow keys for controls and WASD for camera".
+var arrows_move: bool = false
 
 
 func _ready() -> void:
-	InputSetup.register()
 	load_settings()
+	InputSetup.register()
+
+
+## Swap which keys move the hero and which turn the camera; applies at once and is saved.
+func set_arrows_move(on: bool) -> void:
+	arrows_move = on
+	InputSetup.register()
+	save_settings()
+
+
+## One line of keyboard help for the current layout.
+func controls_hint() -> String:
+	return ("Arrow keys move  ·  WASD camera" if arrows_move else "WASD move  ·  Arrow keys camera")
 
 
 func _input(event: InputEvent) -> void:
@@ -45,6 +59,7 @@ func load_settings() -> void:
 	camera_distance = clampf(float(cfg.get_value("camera", "distance", camera_distance)), CAMERA_DISTANCE_MIN, CAMERA_DISTANCE_MAX)
 	music_volume = float(cfg.get_value("audio", "music_volume", music_volume))
 	sfx_volume = float(cfg.get_value("audio", "sfx_volume", sfx_volume))
+	arrows_move = bool(cfg.get_value("controls", "arrows_move", arrows_move))
 
 
 func save_settings() -> void:
@@ -53,6 +68,7 @@ func save_settings() -> void:
 	cfg.set_value("controls", "stick_sensitivity", stick_sensitivity)
 	cfg.set_value("controls", "invert_x", invert_x)
 	cfg.set_value("controls", "invert_y", invert_y)
+	cfg.set_value("controls", "arrows_move", arrows_move)
 	cfg.set_value("camera", "auto_follow", auto_follow)
 	cfg.set_value("camera", "screen_shake", screen_shake)
 	cfg.set_value("camera", "distance", camera_distance)

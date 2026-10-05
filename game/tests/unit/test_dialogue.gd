@@ -5,7 +5,13 @@ extends TestCase
 func test_flags_exist_and_lines_pick() -> void:
 	var saved := Progress.data.duplicate(true)
 	Progress.data = Progress.fresh_data()
-	for npc: String in ["elder_fern", "pip", "old_bramble"]:
+	var npcs: Array[String] = []
+	for f in DirAccess.get_files_at(DialogueData.DIR):
+		if f.ends_with(".json"):
+			npcs.append(f.get_basename())
+	check(npcs.size() >= 12, "every villager has a dialogue file")
+	for npc: String in npcs:
+		check(Npc.MODELS.has(npc), "%s has a body" % npc)
 		var data := DialogueData.load_npc(npc)
 		check(not data.is_empty(), "%s loads" % npc)
 		for flag in DialogueData.referenced_flags(data):
