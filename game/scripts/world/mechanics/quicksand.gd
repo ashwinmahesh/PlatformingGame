@@ -3,6 +3,8 @@ extends Area3D
 ## Sinking sand: walking through it is slow (Build 4, Sunscorch Canyon). Jump across instead.
 
 var radius: float = 5.0
+## Build 6: &"sand", or &"tar" (Bubbleton's sticky tar pits: dark, bubbling).
+var look: StringName = &"sand"
 
 
 func _ready() -> void:
@@ -17,12 +19,20 @@ func _ready() -> void:
 	disc.bottom_radius = radius
 	disc.height = 0.06
 	disc.radial_segments = 32
-	Kit.mesh_instance(self, disc, Kit.mat(&"wood_warm"), Vector3(0.0, 0.03, 0.0))
+	var tar := look == &"tar"
+	Kit.mesh_instance(self, disc, Kit.mat(&"ink_navy" if tar else &"wood_warm"), Vector3(0.0, 0.03, 0.0))
+	if tar:
+		for i in 6:
+			var bub := SphereMesh.new()
+			bub.radius = 0.35
+			bub.height = 0.5
+			bub.is_hemisphere = true
+			Kit.mesh_instance(self, bub, Kit.mat(&"sea_violet"), Vector3(cos(i * 1.7) * radius * 0.6, 0.03, sin(i * 2.3) * radius * 0.6))
 	for i in 3:
 		var swirl := TorusMesh.new()
 		swirl.inner_radius = radius * (0.25 + i * 0.22)
 		swirl.outer_radius = swirl.inner_radius + 0.15
-		var t := Kit.mesh_instance(self, swirl, Kit.mat(&"bark_light"), Vector3(0.0, 0.05, 0.0))
+		var t := Kit.mesh_instance(self, swirl, Kit.mat(&"sea_violet" if tar else &"bark_light"), Vector3(0.0, 0.05, 0.0))
 		t.scale.y = 0.2
 
 

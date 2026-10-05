@@ -53,6 +53,7 @@ func build() -> void:
 	_shipwreck()
 	_coral_gardens()
 	_side_spots()
+	_landmarks()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life(&"kelp")
@@ -129,7 +130,7 @@ func _seafloor() -> void:
 func _busy(p: Vector3) -> bool:
 	if p.x > -76.0 and p.x < -46.0 and absf(p.z) < 26.0:
 		return true
-	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, 0.0), Vector3(-100.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), Vector3(60.0, 0.0, 62.0), Vector3(-62.0, 0.0, 70.0)]:
+	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, 0.0), Vector3(-100.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), Vector3(60.0, 0.0, 62.0), Vector3(-62.0, 0.0, 70.0), Vector3(-58.0, 0.0, -42.0), Vector3(50.0, 0.0, -46.0), Vector3(-40.0, 0.0, 40.0), Vector3(34.0, 0.0, 44.0), Vector3(36.0, 0.0, 12.0)]:
 		if Vector2(p.x - c.x, p.z - c.z).length() < 36.0:
 			return true
 	return absf(p.x) < 10.0 or absf(p.z) < 8.0
@@ -464,6 +465,204 @@ func _side_spots() -> void:
 		Whimsy.anemone(self, Vector3(-62.0 + _rng.randf_range(-9.0, 9.0), 0.0, 70.0 + _rng.randf_range(-9.0, 9.0)), &"candy_pink", 1.2)
 	Ambient.fish(self, Vector3(-62.0, 8.0, 70.0), 8.0, 7, &"gold")
 	add_capture_point("clam_beds", Vector3(40.0, 16.0, 84.0), Vector3(62.0, 6.0, 60.0))
+
+
+# --- Seafloor landmarks (Build 6, Ashwin: "more dense... more buildings and Bikini Bottom themed
+# things like the tar lake, a pineapple house, and a burger restaurant we can go inside") ------------
+# Homages in this world's own style and with its own names and folk.
+
+func _landmarks() -> void:
+	region(Vector3.ZERO)
+	_pineapple_row()
+	_grill(Vector3(50.0, 0.0, -46.0))
+	_tar_pits(Vector3(-40.0, 0.0, 40.0))
+	_glass_dome(Vector3(34.0, 0.0, 44.0))
+	_boat_lot(Vector3(36.0, 0.0, 12.0))
+	# Extra shell cottages and life through town.
+	Whimsy.shell_house(self, Vector3(-12.0, 0.0, 34.0), deg_to_rad(160.0), &"coral_orange", 0.8)
+	Whimsy.shell_house(self, Vector3(14.0, 0.0, -30.0), deg_to_rad(-20.0), &"gold", 0.8)
+	Whimsy.shell_house(self, Vector3(-32.0, 0.0, 2.0), deg_to_rad(90.0), &"mush_teal", 0.85)
+	for i in 4:
+		Ambient.fish(self, Vector3(_rng.randf_range(-50.0, 50.0), _rng.randf_range(5.0, 12.0), _rng.randf_range(-50.0, 50.0)), 7.0, 6, [&"candy_pink", &"gold", &"slime_blue", &"lime_pop"][i] as StringName)
+
+
+## Pineapple Row: a pineapple cottage, a stone-head house and a round rock house side by side.
+func _pineapple_row() -> void:
+	var pa := Vector3(-46.0, 0.0, -40.0)
+	var key := "pineapple"
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var prof: Array[Vector2] = []
+	var pc: Array[Color] = []
+	for i in 12:
+		var t := float(i) / 11.0
+		prof.append(Vector2(sin(t * PI * 0.92 + 0.12) * 5.2, t * 12.0))
+		pc.append(Whimsy.vcol(&"sunset_orange" if i % 2 == 0 else &"gold"))
+	prof[11] = Vector2(0.6, 12.0)
+	var mesh := MeshInstance3D.new()
+	mesh.name = key
+	add_child(mesh)
+	Whimsy._lathe(st, Transform3D.IDENTITY, prof, pc, 20)
+	mesh.mesh = st.commit()
+	mesh.material_override = Whimsy.material()
+	mesh.position = pa
+	var body := Kit.static_body(self, pa + Vector3(0.0, 5.5, 0.0))
+	var c := CylinderShape3D.new()
+	c.radius = 4.6
+	c.height = 11.0
+	Kit.add_shape(body, c)
+	# Spiky leaf crown: broad leaves you can stand on, stepping up to the top.
+	for i in 7:
+		var a := float(i) / 7.0 * TAU
+		var leaf := Kit.block(self, pa + Vector3(cos(a) * 3.2, 12.6 + (i % 2) * 1.6, sin(a) * 3.2), Vector3(3.6, 0.5, 1.8), &"kelp", Layers.WORLD | Layers.CAMERA_BLOCKER, &"lime_pop")
+		leaf.rotation = Vector3(0.0, -a, 0.35)
+	Kit.pillar(self, pa + Vector3(0.0, 15.0, 0.0), 1.6, 2.4, &"kelp", &"lime_pop")
+	seed_at(&"w4_seed_pineapple", pa + Vector3(0.0, 15.0, 0.0))
+	var door := CylinderMesh.new()
+	door.top_radius = 1.2
+	door.bottom_radius = 1.2
+	door.height = 0.2
+	Kit.mesh_instance(self, door, Kit.mat(&"slime_blue"), pa + Vector3(0.0, 1.4, 4.9)).rotation.x = PI * 0.5
+	for spec: Array in [[2.6, 5.5], [-2.6, 7.5]]:
+		var w := CylinderMesh.new()
+		w.top_radius = 0.7
+		w.bottom_radius = 0.7
+		w.height = 0.2
+		var wm := Kit.mesh_instance(self, w, Kit.mat(&"water_light"), pa + Vector3(spec[0] as float, spec[1] as float, 4.4))
+		wm.rotation.x = PI * 0.5
+		# Window boxes double as footholds up the side.
+		ledge(pa + Vector3(spec[0] as float, (spec[1] as float) - 1.0, 5.4), Vector3(2.4, 0.5, 1.6), &"wood_warm")
+	ledge(pa + Vector3(0.0, 9.5, 5.2), Vector3(2.4, 0.5, 1.6), &"wood_warm")
+	# Neighbours: a stone-head house and a round rock house.
+	prop(&"statue_head", pa + Vector3(-15.0, 0.0, -2.0), 0.3, 4.2)
+	var rock := SphereMesh.new()
+	rock.radius = 4.5
+	rock.height = 6.0
+	rock.is_hemisphere = true
+	var rb := Kit.static_body(self, pa + Vector3(-30.0, 0.0, 0.0))
+	Kit.mesh_instance(rb, rock, Kit.mat(&"stone_dark", 0.03))
+	var rs := SphereShape3D.new()
+	rs.radius = 4.5
+	Kit.add_shape(rb, rs)
+	Kit.pillar(self, pa + Vector3(-30.0, 6.5, 0.0), 0.25, 2.0, &"bark_mid")
+	sign_post(pa + Vector3(6.0, 0.0, 8.0), "Pineapple Row")
+	var nb := Npc.new()
+	nb.npc_id = "finn"
+	nb.display_name = "Finn's cousin Fern"
+	nb.bubble_helmet = true
+	nb.position = pa + Vector3(-8.0, 0.0, 7.0)
+	add_child(nb)
+	add_capture_point("pineapple_row", pa + Vector3(10.0, 12.0, 26.0), pa + Vector3(-12.0, 5.0, 0.0))
+
+
+## The Salty Shell Grill: a burger joint you can walk into. Its roof is a platform with a seed.
+func _grill(base: Vector3) -> void:
+	var w := 18.0
+	var d := 14.0
+	var h := 6.0
+	var wall := &"wood_plank"
+	var layers := Layers.WORLD | Layers.CAMERA_BLOCKER
+	Kit.block(self, base + Vector3(0.0, 0.3, 0.0), Vector3(w, 0.3, d), &"wood_warm", layers, &"")
+	Kit.block(self, base + Vector3(0.0, h, -d * 0.5 + 0.5), Vector3(w, h, 1.0), wall, layers, &"")
+	Kit.block(self, base + Vector3(-w * 0.5 + 0.5, h, 0.0), Vector3(1.0, h, d), wall, layers, &"")
+	Kit.block(self, base + Vector3(w * 0.5 - 0.5, h, 0.0), Vector3(1.0, h, d), wall, layers, &"")
+	# Front wall with a wide doorway.
+	Kit.block(self, base + Vector3(-5.5, h, d * 0.5 - 0.5), Vector3(7.0, h, 1.0), wall, layers, &"")
+	Kit.block(self, base + Vector3(5.5, h, d * 0.5 - 0.5), Vector3(7.0, h, 1.0), wall, layers, &"")
+	Kit.block(self, base + Vector3(0.0, h, d * 0.5 - 0.5), Vector3(4.0, 1.6, 1.0), wall, layers, &"")
+	Kit.block(self, base + Vector3(0.0, h + 0.8, 0.0), Vector3(w + 1.0, 0.8, d + 1.0), &"roof_red", layers, &"roof_red")
+	# Big clam sign on the roof.
+	var clam := SphereMesh.new()
+	clam.radius = 3.0
+	clam.height = 3.0
+	clam.is_hemisphere = true
+	var cm := Kit.mesh_instance(self, clam, Kit.mat(&"candy_pink", 0.04), base + Vector3(0.0, h + 3.8, d * 0.5 - 1.0))
+	cm.rotation.x = PI * 0.5
+	var title := Kit.label(self, base + Vector3(0.0, h + 2.6, d * 0.5 + 0.7), "The Salty Shell Grill", 72)
+	title.modulate = Palette.color(&"gold")
+	# Inside: counter, kitchen hatch, tables, a cook and a cashier.
+	Kit.block(self, base + Vector3(0.0, 1.4, -2.0), Vector3(10.0, 1.1, 1.4), &"coral_orange", layers, &"wood_plank")
+	for spec: Array in [[-5.5, 3.0], [5.5, 3.0], [-5.5, -0.5], [5.5, -0.5]]:
+		prop(&"q_table", base + Vector3(spec[0] as float, 0.3, spec[1] as float), 0.0, 1.0)
+		prop(&"q_bench", base + Vector3(spec[0] as float, 0.3, (spec[1] as float) + 1.4), 0.0, 1.0, false)
+	var grill := RoundMesh.box(Vector3(3.0, 1.2, 1.2), 0.2)
+	Kit.mesh_instance(self, grill, Kit.mat(&"stone_dark"), base + Vector3(-3.0, 0.9, -5.2))
+	var glow := OmniLight3D.new()
+	glow.light_color = Palette.color(&"sunset_orange")
+	glow.light_energy = 1.4
+	glow.omni_range = 6.0
+	glow.position = base + Vector3(-3.0, 2.0, -5.0)
+	add_child(glow)
+	for spec: Array in [["barnacle", "Chef Pincer", Vector3(-3.0, 0.3, -4.0)], ["coralie", "Cashier Coral", Vector3(2.0, 0.3, -3.2)]]:
+		var npc := Npc.new()
+		npc.npc_id = str(spec[0])
+		npc.display_name = str(spec[1])
+		npc.bubble_helmet = true
+		npc.position = base + (spec[2] as Vector3)
+		add_child(npc)
+	chest(base + Vector3(6.5, 0.3, -5.0), PI, &"w4_seed_grill")
+	# Barrels up the side to the roof.
+	ledge(base + Vector3(w * 0.5 + 2.0, 1.5, 4.0), Vector3(2.6, 1.5, 2.6), &"wood_warm")
+	ledge(base + Vector3(w * 0.5 + 2.0, 4.0, 0.0), Vector3(2.6, 1.0, 2.6), &"wood_warm")
+	heart_at(base + Vector3(0.0, h + 1.6, -3.0))
+	add_capture_point("grill", base + Vector3(-8.0, 9.0, 24.0), base + Vector3(0.0, 3.0, 0.0))
+	add_capture_point("grill_inside", base + Vector3(6.0, 3.5, 5.5), base + Vector3(-3.0, 1.5, -4.0))
+
+
+## The tar pits: sticky, slow-going tar with stepping stones and a seed on the far rock.
+func _tar_pits(c: Vector3) -> void:
+	for spec: Array in [[0.0, 0.0, 9.0], [10.0, 6.0, 6.0], [-9.0, 7.0, 6.0], [4.0, -9.0, 5.5]]:
+		var q := Quicksand.new()
+		q.look = &"tar"
+		q.radius = spec[2] as float
+		q.position = c + Vector3(spec[0] as float, 0.0, spec[1] as float)
+		add_child(q)
+	for spec: Array in [[-4.0, 1.2, 4.0], [3.0, 1.6, -1.0], [9.0, 2.2, 5.0], [12.0, 3.0, -2.0]]:
+		stone(c + Vector3(spec[0] as float, spec[1] as float, spec[2] as float), 2.0, 1.4, &"stone_dark", &"sea_violet")
+	Kit.pillar(self, c + Vector3(16.0, 4.2, -7.0), 2.4, 4.2, &"stone_dark", &"sand_light")
+	seed_at(&"w4_seed_tar", c + Vector3(16.0, 4.2, -7.0))
+	sign_post(c + Vector3(-12.0, 0.0, -10.0), "Tar Pits: sticky! Hop the rocks.")
+	Ambient.bubbles(self, c + Vector3(0.0, 0.5, 0.0), Vector3(14.0, 1.0, 14.0), 20)
+
+
+## A glass dome with a little tree and lawn inside; climb the frame to sit on top.
+func _glass_dome(c: Vector3) -> void:
+	disc(c + Vector3(0.0, 0.4, 0.0), 8.0, &"stone_light", &"grass_mid", 30)
+	var glass := SphereMesh.new()
+	glass.radius = 8.0
+	glass.height = 16.0
+	glass.is_hemisphere = true
+	Kit.mesh_instance(self, glass, Fx.fx_mat(Color(Palette.color(&"bubble"), 0.18)), c + Vector3(0.0, 0.4, 0.0))
+	var body := Kit.static_body(self, c + Vector3(0.0, 0.4, 0.0))
+	var sph := SphereShape3D.new()
+	sph.radius = 8.0
+	Kit.add_shape(body, sph)
+	Whimsy.tree(self, c + Vector3(1.0, 0.4, 1.0), &"autumn", 1.1)
+	for i in 4:
+		var a := float(i) / 4.0 * TAU + 0.4
+		var rib := TorusMesh.new()
+		rib.inner_radius = 7.9
+		rib.outer_radius = 8.2
+		var r := Kit.mesh_instance(self, rib, Kit.mat(&"slime_blue"), c + Vector3(0.0, 0.4, 0.0))
+		r.rotation = Vector3(PI * 0.5, a, 0.0)
+	for k in 3:
+		ledge(c + Vector3(-10.0 + k * 1.0, 2.0 + k * 2.5, -3.0 - k * 2.0), Vector3(2.6, 0.5, 2.6), &"slime_blue")
+	seed_at(&"w4_seed_dome", c + Vector3(0.0, 8.4, 0.0))
+
+
+## A lot of parked boat-cars to hop across.
+func _boat_lot(c: Vector3) -> void:
+	var cols: Array[StringName] = [&"roof_red", &"slime_blue", &"gold", &"mush_purple", &"lime_pop"]
+	for i in 6:
+		var p := c + Vector3((i % 3) * 7.0 - 7.0, 0.0, (i / 3) * 8.0 - 4.0)
+		var hull := Kit.block(self, p + Vector3(0.0, 1.4 + (i % 2) * 0.8, 0.0), Vector3(3.6, 1.4 + (i % 2) * 0.8, 5.5), cols[i % cols.size()], Layers.WORLD | Layers.CAMERA_BLOCKER, &"")
+		hull.rotation.y = 0.2 * (i % 3) - 0.2
+		var bubble := SphereMesh.new()
+		bubble.radius = 1.4
+		bubble.height = 1.6
+		bubble.is_hemisphere = true
+		Kit.mesh_instance(self, bubble, Fx.fx_mat(Color(Palette.color(&"bubble"), 0.4)), p + Vector3(0.0, 1.4 + (i % 2) * 0.8, 0.6))
+	sign_post(c + Vector3(-11.0, 0.0, 0.0), "Bubble Boat Lot", PI * 0.5)
 
 
 func _on_shards_complete() -> void:
