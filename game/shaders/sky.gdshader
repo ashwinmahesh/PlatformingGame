@@ -1,9 +1,9 @@
 // Three-colour gradient sky with a sun disc and soft cloud bands (plan §10.3).
 shader_type sky;
 
-uniform vec3 top_col : source_color = vec3(0.431, 0.776, 1.0);
-uniform vec3 horizon_col : source_color = vec3(0.749, 0.902, 1.0);
-uniform vec3 bottom_col : source_color = vec3(0.62, 0.84, 0.92);
+uniform vec3 top_col : source_color = vec3(0.486, 0.784, 0.949);
+uniform vec3 horizon_col : source_color = vec3(0.98, 0.9, 0.79);
+uniform vec3 bottom_col : source_color = vec3(0.93, 0.85, 0.74);
 
 void sky() {
 	float y = EYEDIR.y;

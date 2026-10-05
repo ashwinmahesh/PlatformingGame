@@ -10,5 +10,5 @@ scene_path = "res://scenes/levels/w1/glimmerbrook.tscn"
 entrance_spawn = &"w1_entrance"
 arena_exit_spawn = &"w1_arena_exit"
 spawn_ids = Array[StringName]([&"w1_entrance", &"w1_cp_stump", &"w1_cp_clearing", &"w1_cp_far_bank", &"w1_cp_waterfall", &"w1_cp_lily_gate", &"w1_arena_exit"])
-seed_ids = Array[StringName]([&"w1_seed_fernway", &"w1_seed_clearing", &"w1_seed_river", &"w1_seed_grove", &"w1_seed_waterfall", &"w1_seed_ridge"])
+seed_ids = Array[StringName]([&"w1_seed_fernway", &"w1_seed_clearing", &"w1_seed_river", &"w1_seed_grove", &"w1_seed_waterfall", &"w1_seed_ridge", &"w1_seed_hollow_tree", &"w1_seed_fern_nook", &"w1_seed_waterfall_cave", &"w1_seed_riverbed"])
 first_clear_heart_containers = 1

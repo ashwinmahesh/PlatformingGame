@@ -3,7 +3,7 @@ extends Node3D
 ## CameraRig -> yaw -> pitch -> SpringArm3D -> Camera3D (plan §3.5).
 ## Mario vertical framing: height follows the last ground, tracking up only 3 m above it.
 
-const ARM_LENGTH := 10.5
+const ZOOM_SPEED := 6.0
 const LOOK_AHEAD := 1.5
 const FOCUS_HEIGHT := 1.5
 const PITCH_MIN := deg_to_rad(-62.0)
@@ -22,6 +22,8 @@ var _ground_ref: float = 0.0
 var _look_ahead: Vector3 = Vector3.ZERO
 var _idle_input_time: float = 0.0
 var _trauma: float = 0.0
+var _zoom_dirty: bool = false
+var _tint: ColorRect
 var _recenter_tween: Tween
 
 
@@ -33,7 +35,7 @@ func _ready() -> void:
 	_pitch_node = Node3D.new()
 	_yaw_node.add_child(_pitch_node)
 	_arm = SpringArm3D.new()
-	_arm.spring_length = ARM_LENGTH
+	_arm.spring_length = Settings.camera_distance
 	_arm.collision_mask = Layers.CAMERA_BLOCKER
 	_arm.margin = 0.25
 	var sphere := SphereShape3D.new()
@@ -101,6 +103,15 @@ func _process(delta: float) -> void:
 	# Look input.
 	var sx := -1.0 if Settings.invert_x else 1.0
 	var sy := -1.0 if Settings.invert_y else 1.0
+	# Zoom: - and = keys (or the shoulder buttons) change the distance; it's saved in settings.
+	var zoom := Input.get_axis(&"cam_zoom_in", &"cam_zoom_out")
+	if absf(zoom) > 0.01:
+		Settings.camera_distance = clampf(Settings.camera_distance + zoom * ZOOM_SPEED * delta, Settings.CAMERA_DISTANCE_MIN, Settings.CAMERA_DISTANCE_MAX)
+		_zoom_dirty = true
+	elif _zoom_dirty:
+		_zoom_dirty = false
+		Settings.save_settings()
+	_arm.spring_length = lerpf(_arm.spring_length, Settings.camera_distance, 1.0 - exp(-8.0 * delta))
 	# Arrow keys or the right stick turn the camera (Build 2: no mouse look).
 	var stick := Input.get_vector(&"cam_left", &"cam_right", &"cam_up", &"cam_down")
 	var look := stick * Settings.stick_sensitivity * delta
@@ -127,7 +138,7 @@ func _process(delta: float) -> void:
 		var lateral := h_vel.normalized().dot(cam_right)
 		yaw -= lateral * Settings.auto_follow * 1.1 * delta
 	# Vertical framing (Mario rule).
-	if player.is_grounded():
+	if player.is_grounded() or player.is_swimming():
 		_ground_ref = p.y
 	var fy := _ground_ref
 	if p.y > _ground_ref + VERTICAL_SLACK:
@@ -148,6 +159,32 @@ func _process(delta: float) -> void:
 	player.camera_yaw = yaw
 	_trauma = maxf(_trauma - delta * 1.6, 0.0)
 	_apply()
+	_update_underwater_tint()
+
+
+## Blue-green tint while the camera itself is under the water surface (Build 3 swimming).
+func _update_underwater_tint() -> void:
+	if _tint == null:
+		var layer := CanvasLayer.new()
+		layer.layer = 5
+		add_child(layer)
+		_tint = ColorRect.new()
+		_tint.color = Color(Palette.color(&"water_mid"), 0.35)
+		_tint.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		layer.add_child(_tint)
+	var under := false
+	if camera != null and camera.is_inside_tree():
+		var pq := PhysicsPointQueryParameters3D.new()
+		pq.position = camera.global_position
+		pq.collide_with_areas = true
+		pq.collide_with_bodies = false
+		pq.collision_mask = Layers.HAZARD
+		for r in get_world_3d().direct_space_state.intersect_point(pq, 4):
+			var a := r["collider"] as Area3D
+			if a != null and StringName(str(a.get_meta(&"kind", ""))) == &"water":
+				under = true
+	_tint.visible = under
 
 
 func _apply() -> void:

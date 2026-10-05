@@ -187,7 +187,12 @@ func _stump_ring() -> void:
 
 func _fernway() -> void:
 	_plateau(Vector3(0.0, FERN_Y, -44.0), Vector2(20.0, 52.0))
-	Kit.block(self, Vector3(-11.5, FERN_Y + 9.0, -44.0), Vector3(3.0, 9.0 + FERN_Y - FLOOR_Y, 52.0), &"stone_dark")
+	# Left wall, with a half-hidden doorway into a nook (hidden area).
+	var wall_h := 9.0 + FERN_Y - FLOOR_Y
+	Kit.block(self, Vector3(-11.5, FERN_Y + 9.0, -32.5), Vector3(3.0, wall_h, 29.0), &"stone_dark")
+	Kit.block(self, Vector3(-11.5, FERN_Y + 9.0, -60.0), Vector3(3.0, wall_h, 20.0), &"stone_dark")
+	Kit.block(self, Vector3(-11.5, FERN_Y + 9.0, -48.5), Vector3(3.0, 5.5, 3.0), &"stone_dark")
+	_fern_nook()
 	Props.spawn(self, &"log_large", Vector3(-2.0, FERN_Y, -27.0), PI * 0.5, 1.6)
 	Props.spawn(self, &"log_large", Vector3(3.0, FERN_Y, -30.0), PI * 0.5 + 0.2, 1.3)
 	# Two Gloplets on the path, with a log-beam bypass along the right edge.
@@ -214,6 +219,53 @@ func _fernway() -> void:
 	add_capture_point("s2_springcap", Vector3(8.0, FERN_Y + 7.0, -50.0), Vector3(0.0, FERN_Y + 6.0, -68.0))
 
 
+func _fern_nook() -> void:
+	_plateau(Vector3(-16.5, FERN_Y, -48.5), Vector2(7.0, 10.0), &"stone_dark")
+	Kit.block(self, Vector3(-20.5, FERN_Y + 5.0, -48.5), Vector3(1.0, 5.0, 10.0), &"stone_dark")
+	Kit.block(self, Vector3(-16.5, FERN_Y + 5.0, -43.0), Vector3(9.0, 5.0, 1.0), &"stone_dark")
+	Kit.block(self, Vector3(-16.5, FERN_Y + 5.0, -54.0), Vector3(9.0, 5.0, 1.0), &"stone_dark")
+	Kit.block(self, Vector3(-16.5, FERN_Y + 6.0, -48.5), Vector3(9.0, 1.0, 12.0), &"stone_dark")
+	_seed(&"w1_seed_fern_nook", Vector3(-17.5, FERN_Y, -48.5))
+	add_capture_point("s2_nook", Vector3(-3.0, FERN_Y + 3.0, -44.0), Vector3(-11.0, FERN_Y + 1.5, -48.5))
+	Pickup.spawn_heart(self, Vector3(-15.5, FERN_Y + 0.5, -46.0))
+	Props.spawn(self, &"mushroom_red_group", Vector3(-19.0, FERN_Y, -51.0), 0.4, 1.4, false)
+	Props.spawn(self, &"mushroom_tan_group", Vector3(-19.0, FERN_Y, -46.0), 1.4, 1.3, false)
+	var glow := OmniLight3D.new()
+	glow.light_color = Palette.color(&"gold")
+	glow.light_energy = 1.2
+	glow.omni_range = 7.0
+	glow.position = Vector3(-16.5, FERN_Y + 2.5, -48.5)
+	add_child(glow)
+	# Bushes half-hide the doorway; a glint of light gives it away.
+	for z: float in [-46.8, -50.2]:
+		Props.spawn(self, &"bush_detailed", Vector3(-9.6, FERN_Y, z), z, 1.1, false)
+
+
+## A hollow tree you can walk into (hidden area): a ring of bark with a gap facing the meadow.
+func _hollow_tree(center: Vector3, radius: float, height: float, opening_yaw: float, seed_id: StringName) -> void:
+	var segments := 14
+	for i in segments:
+		var a := float(i) / segments * TAU
+		if absf(wrapf(a - opening_yaw, -PI, PI)) < 0.42:
+			continue
+		var p := center + Vector3(cos(a), 0.0, sin(a)) * radius
+		var seg := Kit.block(self, p + Vector3(0.0, height, 0.0), Vector3(1.6, height, 1.3), &"bark_mid")
+		seg.rotation.y = -a
+	Kit.pillar(self, center + Vector3(0.0, height + 0.8, 0.0), radius + 0.9, 1.6, &"bark_mid", &"bark_light")
+	for spec: Array in [[0.0, 3.0, 0.0, 4.6], [-2.2, 1.8, 1.5, 3.4], [2.4, 2.0, -1.2, 3.6], [0.5, 1.4, 2.8, 3.0]]:
+		var blob := Kit.blob(self, center + Vector3(spec[0] as float, height + 1.6 + (spec[1] as float), spec[2] as float), spec[3] as float, &"leaf_dark")
+		blob.mesh = RoundMesh.smoothed(blob.mesh)
+	_seed(seed_id, center + Vector3(0.0, 0.0, 0.0))
+	Pickup.spawn_heart(self, center + Vector3(0.8, 0.4, 0.8))
+	Props.spawn(self, &"mushroom_tan_group", center + Vector3(-1.0, 0.0, -0.8), 0.0, 1.2, false)
+	var glow := OmniLight3D.new()
+	glow.light_color = Palette.color(&"gold")
+	glow.light_energy = 1.4
+	glow.omni_range = 6.0
+	glow.position = center + Vector3(0.0, 2.0, 0.0)
+	add_child(glow)
+
+
 # --- Section 3: Sunny Clearing -----------------------------------------------------------------
 
 func _sunny_clearing() -> void:
@@ -232,7 +284,9 @@ func _sunny_clearing() -> void:
 	_tree_row(TOP_Y, -20.0, -74.0, -122.0, 7.0)
 	_tree_row(TOP_Y, 20.0, -74.0, -100.0, 7.0)
 	_scatter(TOP_Y, -20.0, 20.0, -72.0, -124.0, 70, [&"grass", &"grass_large", &"flower_red", &"flower_yellow", &"flower_purple", &"flower_red_b", &"flower_yellow_b", &"bush", &"mushroom_red"])
-	Props.spawn(self, &"rock_tall_b", Vector3(-17.0, TOP_Y, -110.0), 0.3, 1.4)
+	Props.spawn(self, &"rock_tall_b", Vector3(-17.0, TOP_Y, -88.0), 0.3, 1.4)
+	_hollow_tree(Vector3(-16.0, TOP_Y, -112.0), 3.0, 7.0, 0.0, &"w1_seed_hollow_tree")
+	add_capture_point("s3_hollow_tree", Vector3(-6.0, TOP_Y + 3.0, -108.0), Vector3(-16.0, TOP_Y + 2.0, -112.0))
 	Props.spawn(self, &"log_stack", Vector3(18.0, TOP_Y, -80.0), 0.6, 1.2)
 	add_capture_point("s3_clearing", Vector3(-16.0, TOP_Y + 9.0, -72.0), Vector3(0.0, TOP_Y, -102.0))
 
@@ -248,20 +302,33 @@ func _river() -> void:
 	# Build 2: every stepping piece is much wider (Ashwin: "too small").
 	for spec: Array in [[0.0, -131.0], [3.0, -137.5], [-1.5, -144.0]]:
 		Kit.pillar(self, Vector3(spec[0] as float, TOP_Y - 0.2, spec[1] as float), 2.5, 8.0, &"stone_light", &"moss")
+	# Build 3: slow, wide log rafts with flat tops (Ashwin: "too fast, too hard to land on").
 	for spec: Array in [[-151.0, 0.0], [-158.5, 0.5]]:
-		var log_p := MovingPlatform.new()
-		log_p.size = Vector3(6.5, 2.6, 2.6)
-		log_p.travel = Vector3(9.0, 0.0, 0.0)
-		log_p.period = 3.8
-		log_p.phase = spec[1] as float
-		log_p.position = Vector3(0.0, TOP_Y - 1.2, spec[0] as float)
-		log_p.rotation.y = PI * 0.5
-		add_child(log_p)
+		var raft := MovingPlatform.new()
+		raft.raft = true
+		raft.size = Vector3(6.5, 1.0, 4.2)
+		raft.travel = Vector3(6.0, 0.0, 0.0)
+		raft.period = 8.0
+		raft.phase = spec[1] as float
+		raft.color_name = &"bark_light"
+		raft.position = Vector3(0.0, TOP_Y - 0.6, spec[0] as float)
+		raft.rotation.y = PI * 0.5
+		add_child(raft)
 	for spec: Array in [[0.0, -165.5], [-2.0, -171.5], [1.0, -177.5]]:
 		var pad := SinkingPad.new()
 		pad.radius = 2.8
 		pad.position = Vector3(spec[0] as float, TOP_Y - 0.4, spec[1] as float)
 		add_child(pad)
+	# Underwater challenge: a seed in a sunken log ring on the riverbed (dive with Shift).
+	var bed := water_y - 4.0
+	Props.spawn(self, &"log_large", Vector3(-12.0, bed, -147.0), 0.4, 1.2, false)
+	Props.spawn(self, &"log_large", Vector3(-12.5, bed, -152.5), 2.2, 1.2, false)
+	for i in 5:
+		var a := float(i) / 5.0 * TAU
+		Props.spawn(self, &"rock_large_c", Vector3(-12.0 + cos(a) * 3.2, bed, -150.0 + sin(a) * 3.2), a, 0.8, false)
+	_seed(&"w1_seed_riverbed", Vector3(-12.0, bed + 0.3, -150.0))
+	for i in 6:
+		Props.spawn(self, &"waterplant", Vector3(_rng.randf_range(-20.0, 20.0), bed, _rng.randf_range(-130.0, -178.0)), _rng.randf() * TAU, 1.6, false)
 	# Optional seed island off the drifting logs.
 	Kit.pillar(self, Vector3(15.0, TOP_Y + 1.0, -154.0), 2.0, 9.0, &"stone_light", &"moss")
 	_seed(&"w1_seed_river", Vector3(15.0, TOP_Y + 1.0, -154.0))
@@ -310,17 +377,22 @@ func _bonk_grove() -> void:
 # --- Section 6: Waterfall Climb ----------------------------------------------------------------
 
 func _waterfall_climb() -> void:
-	_plateau(Vector3(0.0, TOP_Y, -257.0), Vector2(44.0, 18.0))
+	# Base ground, with a deep pool cut into it under the waterfall (Build 3: swimming).
+	_plateau(Vector3(7.0, TOP_Y, -257.0), Vector2(30.0, 18.0))
+	_plateau(Vector3(-20.0, TOP_Y, -257.0), Vector2(4.0, 18.0))
+	_plateau(Vector3(-13.0, TOP_Y, -250.5), Vector2(10.0, 5.0))
+	Kit.block(self, Vector3(-13.0, TOP_Y - 7.0, -259.5), Vector3(10.0, TOP_Y - 7.0 - FLOOR_Y, 13.0), &"stone_dark")
+	_plateau(Vector3(-16.5, TOP_Y, -272.5), Vector2(3.0, 15.0), &"stone_dark")
+	_pool_and_cave()
 	# The cliff: 18 m, climbed on ledges and a rising rock beside the waterfall.
-	_plateau(Vector3(0.0, RIDGE_Y, -273.0), Vector2(30.0, 14.0), &"stone_dark")
-	Kit.block(self, Vector3(-6.0, TOP_Y + 4.0, -259.0), Vector3(5.0, 4.0, 5.0), &"stone_light")
+	Kit.block(self, Vector3(-5.0, TOP_Y + 4.0, -259.0), Vector3(5.0, 4.0, 5.0), &"stone_light")
 	var riser := MovingPlatform.new()
 	riser.rounded = false
 	riser.size = Vector3(4.5, 1.0, 4.5)
 	riser.travel = Vector3(0.0, 8.0, 0.0)
 	riser.period = 4.0
 	riser.color_name = &"stone_light"
-	riser.position = Vector3(1.0, TOP_Y + 7.5, -258.0)
+	riser.position = Vector3(1.5, TOP_Y + 7.5, -258.0)
 	add_child(riser)
 	Kit.block(self, Vector3(8.0, TOP_Y + 9.5, -262.0), Vector3(5.5, 1.5, 5.5), &"stone_light")
 	_checkpoint(&"w1_cp_waterfall", Vector3(7.0, TOP_Y + 9.5, -261.0))
@@ -328,19 +400,54 @@ func _waterfall_climb() -> void:
 	_zone(&"w1_waterfall", Vector3(4.0, TOP_Y + 9.5, -262.0), 8.0, "Gloplets sit beside the ledges", [
 		[Vector3(5.5, 0.0, 0.0), GLOPLET], [Vector3(-3.0, 4.5, -2.5), GLOPLET],
 	])
-	_seed(&"w1_seed_waterfall", Vector3(1.0, TOP_Y + 17.0, -258.0))
-	# Waterfall into a pool beside the route.
+	_seed(&"w1_seed_waterfall", Vector3(1.5, TOP_Y + 17.0, -258.0))
 	var fall := BoxMesh.new()
 	fall.size = Vector3(8.0, WATERFALL_RISE + 2.0, 0.5)
 	var wm := ShaderMaterial.new()
 	wm.shader = preload("res://shaders/water.gdshader")
 	wm.set_shader_parameter(&"flow", Vector2(0.0, 3.0))
 	wm.set_shader_parameter(&"vertical", true)
-	Kit.mesh_instance(self, fall, wm, Vector3(-13.0, TOP_Y + WATERFALL_RISE * 0.5, -265.8))
-	Kit.water(self, Vector3(-13.0, TOP_Y - 0.4, -259.0), Vector2(10.0, 12.0))
-	Kit.block(self, Vector3(-13.0, TOP_Y - 2.0, -259.0), Vector3(10.0, 2.0, 12.0), &"stone_dark")
+	Kit.mesh_instance(self, fall, wm, Vector3(-13.0, TOP_Y + WATERFALL_RISE * 0.5, -265.6))
 	_sign(Vector3(10.0, TOP_Y, -250.0), "Ride the rising rock.\nTriple jump to the top!")
 	add_capture_point("s6_waterfall", Vector3(16.0, TOP_Y + 8.0, -244.0), Vector3(0.0, TOP_Y + 9.0, -262.0))
+	add_capture_point("s6_cave", Vector3(-9.0, TOP_Y + 3.0, -270.0), Vector3(-10.0, TOP_Y, -276.0))
+
+
+## The cliff above the pool, carved with a secret: dive under the lip behind the waterfall and
+## swim through a short tunnel into a dry grotto with a seed (hidden area + underwater challenge).
+func _pool_and_cave() -> void:
+	var surface := TOP_Y - 0.5
+	var bottom := TOP_Y - 7.0
+	Kit.water(self, Vector3(-12.5, surface, -266.0), Vector2(11.0, 26.0), surface - bottom)
+	# Solid cliff to the right of the cave.
+	Kit.block(self, Vector3(4.0, RIDGE_Y, -273.0), Vector3(22.0, RIDGE_Y - FLOOR_Y, 14.0), &"stone_dark")
+	# Left part of the cliff, built around the cavity (x -15..-7, z -266..-279).
+	Kit.block(self, Vector3(-11.0, bottom, -273.0), Vector3(8.0, bottom - FLOOR_Y, 14.0), &"stone_dark")
+	Kit.block(self, Vector3(-11.0, RIDGE_Y, -279.5), Vector3(8.0, RIDGE_Y - bottom, 1.0), &"stone_dark")
+	Kit.block(self, Vector3(-11.0, RIDGE_Y, -272.5), Vector3(8.0, RIDGE_Y - TOP_Y - 5.0, 13.0), &"stone_dark")
+	Kit.block(self, Vector3(-14.5, TOP_Y + 5.0, -272.5), Vector3(1.0, TOP_Y + 5.0 - bottom, 13.0), &"stone_dark")
+	# The lip: solid above the waterline, open underneath, so the way in is only by diving.
+	Kit.block(self, Vector3(-11.0, TOP_Y + 5.0, -267.5), Vector3(8.0, 5.0 + 2.5, 3.0), &"stone_dark")
+	# Grotto ledge with the reward, lit warm so it glows through the water.
+	Kit.block(self, Vector3(-9.0, TOP_Y + 0.2, -275.5), Vector3(4.0, 0.8, 5.0), &"stone_light")
+	_seed(&"w1_seed_waterfall_cave", Vector3(-9.0, TOP_Y + 0.2, -276.0))
+	Pickup.spawn_heart(self, Vector3(-8.0, TOP_Y + 0.6, -274.0))
+	for spec: Array in [[-10.5, -277.5], [-7.8, -277.8]]:
+		Props.spawn(self, &"mushroom_tan_group", Vector3(spec[0] as float, TOP_Y + 0.2, spec[1] as float), 0.3, 1.3, false)
+	var glow := OmniLight3D.new()
+	glow.light_color = Palette.color(&"gold")
+	glow.light_energy = 1.6
+	glow.omni_range = 9.0
+	glow.position = Vector3(-10.0, TOP_Y + 2.0, -274.0)
+	add_child(glow)
+	var tunnel_glow := OmniLight3D.new()
+	tunnel_glow.light_color = Palette.color(&"portal_teal")
+	tunnel_glow.light_energy = 1.2
+	tunnel_glow.omni_range = 6.0
+	tunnel_glow.position = Vector3(-11.0, TOP_Y - 4.0, -266.0)
+	add_child(tunnel_glow)
+	for i in 4:
+		Props.spawn(self, &"waterplant", Vector3(-17.0 + i * 2.5, bottom, -255.0 - i * 2.0), i * 1.3, 1.4, false)
 
 
 # --- Section 7: Ridge Run ----------------------------------------------------------------------

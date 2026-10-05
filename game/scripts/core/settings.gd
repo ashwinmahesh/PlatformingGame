@@ -9,6 +9,10 @@ var invert_x: bool = false
 var invert_y: bool = false
 var auto_follow: float = 0.5
 var screen_shake: float = 0.6
+## Camera distance from the hero in metres (Build 3: closer by default, adjustable).
+var camera_distance: float = 8.5
+const CAMERA_DISTANCE_MIN := 5.0
+const CAMERA_DISTANCE_MAX := 14.0
 var music_volume: float = 0.7
 var sfx_volume: float = 0.9
 var last_device_gamepad: bool = false
@@ -38,6 +42,7 @@ func load_settings() -> void:
 	invert_y = bool(cfg.get_value("controls", "invert_y", invert_y))
 	auto_follow = float(cfg.get_value("camera", "auto_follow", auto_follow))
 	screen_shake = float(cfg.get_value("camera", "screen_shake", screen_shake))
+	camera_distance = clampf(float(cfg.get_value("camera", "distance", camera_distance)), CAMERA_DISTANCE_MIN, CAMERA_DISTANCE_MAX)
 	music_volume = float(cfg.get_value("audio", "music_volume", music_volume))
 	sfx_volume = float(cfg.get_value("audio", "sfx_volume", sfx_volume))
 
@@ -50,6 +55,7 @@ func save_settings() -> void:
 	cfg.set_value("controls", "invert_y", invert_y)
 	cfg.set_value("camera", "auto_follow", auto_follow)
 	cfg.set_value("camera", "screen_shake", screen_shake)
+	cfg.set_value("camera", "distance", camera_distance)
 	cfg.set_value("audio", "music_volume", music_volume)
 	cfg.set_value("audio", "sfx_volume", sfx_volume)
 	cfg.save(PATH)

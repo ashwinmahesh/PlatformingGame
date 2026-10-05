@@ -4,7 +4,7 @@ extends Level
 ## No enemies ever appear here. Glimmer Seeds bloom into flower beds (plan pillar 5).
 
 const COURSE := "rooftop_course"
-const FLOWER_BEDS: Array[Vector3] = [Vector3(-6.0, 0.0, 9.0), Vector3(6.5, 0.0, 10.0), Vector3(-9.0, 0.0, -14.0), Vector3(9.5, 0.0, -14.5), Vector3(0.0, 0.0, 26.0), Vector3(-4.0, 0.0, 30.0)]
+const FLOWER_BEDS: Array[Vector3] = [Vector3(-6.0, 0.0, 9.0), Vector3(6.5, 0.0, 10.0), Vector3(-9.0, 0.0, -14.0), Vector3(9.5, 0.0, -14.5), Vector3(0.0, 0.0, 26.0), Vector3(-4.0, 0.0, 30.0), Vector3(4.0, 0.0, 30.0), Vector3(-13.0, 0.0, 22.0), Vector3(13.0, 0.0, 22.0), Vector3(0.0, 0.0, 33.0)]
 
 var _course_running: bool = false
 var _course_time: float = 0.0

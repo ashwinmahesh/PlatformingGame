@@ -8,6 +8,7 @@ var jump_held: bool = false
 var jump_released: bool = false
 var attack_pressed: bool = false
 var plunge_pressed: bool = false
+var plunge_held: bool = false
 var interact_pressed: bool = false
 var lock_pressed: bool = false
 var lock_held: bool = false

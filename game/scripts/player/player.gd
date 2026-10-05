@@ -9,7 +9,7 @@ signal hp_changed(hp: int, max_hp: int)
 signal died
 signal bounced(height: float)
 
-enum State { NORMAL, ATTACK, PLUNGE, PLUNGE_LAND, HURT, TALK, FROZEN, DEAD }
+enum State { NORMAL, ATTACK, PLUNGE, PLUNGE_LAND, HURT, TALK, FROZEN, DEAD, SWIM }
 
 const ATTACK_SLASH_1 := preload("res://data/attacks/slash_1.tres")
 const ATTACK_AIR := preload("res://data/attacks/air_slash.tres")
@@ -30,6 +30,12 @@ const ATTACK_CLIPS: Dictionary[StringName, StringName] = {
 	&"air_slash": &"1H_Melee_Attack_Chop",
 }
 const STEP_PROBE := 0.45
+## Swimming (Build 3): float with your head above water, dive with Shift, rise with Space.
+const BREATH_MAX := 10.0
+const SWIM_SPEED := 5.5
+const SWIM_VERTICAL := 4.0
+const SWIM_HOP_HEIGHT := 2.6
+const DROWN_INTERVAL := 1.5
 const STEP_HOLD_TICKS := 8
 
 @export var settings: MovementSettings = preload("res://data/movement/hero_movement.tres")
@@ -61,6 +67,11 @@ var _landed_at_tick: int = -1000
 var _speed_at_landing: float = 0.0
 var _skidding: bool = false
 var _step_hold: int = 0
+var breath: float = BREATH_MAX
+var water_surface: float = NAN
+var _drown_left: float = 0.0
+var _bubble_left: float = 0.0
+var _swim_grace: float = 0.0
 
 # Combat (plan §4.1)
 var attack: AttackDef
@@ -279,6 +290,7 @@ func on_hazard(kind: StringName = &"water") -> void:
 
 
 func respawn_at(pos: Vector3, look: Vector3 = Vector3.FORWARD) -> void:
+	breath = BREATH_MAX
 	global_position = pos
 	velocity = Vector3.ZERO
 	reset_physics_interpolation()
@@ -370,6 +382,16 @@ func _physics_process(delta: float) -> void:
 
 
 func _movement_tick(delta: float, inp: PlayerInput) -> void:
+	water_surface = _sample_water()
+	if _swim_grace > 0.0:
+		_swim_grace -= delta
+	if not is_nan(water_surface) and _swim_grace <= 0.0 and state in [State.NORMAL, State.ATTACK, State.PLUNGE, State.PLUNGE_LAND, State.HURT] and global_position.y + 0.9 < water_surface:
+		_enter_swim()
+	if state == State.SWIM:
+		_swim_tick(delta, inp)
+		return
+	if breath < BREATH_MAX:
+		breath = minf(breath + delta * 4.0, BREATH_MAX)
 	# 2. Read contact from last tick's move.
 	if _ignore_floor_ticks > 0:
 		_ignore_floor_ticks -= 1
@@ -417,8 +439,111 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 		_sample_safe_ground()
 
 
+# --- Swimming (Build 3) -------------------------------------------------------------------------
+
+## Surface height of the water the hero's chest is in, or NAN.
+func _sample_water() -> float:
+	var pq := PhysicsPointQueryParameters3D.new()
+	pq.position = global_position + Vector3.UP * 0.7
+	pq.collide_with_areas = true
+	pq.collide_with_bodies = false
+	pq.collision_mask = Layers.HAZARD
+	for r in get_world_3d().direct_space_state.intersect_point(pq, 4):
+		var a := r["collider"] as Area3D
+		if a != null and StringName(str(a.get_meta(&"kind", ""))) == &"water":
+			return float(a.get_meta(&"surface", a.global_position.y))
+	return NAN
+
+
+func is_swimming() -> bool:
+	return state == State.SWIM
+
+
+func head_underwater() -> bool:
+	return state == State.SWIM and not is_nan(water_surface) and global_position.y + 1.25 < water_surface
+
+
+func _enter_swim() -> void:
+	state = State.SWIM
+	attack = null
+	stored_attack_tick = -1
+	buffer_age = -1
+	jumps_used = 0
+	air_slash_ready = false
+	_flip_speed = 0.0
+	velocity.y *= 0.25
+	velocity.x *= 0.5
+	velocity.z *= 0.5
+	AudioDirector.play(&"splash", -4.0)
+	Fx.burst(get_parent(), Vector3(global_position.x, water_surface, global_position.z), Palette.color(&"foam"), 14, 4.0, 0.14)
+	Telemetry.log_event("swim", {"pos": global_position})
+
+
+func _swim_tick(delta: float, inp: PlayerInput) -> void:
+	if is_nan(water_surface):
+		state = State.NORMAL
+		return
+	if invuln_left > 0.0:
+		invuln_left -= delta
+	var float_y := water_surface - 1.05
+	# Breath: drains with your head under, refills fast at the surface.
+	if head_underwater():
+		breath = maxf(breath - delta, 0.0)
+		_bubble_left -= delta
+		if _bubble_left <= 0.0:
+			_bubble_left = 0.6
+			Fx.burst(get_parent(), global_position + Vector3.UP * 1.3, Palette.color(&"foam"), 2, 1.0, 0.07, 2.0, 0.8)
+		if breath <= 0.0:
+			_drown_left -= delta
+			if _drown_left <= 0.0:
+				_drown_left = DROWN_INTERVAL
+				hp = maxi(hp - 1, 0)
+				hp_changed.emit(hp, max_hp)
+				AudioDirector.play(&"hurt")
+				Telemetry.log_event("hurt", {"cause": "drown", "halves": 1, "hp": hp, "pos": global_position})
+				if hp <= 0:
+					_die("drown")
+					return
+	else:
+		breath = minf(breath + delta * 4.0, BREATH_MAX)
+		_drown_left = 0.0
+	# Hop out from the surface (high enough to climb a bank).
+	if inp.jump_pressed and global_position.y > float_y - 0.4:
+		state = State.NORMAL
+		_swim_grace = 0.35
+		velocity.y = settings.launch_velocity(SWIM_HOP_HEIGHT)
+		jumps_used = 1
+		air_slash_ready = true
+		_left_ground_by_launch = true
+		_ignore_floor_ticks = 2
+		was_grounded = false
+		AudioDirector.play(&"jump1", -3.0)
+		Fx.burst(get_parent(), Vector3(global_position.x, water_surface, global_position.z), Palette.color(&"foam"), 10, 3.0, 0.12)
+		move_and_slide()
+		return
+	# Swim: horizontal from the stick, vertical from Space (up) and Shift (down), else float up.
+	var dir := _move_basis() * Vector3(inp.move.x, 0.0, -inp.move.y)
+	var target := dir.limit_length(1.0) * SWIM_SPEED * (0.8 if head_underwater() else 1.0)
+	var h := Vector3(velocity.x, 0.0, velocity.z).move_toward(target, 16.0 * delta)
+	var want_vy := clampf((float_y - global_position.y) * 3.0, -2.0, 3.5)
+	if inp.plunge_held:
+		want_vy = -SWIM_VERTICAL
+	elif inp.jump_held and head_underwater():
+		want_vy = SWIM_VERTICAL
+	velocity = Vector3(h.x, move_toward(velocity.y, want_vy, 14.0 * delta), h.z)
+	if velocity.y > 0.0 and global_position.y > float_y:
+		velocity.y = minf(velocity.y, (float_y - global_position.y) * 5.0 + 0.3)
+	if dir.length() > 0.05:
+		var ang := facing.signed_angle_to(dir.normalized(), Vector3.UP)
+		facing = facing.rotated(Vector3.UP, clampf(ang, -deg_to_rad(360.0) * delta, deg_to_rad(360.0) * delta)).normalized()
+	move_and_slide()
+	# Wading out: feet on the bottom with the chest above the surface.
+	if is_on_floor() and global_position.y + 0.9 >= water_surface:
+		state = State.NORMAL
+
+
 func _accepts_jump_press() -> bool:
-	return state in [State.NORMAL, State.ATTACK]
+	return state in [State.NORMAL, State.ATTACK, State.SWIM]
 
 
 func _buffer_paused() -> bool:
@@ -1023,7 +1148,7 @@ func _process(delta: float) -> void:
 		shadow.global_position = p + Vector3.UP * 0.3
 		shadow.size = Vector3(s, 1.6, s)
 	# Landing marker: shows where the current arc meets the ground (Build 2 depth-perception aid).
-	var airborne := not is_on_floor() and state not in [State.DEAD, State.FROZEN]
+	var airborne := not is_on_floor() and state not in [State.DEAD, State.FROZEN, State.SWIM]
 	landing_marker.visible = false
 	if airborne:
 		var land: Variant = predict_landing()
@@ -1058,6 +1183,7 @@ func _update_visual(delta: float) -> void:
 	else:
 		_flip_angle = 0.0
 	body_pivot.rotation = Vector3(-_flip_angle, 0.0, 0.0)
+	body_pivot.position.y = 0.6
 	if _skidding:
 		body_pivot.rotation.x = 0.3
 	# Hurtbox shrinks during the J3 tuck-flip.
@@ -1111,6 +1237,12 @@ func _animate(grounded: bool, h_speed: float) -> void:
 			return
 		State.PLUNGE_LAND:
 			hero.play(&"Jump_Land", 0.05, 1.4)
+			return
+		State.SWIM:
+			var moving := h_speed > 0.8
+			hero.play(&"Running_A" if moving else &"Idle", 0.2, 0.55 if moving else 0.6)
+			body_pivot.rotation.x = -1.15 if moving or head_underwater() else -0.15
+			body_pivot.position.y = 0.6 + sin(Time.get_ticks_msec() * 0.004) * 0.05
 			return
 		State.ATTACK:
 			if attack != null:

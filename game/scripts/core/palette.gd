@@ -42,27 +42,27 @@ const CELLS: Dictionary[StringName, Vector2i] = {
 
 ## The same colours as Color values, for UI, particles and lights.
 const COLORS: Dictionary[StringName, Color] = {
-	&"grass_light": Color("#8BD450"),
-	&"grass_mid": Color("#5DB33B"),
-	&"leaf_dark": Color("#2F7D3A"),
-	&"leaf_teal": Color("#3FA58A"),
-	&"moss": Color("#A6C94A"),
-	&"bark_light": Color("#B77B4A"),
-	&"bark_mid": Color("#8A5432"),
-	&"bark_dark": Color("#5B3420"),
-	&"wood_plank": Color("#D9A066"),
-	&"wood_warm": Color("#C07A3E"),
-	&"roof_red": Color("#E0524A"),
-	&"roof_blue": Color("#4A7FD9"),
-	&"roof_teal": Color("#3FB8AF"),
-	&"thatch": Color("#E8C46A"),
-	&"stone_light": Color("#C9C2B5"),
-	&"stone_dark": Color("#8E8A85"),
+	&"grass_light": Color("#A9D65A"),
+	&"grass_mid": Color("#82BD45"),
+	&"leaf_dark": Color("#4F8A35"),
+	&"leaf_teal": Color("#69A85A"),
+	&"moss": Color("#BFCB4E"),
+	&"bark_light": Color("#C98A52"),
+	&"bark_mid": Color("#9C6038"),
+	&"bark_dark": Color("#6E3F25"),
+	&"wood_plank": Color("#E6AE6E"),
+	&"wood_warm": Color("#CF8442"),
+	&"roof_red": Color("#E8664A"),
+	&"roof_blue": Color("#5B86D0"),
+	&"roof_teal": Color("#4FB8A4"),
+	&"thatch": Color("#F0CB70"),
+	&"stone_light": Color("#DCCBB2"),
+	&"stone_dark": Color("#A38F7C"),
 	&"water_light": Color("#7FE0F0"),
 	&"water_mid": Color("#39A9DB"),
 	&"water_deep": Color("#2A6FB0"),
 	&"foam": Color("#F4FBFF"),
-	&"sky_top": Color("#6EC6FF"),
+	&"sky_top": Color("#7CC8F2"),
 	&"portal_magenta": Color("#E05AD6"),
 	&"portal_teal": Color("#4DF0D2"),
 	&"gold": Color("#FFC83D"),
@@ -76,9 +76,9 @@ const COLORS: Dictionary[StringName, Color] = {
 	&"gloop_pink": Color("#F2709C"),
 }
 
-const INK := Color("#2B2238")
-const SHADOW_TINT := Color("#6B5B95")
-const FOG := Color("#BFE6FF")
+const INK := Color("#3A2633")
+const SHADOW_TINT := Color("#8C6A8C")
+const FOG := Color("#F6E4CC")
 
 
 static func cell(color_name: StringName) -> Vector2i:

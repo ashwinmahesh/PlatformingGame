@@ -7,22 +7,30 @@ const SLIME := preload("res://shaders/slime.gdshader")
 const OUTLINE := preload("res://shaders/outline.gdshader")
 const PALETTE_TEX := preload("res://assets/textures/palette.png")
 
+## Default top colour for blocks of a given side colour.
+const TOPS: Dictionary[StringName, StringName] = {&"bark_mid": &"grass_mid", &"bark_dark": &"grass_mid", &"bark_light": &"moss", &"stone_dark": &"moss", &"stone_light": &"moss"}
+
 static var _cache: Dictionary[String, Material] = {}
 
 
 static func clear_cache() -> void:
 	_cache.clear()
+	RoundMesh.clear_cache()
 
 
-## Shared material for a palette colour. outline_width > 0 adds the ink outline pass.
-static func mat(color_name: StringName, outline_width: float = 0.0) -> Material:
-	var key := "%s|%.3f" % [color_name, outline_width]
+## Shared material for a palette colour. outline_width > 0 adds the ink outline pass; `top`
+## gives upward-facing surfaces a second colour (grass on top of a rounded plateau).
+static func mat(color_name: StringName, outline_width: float = 0.0, top: StringName = &"") -> Material:
+	var key := "%s|%.3f|%s" % [color_name, outline_width, top]
 	if _cache.has(key):
 		return _cache[key]
 	var m := ShaderMaterial.new()
 	m.shader = TOON
 	m.set_shader_parameter(&"palette_tex", PALETTE_TEX)
 	m.set_shader_parameter(&"cell", Vector2(Palette.cell(color_name)))
+	if top != &"":
+		m.set_shader_parameter(&"top_cell", Vector2(Palette.cell(top)))
+		m.set_shader_parameter(&"top_amount", 1.0)
 	if outline_width > 0.0:
 		m.next_pass = outline(outline_width)
 	_cache[key] = m
@@ -78,44 +86,28 @@ static func add_shape(body: CollisionObject3D, shape: Shape3D, offset: Vector3 =
 	return cs
 
 
-## Solid box. pos is the centre of the top face, which is how level layouts are written.
+## Solid box with softly rounded edges (Build 3). pos is the centre of the top face, which is
+## how level layouts are written. Dirt and stone blocks get a grassy or mossy top.
 static func block(parent: Node, top_center: Vector3, size: Vector3, color_name: StringName, layers: int = Layers.WORLD | Layers.CAMERA_BLOCKER) -> StaticBody3D:
 	var body := static_body(parent, top_center - Vector3(0.0, size.y * 0.5, 0.0), layers)
 	var shape := BoxShape3D.new()
 	shape.size = size
 	add_shape(body, shape)
-	var bm := BoxMesh.new()
-	bm.size = size
-	mesh_instance(body, bm, mat(color_name))
-	# Grassy lighter top so safe surfaces read (plan §10.1).
-	if color_name in [&"bark_mid", &"bark_dark", &"stone_dark"] and size.x > 1.5 and size.z > 1.5:
-		var cap := BoxMesh.new()
-		cap.size = Vector3(size.x + 0.04, 0.18, size.z + 0.04)
-		mesh_instance(body, cap, mat(&"grass_mid" if color_name != &"stone_dark" else &"moss"), Vector3(0.0, size.y * 0.5 - 0.08, 0.0))
+	var radius := clampf(minf(size.x, minf(size.y, size.z)) * 0.3, 0.12, 1.1)
+	var top: StringName = TOPS.get(color_name, &"") if size.x > 1.5 and size.z > 1.5 else &""
+	mesh_instance(body, RoundMesh.box(size, radius), mat(color_name, 0.0, top))
 	return body
 
 
-## Solid cylinder (stumps, stones, mushroom stems). pos is the centre of the top face.
+## Solid cylinder (stumps, stones, mushroom stems) with a rounded rim. pos is the centre of the
+## top face. top_color tints the upward-facing top.
 static func pillar(parent: Node, top_center: Vector3, radius: float, height: float, color_name: StringName, top_color: StringName = &"", layers: int = Layers.WORLD | Layers.CAMERA_BLOCKER) -> StaticBody3D:
 	var body := static_body(parent, top_center - Vector3(0.0, height * 0.5, 0.0), layers)
 	var shape := CylinderShape3D.new()
 	shape.radius = radius
 	shape.height = height
 	add_shape(body, shape)
-	var cm := CylinderMesh.new()
-	cm.top_radius = radius
-	cm.bottom_radius = radius * 1.06
-	cm.height = height
-	cm.radial_segments = 14
-	cm.rings = 1
-	mesh_instance(body, cm, mat(color_name))
-	if top_color != &"":
-		var cap := CylinderMesh.new()
-		cap.top_radius = radius * 0.98
-		cap.bottom_radius = radius * 1.02
-		cap.height = 0.14
-		cap.radial_segments = 14
-		mesh_instance(body, cap, mat(top_color), Vector3(0.0, height * 0.5 - 0.06, 0.0))
+	mesh_instance(body, RoundMesh.pillar(radius, height, clampf(radius * 0.25, 0.08, 0.5)), mat(color_name, 0.0, top_color))
 	return body
 
 
@@ -173,13 +165,13 @@ static func blob(parent: Node, pos: Vector3, radius: float, color_name: StringNa
 	var sm := SphereMesh.new()
 	sm.radius = radius
 	sm.height = radius * 1.4
-	sm.radial_segments = 8
-	sm.rings = 4
+	sm.radial_segments = 18
+	sm.rings = 9
 	return mesh_instance(parent, sm, mat(color_name), pos)
 
 
-## Water surface with a hazard volume underneath (plan §5.3: water is a hazard, no swimming).
-static func water(parent: Node, center: Vector3, size: Vector2) -> Area3D:
+## Water surface with a swimmable volume underneath (Build 3: the hero swims; enemies still sink).
+static func water(parent: Node, center: Vector3, size: Vector2, depth: float = 5.0) -> Area3D:
 	var pm := PlaneMesh.new()
 	pm.size = size
 	pm.subdivide_width = int(size.x / 2.0)
@@ -190,10 +182,12 @@ static func water(parent: Node, center: Vector3, size: Vector2) -> Area3D:
 	var area := Area3D.new()
 	area.collision_layer = Layers.HAZARD
 	area.collision_mask = Layers.PLAYER_BODY | Layers.ENEMY_BODY
-	area.position = center + Vector3(0.0, -2.6, 0.0)
+	area.position = center + Vector3(0.0, -0.05 - depth * 0.5, 0.0)
 	area.monitorable = true
+	area.set_meta(&"kind", &"water")
+	area.set_meta(&"surface", center.y)
 	var shape := BoxShape3D.new()
-	shape.size = Vector3(size.x, 5.0, size.y)
+	shape.size = Vector3(size.x, depth, size.y)
 	add_shape(area, shape)
 	area.add_to_group(&"hazard")
 	parent.add_child(area)

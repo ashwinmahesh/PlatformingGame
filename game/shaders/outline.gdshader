@@ -2,7 +2,7 @@
 shader_type spatial;
 render_mode unshaded, cull_front, depth_draw_opaque;
 
-uniform vec3 ink : source_color = vec3(0.169, 0.133, 0.22);
+uniform vec3 ink : source_color = vec3(0.227, 0.149, 0.2);
 uniform float width = 0.03;
 
 void vertex() {

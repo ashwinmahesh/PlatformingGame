@@ -6,6 +6,7 @@ var player: Player
 var world_id: StringName = &""
 
 var _hearts: HeartsDisplay
+var _breath: BreathDisplay
 var _seeds: Label
 var _notice: Label
 var _prompt: Label
@@ -40,6 +41,9 @@ func _ready() -> void:
 	_hearts = HeartsDisplay.new()
 	_hearts.position = Vector2(40, 32)
 	root.add_child(_hearts)
+	_breath = BreathDisplay.new()
+	_breath.position = Vector2(44, 100)
+	root.add_child(_breath)
 	_seeds = _label(root, "", 34, HORIZONTAL_ALIGNMENT_RIGHT)
 	_seeds.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	_seeds.offset_left = -360
@@ -278,6 +282,8 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed(&"pause") and not Router.busy:
 		set_paused(not get_tree().paused)
 	_update_prompt()
+	if player != null and is_instance_valid(player):
+		_breath.set_breath(player.breath / Player.BREATH_MAX, player.head_underwater() or player.breath < Player.BREATH_MAX - 0.05)
 
 
 func _update_prompt() -> void:
@@ -306,8 +312,8 @@ func _build_pause(root: Control) -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	panel.offset_left = -330
 	panel.offset_right = 330
-	panel.offset_top = -380
-	panel.offset_bottom = 380
+	panel.offset_top = -450
+	panel.offset_bottom = 450
 	_pause.add_child(panel)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override(&"separation", 14)
@@ -318,6 +324,7 @@ func _build_pause(root: Control) -> void:
 	title.add_theme_font_size_override(&"font_size", 52)
 	vb.add_child(title)
 	_button(vb, "Resume", func() -> void: set_paused(false))
+	_slider(vb, "Camera distance  (- / = keys)", Settings.CAMERA_DISTANCE_MIN, Settings.CAMERA_DISTANCE_MAX, Settings.camera_distance, func(v: float) -> void: Settings.camera_distance = v)
 	_slider(vb, "Camera turn speed", 0.8, 5.0, Settings.stick_sensitivity, func(v: float) -> void: Settings.stick_sensitivity = v)
 	_slider(vb, "Music volume", 0.0, 1.0, Settings.music_volume, func(v: float) -> void:
 		Settings.music_volume = v

@@ -31,6 +31,7 @@ func sample() -> PlayerInput:
 	i.jump_released = &"jump" in _released
 	i.attack_pressed = &"attack" in _pressed
 	i.plunge_pressed = &"plunge" in _pressed
+	i.plunge_held = _held.get(&"plunge", false) or i.plunge_pressed
 	i.interact_pressed = &"interact" in _pressed
 	i.lock_pressed = &"lock_on" in _pressed
 	i.lock_held = _held.get(&"lock_on", false)

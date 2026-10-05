@@ -93,15 +93,15 @@ func _build_environment() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Palette.FOG
-	env.ambient_light_energy = 0.32
+	env.ambient_light_energy = 0.36
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.fog_enabled = true
 	env.fog_mode = Environment.FOG_MODE_DEPTH
 	env.fog_light_color = Palette.FOG
-	env.fog_depth_begin = 45.0
+	env.fog_depth_begin = 70.0
 	env.fog_depth_end = 220.0
-	env.fog_density = 0.6
+	env.fog_density = 0.4
 	env.fog_sky_affect = 0.0
 	env.glow_enabled = true
 	env.glow_intensity = 0.5
@@ -110,7 +110,7 @@ func _build_environment() -> void:
 	we.environment = env
 	add_child(we)
 	sun = DirectionalLight3D.new()
-	sun.light_color = Color("#FFF2D6")
+	sun.light_color = Color("#FFE2B5")
 	sun.light_energy = 0.95
 	sun.rotation = Vector3(deg_to_rad(-48.0), deg_to_rad(-35.0), 0.0)
 	sun.shadow_enabled = true
@@ -127,7 +127,9 @@ func _physics_process(_delta: float) -> void:
 
 func _on_hazard_body(body: Node3D, kind: StringName) -> void:
 	if body is Player:
-		(body as Player).on_hazard(kind)
+		# Water is swimmable (Build 3); only pits and the kill plane send the hero back.
+		if kind != &"water":
+			(body as Player).on_hazard(kind)
 	elif body is Gloplet:
 		body.call_deferred(&"_defeat", false)
 

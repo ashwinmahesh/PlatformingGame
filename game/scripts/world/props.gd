@@ -90,6 +90,9 @@ const TABLE: Dictionary[StringName, Array] = {
 ## Far backdrop pieces never cast shadows (a mountain's shadow would darken the whole level).
 const NO_SHADOW: Array[StringName] = [&"mountain", &"hills_trees", &"forest_cluster", &"forest_cluster_b", &"forest_medium", &"cloud_big", &"cloud_small"]
 
+## Built shapes keep their crisp edges; everything natural gets smooth normals (Build 3: rounder).
+const KEEP_FACETS: Array[StringName] = [&"home_a_blue", &"home_a_green", &"home_b_red", &"market", &"windmill", &"well", &"tower", &"village_fence", &"barrel", &"crate", &"crate_small", &"flag", &"tent", &"target", &"sack", &"wheelbarrow", &"lumber", &"fence", &"fence_high", &"sign", &"obelisk", &"column", &"tent_small"]
+
 static var _scenes: Dictionary[StringName, PackedScene] = {}
 
 
@@ -117,6 +120,10 @@ static func spawn(parent: Node, id: StringName, pos: Vector3, yaw: float = 0.0, 
 	model.scale = Vector3.ONE * s
 	holder.add_child(model)
 	Toon.apply(model, 0.0, leaf)
+	if id not in KEEP_FACETS:
+		for n in model.find_children("*", "MeshInstance3D", true, false):
+			var mi := n as MeshInstance3D
+			mi.mesh = RoundMesh.smoothed(mi.mesh)
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		(n as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if id in NO_SHADOW else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	if collide:

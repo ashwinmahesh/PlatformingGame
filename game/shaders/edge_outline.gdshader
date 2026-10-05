@@ -6,7 +6,7 @@ render_mode unshaded, blend_mix, depth_draw_never, depth_test_disabled, cull_dis
 
 uniform sampler2D depth_tex : hint_depth_texture, filter_nearest, repeat_disable;
 uniform sampler2D normal_tex : hint_normal_roughness_texture, filter_nearest, repeat_disable;
-uniform vec3 ink : source_color = vec3(0.169, 0.133, 0.22);
+uniform vec3 ink : source_color = vec3(0.227, 0.149, 0.2);
 uniform float thickness = 2.0;
 uniform float depth_threshold = 0.06;
 uniform float normal_threshold = 0.55;

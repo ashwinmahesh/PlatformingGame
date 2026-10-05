@@ -22,6 +22,8 @@ static func register() -> void:
 	_action(&"lock_on", [_key(KEY_Q), _axis(JOY_AXIS_TRIGGER_LEFT, 1.0)])
 	_action(&"switch_target", [_key(KEY_TAB), _joy(JOY_BUTTON_RIGHT_STICK)])
 	_action(&"pause", [_key(KEY_ESCAPE), _joy(JOY_BUTTON_START)])
+	_action(&"cam_zoom_in", [_key(KEY_EQUAL), _key(KEY_KP_ADD), _joy(JOY_BUTTON_RIGHT_SHOULDER)])
+	_action(&"cam_zoom_out", [_key(KEY_MINUS), _key(KEY_KP_SUBTRACT), _joy(JOY_BUTTON_LEFT_SHOULDER)])
 	_action(&"dev_feel_lab", [_key(KEY_F1)])
 	_action(&"dev_ai_debug", [_key(KEY_F2)])
 	_action(&"ui_accept_game", [_key(KEY_ENTER), _key(KEY_E), _key(KEY_SPACE), _joy(JOY_BUTTON_A)])

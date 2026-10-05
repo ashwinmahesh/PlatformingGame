@@ -1,11 +1,163 @@
 {
-  "grid": [8, 4],
+  "grid": [
+    8,
+    4
+  ],
   "cell_px": 16,
   "rows": [
-    {"name": "nature", "colors": [["grass_light", "#8BD450"], ["grass_mid", "#5DB33B"], ["leaf_dark", "#2F7D3A"], ["leaf_teal", "#3FA58A"], ["moss", "#A6C94A"], ["bark_light", "#B77B4A"], ["bark_mid", "#8A5432"], ["bark_dark", "#5B3420"]]},
-    {"name": "village", "colors": [["wood_plank", "#D9A066"], ["wood_warm", "#C07A3E"], ["roof_red", "#E0524A"], ["roof_blue", "#4A7FD9"], ["roof_teal", "#3FB8AF"], ["thatch", "#E8C46A"], ["stone_light", "#C9C2B5"], ["stone_dark", "#8E8A85"]]},
-    {"name": "water_magic", "colors": [["water_light", "#7FE0F0"], ["water_mid", "#39A9DB"], ["water_deep", "#2A6FB0"], ["foam", "#F4FBFF"], ["sky_top", "#6EC6FF"], ["portal_magenta", "#E05AD6"], ["portal_teal", "#4DF0D2"], ["gold", "#FFC83D"]]},
-    {"name": "characters", "colors": [["skin_light", "#FFD9B8"], ["skin_mid", "#E0A37A"], ["skin_dark", "#9C6644"], ["tunic_blue", "#3D7BE0"], ["cloth_cream", "#F5EBD3"], ["slime_green", "#63E06B"], ["slime_blue", "#4FB7FF"], ["gloop_pink", "#F2709C"]]}
+    {
+      "name": "nature",
+      "colors": [
+        [
+          "grass_light",
+          "#A9D65A"
+        ],
+        [
+          "grass_mid",
+          "#82BD45"
+        ],
+        [
+          "leaf_dark",
+          "#4F8A35"
+        ],
+        [
+          "leaf_teal",
+          "#69A85A"
+        ],
+        [
+          "moss",
+          "#BFCB4E"
+        ],
+        [
+          "bark_light",
+          "#C98A52"
+        ],
+        [
+          "bark_mid",
+          "#9C6038"
+        ],
+        [
+          "bark_dark",
+          "#6E3F25"
+        ]
+      ]
+    },
+    {
+      "name": "village",
+      "colors": [
+        [
+          "wood_plank",
+          "#E6AE6E"
+        ],
+        [
+          "wood_warm",
+          "#CF8442"
+        ],
+        [
+          "roof_red",
+          "#E8664A"
+        ],
+        [
+          "roof_blue",
+          "#5B86D0"
+        ],
+        [
+          "roof_teal",
+          "#4FB8A4"
+        ],
+        [
+          "thatch",
+          "#F0CB70"
+        ],
+        [
+          "stone_light",
+          "#DCCBB2"
+        ],
+        [
+          "stone_dark",
+          "#A38F7C"
+        ]
+      ]
+    },
+    {
+      "name": "water_magic",
+      "colors": [
+        [
+          "water_light",
+          "#7FE0F0"
+        ],
+        [
+          "water_mid",
+          "#39A9DB"
+        ],
+        [
+          "water_deep",
+          "#2A6FB0"
+        ],
+        [
+          "foam",
+          "#F4FBFF"
+        ],
+        [
+          "sky_top",
+          "#7CC8F2"
+        ],
+        [
+          "portal_magenta",
+          "#E05AD6"
+        ],
+        [
+          "portal_teal",
+          "#4DF0D2"
+        ],
+        [
+          "gold",
+          "#FFC83D"
+        ]
+      ]
+    },
+    {
+      "name": "characters",
+      "colors": [
+        [
+          "skin_light",
+          "#FFD9B8"
+        ],
+        [
+          "skin_mid",
+          "#E0A37A"
+        ],
+        [
+          "skin_dark",
+          "#9C6644"
+        ],
+        [
+          "tunic_blue",
+          "#3D7BE0"
+        ],
+        [
+          "cloth_cream",
+          "#F5EBD3"
+        ],
+        [
+          "slime_green",
+          "#63E06B"
+        ],
+        [
+          "slime_blue",
+          "#4FB7FF"
+        ],
+        [
+          "gloop_pink",
+          "#F2709C"
+        ]
+      ]
+    }
   ],
-  "shader_only": {"ink": "#2B2238", "shadow_tint": "#6B5B95", "fog": "#BFE6FF"}
+  "shader_only": {
+    "ink": "#3A2633",
+    "shadow_tint": "#8C6A8C",
+    "fog": "#F6E4CC"
+  },
+  "note": "Build 3: warmed greens, browns and stones; warm mauve shadows and a peach haze (Ashwin: warmer colours)."
 }
