@@ -50,7 +50,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif _panel != null:
 			_panel.queue_free()
 			_panel = null
-			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+			Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	elif event.is_action_pressed(&"dev_ai_debug"):
 		ai_debug = not ai_debug
 

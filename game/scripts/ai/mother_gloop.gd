@@ -1,8 +1,9 @@
 class_name MotherGloop
 extends Node3D
-## World 1 boss (plan §8.5). 9 HP, shrinks from scale 1.0 to 0.6 as she takes damage.
-## Damage only lands on her core during a timed window; each window deals at most 3; thresholds
-## at 6 and 3 HP clamp damage, so the fight lasts at least 3 windows. Every state has a bounded
+## World 1 boss (plan §8.5, retuned in Build 2). 5 HP, shrinks from scale 1.0 to 0.6 as she takes
+## damage. Only a Plunge on her open core hurts her: one Plunge per opening, and the core closes
+## the moment it's hit, so the fight takes exactly 5 clean Plunges. Thresholds at 3 and 1 HP
+## start phases 2 and 3. Every state has a bounded
 ## exit and a watchdog. All timings are physics ticks.
 
 signal hp_changed(hp: int)
@@ -11,9 +12,9 @@ signal defeated_once
 enum S { SLEEP, INTRO, WAIT, CHOOSE, HOP_WARN, HOP_AIR, BARRAGE_WARN, BARRAGE_AIR, ROLL_WARN, ROLL, UNROLL, CORE_WINDOW, PHASE_CHANGE, SPLIT, RECOVER, DEFEAT, GONE }
 enum Pattern { NONE, HOP_SLAM, BOUNCE_BARRAGE, ROLLING_CHARGE }
 
-const MAX_HP := 9
-const WINDOW_CAP := 3
-const THRESHOLDS: Array[int] = [6, 3]
+const MAX_HP := 5
+const WINDOW_CAP := 1
+const THRESHOLDS: Array[int] = [3, 1]
 const RADIUS := 2.2
 const INTRO_TICKS := 100
 const CHOOSE_TICKS := 24
@@ -496,10 +497,9 @@ func receive_player_attack(atk: Dictionary, area: Area3D) -> Dictionary:
 		_last_core_id = id
 	else:
 		_last_body_id = id
-	if is_core and state == S.CORE_WINDOW:
-		if plunge:
-			plunged_ever = true
-		var dealt := apply_core_damage(2 if plunge else 1)
+	if is_core and state == S.CORE_WINDOW and plunge:
+		plunged_ever = true
+		var dealt := apply_core_damage(1)
 		if dealt > 0:
 			_body_mat.set_shader_parameter(&"flash", 1.0)
 			create_tween().tween_method(func(v: float) -> void: _body_mat.set_shader_parameter(&"flash", v), 1.0, 0.0, 0.25)
@@ -510,21 +510,27 @@ func receive_player_attack(atk: Dictionary, area: Area3D) -> Dictionary:
 	return {"hit": true, "bounce": bounce_h}
 
 
+## Contact uses the same ellipsoid the body is drawn with, grown by the hero's radius.
+func touches(p: Player, margin: float = 0.35) -> bool:
+	var sc := body_scale()
+	var rx := RADIUS * _squash.x * sc + margin
+	var ry := 0.95 * RADIUS * _squash.y * sc + margin + 0.3
+	var center := global_position + Vector3(0.0, 0.95 * RADIUS * _squash.y * sc, 0.0)
+	var d := p.global_position + Vector3.UP * 0.6 - center
+	return (d.x * d.x + d.z * d.z) / (rx * rx) + (d.y * d.y) / (ry * ry) < 1.0
+
+
 func damage_to_player(p: Player) -> Dictionary:
 	if state in [S.SLEEP, S.INTRO, S.CORE_WINDOW, S.DEFEAT, S.GONE, S.PHASE_CHANGE, S.SPLIT]:
 		return {}
-	var r := RADIUS * body_scale()
-	var to := p.global_position - global_position
-	var flat := Vector2(to.x, to.z).length()
-	var top := global_position.y + 2.0 * r * _squash.y
-	if flat > r * 0.95 or p.global_position.y > top or p.global_position.y + 1.2 < global_position.y:
+	if state in [S.HOP_AIR, S.BARRAGE_AIR] and not _slam_tick:
+		return {}
+	if not touches(p):
 		return {}
 	if _slam_tick:
 		return {"halves": 2, "from": global_position, "heavy": true, "cause": "boss_slam"}
 	if state == S.ROLL:
 		return {"halves": 2, "from": global_position, "heavy": true, "cause": "boss_roll"}
-	if state in [S.HOP_AIR, S.BARRAGE_AIR]:
-		return {}
 	return {"halves": 1, "from": global_position, "cause": "boss_contact"}
 
 
@@ -569,7 +575,11 @@ func _build() -> void:
 	Kit.mesh_instance(_hat, _sphere(0.32), Kit.mat(&"gloop_pink", 0.02), Vector3(0.6, 0.25, 0.3))
 	Kit.mesh_instance(_hat, _sphere(0.14), Kit.mat(&"gold"), Vector3(0.6, 0.45, 0.3))
 	_body_area = _area(Layers.ENEMY_HURTBOX, RADIUS)
-	_core_area = _area(Layers.ENEMY_HURTBOX | Layers.BOUNCE, 0.95)
+	var cyl := CylinderShape3D.new()
+	cyl.radius = RADIUS
+	cyl.height = RADIUS * 1.9
+	(_body_area.get_child(0) as CollisionShape3D).shape = cyl
+	_core_area = _area(Layers.ENEMY_HURTBOX | Layers.BOUNCE, 1.1)
 	_marker = MeshInstance3D.new()
 	var disc := CylinderMesh.new()
 	disc.top_radius = 1.0
@@ -629,10 +639,14 @@ func _update_visual() -> void:
 			to.y = 0.0
 			if to.length() > 0.5:
 				_visual.rotation.y = lerp_angle(_visual.rotation.y, atan2(-to.x, -to.z), 0.08)
-	var height := 2.0 * RADIUS * sc * _squash.y
-	_body_area.position = Vector3(0.0, RADIUS * sc * _squash.y, 0.0)
-	(_body_area.get_child(0) as CollisionShape3D).scale = Vector3.ONE * sc
-	_core_area.position = Vector3(0.0, height, 0.0)
+	# Hurtboxes follow the drawn body: a cylinder inside the squashed ellipsoid, the core on top.
+	var height := 1.9 * RADIUS * sc * _squash.y
+	var body_shape := (_body_area.get_child(0) as CollisionShape3D).shape as CylinderShape3D
+	body_shape.radius = RADIUS * sc * _squash.x * 0.92
+	body_shape.height = height * 0.9
+	_body_area.position = Vector3(0.0, height * 0.5, 0.0)
+	_core_area.position = Vector3(0.0, height - 0.15, 0.0)
+	((_core_area.get_child(0) as CollisionShape3D).shape as SphereShape3D).radius = 1.1 * sc
 	var open := state == S.CORE_WINDOW
 	_hat.rotation.z = lerpf(_hat.rotation.z, 1.1 if open else 0.0, 0.2)
 	_hat.position.x = lerpf(_hat.position.x, 1.2 if open else 0.0, 0.2)

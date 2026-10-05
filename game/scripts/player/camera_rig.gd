@@ -3,16 +3,16 @@ extends Node3D
 ## CameraRig -> yaw -> pitch -> SpringArm3D -> Camera3D (plan §3.5).
 ## Mario vertical framing: height follows the last ground, tracking up only 3 m above it.
 
-const ARM_LENGTH := 7.5
+const ARM_LENGTH := 10.5
 const LOOK_AHEAD := 1.5
-const FOCUS_HEIGHT := 1.3
+const FOCUS_HEIGHT := 1.5
 const PITCH_MIN := deg_to_rad(-62.0)
 const PITCH_MAX := deg_to_rad(28.0)
 const VERTICAL_SLACK := 3.0
 
 var player: Player
 var yaw: float = 0.0
-var pitch: float = deg_to_rad(-18.0)
+var pitch: float = deg_to_rad(-20.0)
 var camera: Camera3D
 var _yaw_node: Node3D
 var _pitch_node: Node3D
@@ -20,7 +20,6 @@ var _arm: SpringArm3D
 var _focus: Vector3 = Vector3.ZERO
 var _ground_ref: float = 0.0
 var _look_ahead: Vector3 = Vector3.ZERO
-var _mouse_delta: Vector2 = Vector2.ZERO
 var _idle_input_time: float = 0.0
 var _trauma: float = 0.0
 var _recenter_tween: Tween
@@ -43,9 +42,25 @@ func _ready() -> void:
 	_pitch_node.add_child(_arm)
 	camera = Camera3D.new()
 	camera.fov = 62.0
-	camera.far = 400.0
+	camera.far = 600.0
 	_arm.add_child(camera)
 	camera.current = true
+	add_outline_pass(camera)
+
+
+## Full-screen ink outline pass (shaders/edge_outline.gdshader) in front of `cam`.
+static func add_outline_pass(cam: Camera3D) -> void:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(2.0, 2.0)
+	var mat := ShaderMaterial.new()
+	mat.shader = preload("res://shaders/edge_outline.gdshader")
+	var mi := MeshInstance3D.new()
+	mi.mesh = quad
+	mi.material_override = mat
+	mi.extra_cull_margin = 16384.0
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.position = Vector3(0.0, 0.0, -1.0)
+	cam.add_child(mi)
 
 
 func attach(p: Player) -> void:
@@ -80,24 +95,15 @@ func add_trauma(amount: float) -> void:
 	_trauma = clampf(_trauma + amount, 0.0, 1.0)
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		_mouse_delta += (event as InputEventMouseMotion).relative
-	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed and Input.mouse_mode != Input.MOUSE_MODE_CAPTURED and not get_tree().paused:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-
-
 func _process(delta: float) -> void:
 	if player == null or not is_instance_valid(player):
 		return
 	# Look input.
 	var sx := -1.0 if Settings.invert_x else 1.0
 	var sy := -1.0 if Settings.invert_y else 1.0
-	var look := Vector2.ZERO
-	look += _mouse_delta * Settings.mouse_sensitivity * 0.01
+	# Arrow keys or the right stick turn the camera (Build 2: no mouse look).
 	var stick := Input.get_vector(&"cam_left", &"cam_right", &"cam_up", &"cam_down")
-	look += stick * Settings.stick_sensitivity * delta
-	_mouse_delta = Vector2.ZERO
+	var look := stick * Settings.stick_sensitivity * delta
 	yaw -= look.x * sx
 	pitch = clampf(pitch - look.y * sy, PITCH_MIN, PITCH_MAX)
 	if look.length() > 0.0001:

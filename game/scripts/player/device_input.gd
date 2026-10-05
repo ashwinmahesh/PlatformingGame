@@ -1,6 +1,6 @@
 class_name DeviceInput
 extends InputSource
-## Reads the keyboard, mouse and gamepad through the input map.
+## Reads the keyboard and gamepad through the input map.
 
 var enabled: bool = true
 

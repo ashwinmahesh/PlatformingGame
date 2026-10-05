@@ -19,6 +19,16 @@ const SAFE_GROUND_INTERVAL := 15
 const LOCK_RANGE := 15.0
 const LOCK_CONE_DEG := 70.0
 const INTERACT_RANGE := 2.2
+const HERO_PATH := "res://assets/models/kaykit_adventurers/Rogue.glb"
+const SWORD_PATH := "res://assets/models/kaykit_adventurers/sword_1handed.gltf"
+const HERO_SCALE := 0.62
+const SWORD_LENGTH_SCALE := 1.45
+const ATTACK_CLIPS: Dictionary[StringName, StringName] = {
+	&"slash_1": &"1H_Melee_Attack_Slice_Diagonal",
+	&"slash_2": &"1H_Melee_Attack_Slice_Horizontal",
+	&"spin_finisher": &"2H_Melee_Attack_Spin",
+	&"air_slash": &"1H_Melee_Attack_Chop",
+}
 const STEP_PROBE := 0.45
 const STEP_HOLD_TICKS := 8
 
@@ -80,14 +90,20 @@ var _dead_left: float = 0.0
 # Nodes (built in _ready)
 var visual: Node3D
 var body_pivot: Node3D
-var sword_pivot: Node3D
 var hurtbox: Area3D
 var sword_shape: SphereShape3D
 var plunge_shape: SphereShape3D
 var hurt_shape: CapsuleShape3D
 var shadow: Decal
-var _trail: MeshInstance3D
-var _trail_mat: ShaderMaterial
+var landing_marker: Decal
+var _plunge_streaks: CPUParticles3D
+var _sword_rest: Transform3D
+var _step_timer: float = 0.0
+var hero: CharacterModel
+var sword: Node3D
+var _sword_trail: SwordTrail
+var _land_anim_left: float = 0.0
+var _cheer_left: float = 0.0
 var _lock_marker: MeshInstance3D
 var _squash: Vector3 = Vector3.ONE
 var _flip_angle: float = 0.0
@@ -116,6 +132,8 @@ func _ready() -> void:
 	_build_hurtbox()
 	_build_visual()
 	_build_shadow()
+	_build_landing_marker()
+	_build_plunge_streaks()
 	max_hp = Progress.max_halves()
 	hp = max_hp
 	safe_position = global_position
@@ -239,12 +257,16 @@ func refill() -> void:
 
 
 ## Fell into water or out of the world: lose ½ heart and return to safe ground (plan §9.8).
-func on_hazard() -> void:
+func on_hazard(kind: StringName = &"water") -> void:
 	if state in [State.DEAD, State.FROZEN]:
 		return
-	AudioDirector.play(&"splash")
-	Fx.burst(get_parent(), global_position, Palette.color(&"foam"), 16, 5.0, 0.15)
-	Telemetry.log_event("fall", {"pos": global_position})
+	if kind == &"water":
+		AudioDirector.play(&"splash")
+		Fx.burst(get_parent(), global_position, Palette.color(&"foam"), 16, 5.0, 0.15)
+	else:
+		AudioDirector.play(&"poof")
+		Fx.burst(get_parent(), global_position + Vector3.UP, Palette.color(&"leaf_dark"), 16, 5.0, 0.15)
+	Telemetry.log_event("fall", {"pos": global_position, "kind": String(kind)})
 	hp = maxi(hp - 1, 0)
 	hp_changed.emit(hp, max_hp)
 	if hp <= 0:
@@ -420,6 +442,7 @@ func _on_landed() -> void:
 	_flip_speed = 0.0
 	_flip_angle = 0.0
 	_squash = Vector3(1.3, 0.7, 1.3)
+	_land_anim_left = 0.18
 	if state == State.PLUNGE:
 		state = State.PLUNGE_LAND
 		plunge_land_left = settings.plunge_land_ticks
@@ -575,8 +598,11 @@ func _apply_gravity(delta: float, jump_held: bool) -> void:
 	if state == State.PLUNGE:
 		if plunge_tick <= settings.plunge_hang_ticks:
 			velocity = Vector3.ZERO
+		elif plunge_tick == settings.plunge_hang_ticks + 1:
+			velocity = Vector3(0.0, -settings.plunge_start_speed, 0.0)
 		else:
-			velocity = Vector3(0.0, -settings.plunge_speed, 0.0)
+			# Straight down, accelerating hard (Build 2 feedback).
+			velocity = Vector3(0.0, maxf(velocity.y - settings.plunge_accel * delta, -settings.plunge_speed), 0.0)
 		return
 	if is_grounded() and velocity.y <= 0.0:
 		velocity.y = -0.5
@@ -837,72 +863,41 @@ func _build_visual() -> void:
 	visual.name = "Visual"
 	add_child(visual)
 	body_pivot = Node3D.new()
-	body_pivot.position.y = 0.55
+	body_pivot.position.y = 0.6
 	visual.add_child(body_pivot)
-	var ow := 0.025
-	var torso := CapsuleMesh.new()
-	torso.radius = 0.3
-	torso.height = 0.78
-	Kit.mesh_instance(body_pivot, torso, Kit.mat(&"tunic_blue", ow), Vector3(0.0, -0.1, 0.0))
-	var belt := CylinderMesh.new()
-	belt.top_radius = 0.31
-	belt.bottom_radius = 0.31
-	belt.height = 0.08
-	Kit.mesh_instance(body_pivot, belt, Kit.mat(&"bark_dark"), Vector3(0.0, -0.12, 0.0))
-	var head := SphereMesh.new()
-	head.radius = 0.34
-	head.height = 0.64
-	Kit.mesh_instance(body_pivot, head, Kit.mat(&"skin_light", ow), Vector3(0.0, 0.48, 0.0))
-	var hat := CylinderMesh.new()
-	hat.top_radius = 0.0
-	hat.bottom_radius = 0.36
-	hat.height = 0.36
-	hat.radial_segments = 10
-	Kit.mesh_instance(body_pivot, hat, Kit.mat(&"grass_mid", ow), Vector3(0.0, 0.8, 0.04))
-	var leaf := SphereMesh.new()
-	leaf.radius = 0.13
-	leaf.height = 0.1
-	var leaf_mi := Kit.mesh_instance(body_pivot, leaf, Kit.mat(&"leaf_teal", 0.015), Vector3(0.1, 1.0, 0.06))
-	leaf_mi.rotation.z = -0.6
-	var scarf := TorusMesh.new()
-	scarf.inner_radius = 0.2
-	scarf.outer_radius = 0.33
-	Kit.mesh_instance(body_pivot, scarf, Kit.mat(&"roof_red", 0.015), Vector3(0.0, 0.2, 0.0))
-	var tail := BoxMesh.new()
-	tail.size = Vector3(0.12, 0.3, 0.05)
-	Kit.mesh_instance(body_pivot, tail, Kit.mat(&"roof_red"), Vector3(0.12, 0.05, 0.3))
-	for side: float in [-1.0, 1.0]:
-		var eye := SphereMesh.new()
-		eye.radius = 0.055
-		eye.height = 0.11
-		Kit.mesh_instance(body_pivot, eye, Kit.mat(&"bark_dark"), Vector3(0.12 * side, 0.5, -0.3))
-		var foot := SphereMesh.new()
-		foot.radius = 0.13
-		foot.height = 0.18
-		Kit.mesh_instance(body_pivot, foot, Kit.mat(&"bark_mid", 0.015), Vector3(0.14 * side, -0.48, -0.03))
-		var hand := SphereMesh.new()
-		hand.radius = 0.1
-		hand.height = 0.2
-		Kit.mesh_instance(body_pivot, hand, Kit.mat(&"skin_light", 0.015), Vector3(0.36 * side, -0.05, -0.05))
-	sword_pivot = Node3D.new()
-	sword_pivot.position = Vector3(0.36, -0.05, -0.05)
-	body_pivot.add_child(sword_pivot)
-	var blade := BoxMesh.new()
-	blade.size = Vector3(0.07, 0.05, 0.8)
-	Kit.mesh_instance(sword_pivot, blade, Kit.mat(&"foam", 0.015), Vector3(0.0, 0.0, -0.5))
-	var guard := BoxMesh.new()
-	guard.size = Vector3(0.26, 0.07, 0.07)
-	Kit.mesh_instance(sword_pivot, guard, Kit.mat(&"gold"), Vector3(0.0, 0.0, -0.1))
-	# Sword trail: a flat arc shown during active ticks.
-	var arc := TorusMesh.new()
-	arc.inner_radius = 0.55
-	arc.outer_radius = 1.25
-	arc.rings = 24
-	arc.ring_segments = 3
-	_trail_mat = Fx.fx_mat(Color(Palette.color(&"foam"), 0.55))
-	_trail = Kit.mesh_instance(visual, arc, _trail_mat, Vector3(0.0, 0.65, 0.0))
-	_trail.scale = Vector3(1.0, 0.05, 1.0)
-	_trail.visible = false
+	# Hero: KayKit Rogue (CC0), restyled with a sprout, a longer sword and the toon look.
+	hero = CharacterModel.create(HERO_PATH, HERO_SCALE, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"], 0.035)
+	hero.position.y = -0.6
+	body_pivot.add_child(hero)
+	var knife := hero.find_part("Knife")
+	if knife != null:
+		sword = (load(SWORD_PATH) as PackedScene).instantiate() as Node3D
+		Toon.apply(sword, 0.03)
+		sword.transform = knife.transform
+		sword.scale = Vector3(1.0, SWORD_LENGTH_SCALE, 1.0)
+		knife.get_parent().add_child(sword)
+		_sword_rest = sword.transform
+	var crown := hero.attach_on_top("head", "Rogue_Head")
+	if crown != null:
+		var leaf := SphereMesh.new()
+		leaf.radius = 0.32
+		leaf.height = 0.16
+		var l1 := Kit.mesh_instance(crown, leaf, Kit.mat(&"grass_mid", 0.05), Vector3(0.12, 0.1, 0.0))
+		l1.rotation.z = -0.7
+		var l2 := Kit.mesh_instance(crown, leaf, Kit.mat(&"leaf_teal", 0.05), Vector3(-0.12, 0.08, 0.0))
+		l2.rotation.z = 0.7
+		var stem := CylinderMesh.new()
+		stem.top_radius = 0.03
+		stem.bottom_radius = 0.05
+		stem.height = 0.25
+		Kit.mesh_instance(crown, stem, Kit.mat(&"leaf_dark"), Vector3(0.0, -0.02, 0.0))
+	hero.play(&"Idle")
+	_sword_trail = SwordTrail.new()
+	_sword_trail.blade = sword
+	_sword_trail.base_local = Vector3(0.0, 0.25, 0.0)
+	_sword_trail.tip_local = Vector3(0.0, 1.38, 0.0)
+	_sword_trail.color = Color(Palette.color(&"foam"), 0.85)
+	add_child(_sword_trail)
 	# Lock-on marker (top level).
 	var diamond := PrismMesh.new()
 	diamond.size = Vector3(0.35, 0.4, 0.1)
@@ -914,6 +909,79 @@ func _build_visual() -> void:
 	_lock_marker.visible = false
 	_lock_marker.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	add_child(_lock_marker)
+
+
+func _build_plunge_streaks() -> void:
+	_plunge_streaks = CPUParticles3D.new()
+	_plunge_streaks.amount = 24
+	_plunge_streaks.lifetime = 0.25
+	_plunge_streaks.local_coords = false
+	_plunge_streaks.emitting = false
+	_plunge_streaks.direction = Vector3.UP
+	_plunge_streaks.spread = 4.0
+	_plunge_streaks.initial_velocity_min = 2.0
+	_plunge_streaks.initial_velocity_max = 4.0
+	_plunge_streaks.gravity = Vector3.ZERO
+	_plunge_streaks.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	_plunge_streaks.emission_sphere_radius = 0.6
+	var streak := BoxMesh.new()
+	streak.size = Vector3(0.05, 0.9, 0.05)
+	_plunge_streaks.mesh = streak
+	_plunge_streaks.material_override = Fx.fx_mat(Color(Palette.color(&"foam"), 0.8))
+	_plunge_streaks.position.y = 1.4
+	add_child(_plunge_streaks)
+
+
+## Plays a celebration (victory).
+func cheer() -> void:
+	_cheer_left = 2.4
+
+
+func _build_landing_marker() -> void:
+	landing_marker = Decal.new()
+	landing_marker.top_level = true
+	landing_marker.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	var g := Gradient.new()
+	g.offsets = PackedFloat32Array([0.0, 0.62, 0.72, 0.86, 1.0])
+	g.colors = PackedColorArray([Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.0), Color(1, 1, 1, 0.95), Color(1, 1, 1, 0.95), Color(1, 1, 1, 0.0)])
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 128
+	tex.height = 128
+	landing_marker.texture_albedo = tex
+	landing_marker.modulate = Palette.color(&"gold")
+	landing_marker.albedo_mix = 1.0
+	landing_marker.emission_energy = 1.0
+	landing_marker.size = Vector3(1.6, 2.0, 1.6)
+	landing_marker.normal_fade = 0.5
+	landing_marker.cull_mask = 1
+	landing_marker.visible = false
+	add_child(landing_marker)
+
+
+## Where the hero will land if nothing changes: steps the current arc and raycasts each step.
+func predict_landing() -> Variant:
+	var pos := global_position + Vector3.UP * 0.1
+	var vel := velocity
+	var space := get_world_3d().direct_space_state
+	var dt := 1.0 / 30.0
+	for i in 120:
+		if state == State.PLUNGE:
+			vel = Vector3(0.0, minf(vel.y, -settings.plunge_start_speed), 0.0)
+		else:
+			var g := settings.gravity_up if vel.y > 0.0 else settings.gravity_down
+			vel.y = maxf(vel.y - g * dt, -settings.terminal_fall)
+		var next := pos + vel * dt
+		var q := PhysicsRayQueryParameters3D.create(pos, next, Layers.WORLD)
+		q.exclude = [get_rid()]
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty() and (hit["normal"] as Vector3).y > 0.5:
+			return hit["position"]
+		pos = next
+	return null
 
 
 func _build_shadow() -> void:
@@ -954,6 +1022,19 @@ func _process(delta: float) -> void:
 		var s := lerpf(0.95, 0.45, clampf(height / 8.0, 0.0, 1.0))
 		shadow.global_position = p + Vector3.UP * 0.3
 		shadow.size = Vector3(s, 1.6, s)
+	# Landing marker: shows where the current arc meets the ground (Build 2 depth-perception aid).
+	var airborne := not is_on_floor() and state not in [State.DEAD, State.FROZEN]
+	landing_marker.visible = false
+	if airborne:
+		var land: Variant = predict_landing()
+		if land != null:
+			var lp := land as Vector3
+			if origin.y - lp.y > 0.6:
+				landing_marker.visible = true
+				landing_marker.global_position = lp + Vector3.UP * 0.4
+				var pulse := 1.0 + sin(Time.get_ticks_msec() * 0.012) * 0.06
+				landing_marker.size = Vector3(1.5 * pulse, 2.0, 1.5 * pulse)
+	_plunge_streaks.emitting = state == State.PLUNGE and plunge_tick > settings.plunge_hang_ticks
 	if lock_target != null and is_instance_valid(lock_target):
 		_lock_marker.visible = true
 		_lock_marker.global_position = lock_target.global_position + Vector3.UP * (2.2 + sin(Time.get_ticks_msec() * 0.008) * 0.12)
@@ -965,15 +1046,10 @@ func _process(delta: float) -> void:
 func _update_visual(delta: float) -> void:
 	visual.basis = Basis.looking_at(facing, Vector3.UP)
 	_squash = _squash.lerp(Vector3.ONE, 1.0 - exp(-12.0 * delta))
-	var s := _squash
+	var grounded := is_grounded() or _step_hold > 0
 	var h_speed := Vector2(velocity.x, velocity.z).length()
-	var grounded := is_grounded()
-	if grounded and h_speed > 0.5:
-		_run_phase += delta * h_speed * 2.2
-		s.y *= 1.0 + sin(_run_phase * 2.0) * 0.05
-	body_pivot.scale = s
-	body_pivot.position.y = 0.55 + (absf(sin(_run_phase)) * 0.08 if grounded and h_speed > 0.5 else 0.0)
-	# J3 forward flip and bounce spins.
+	body_pivot.scale = _squash
+	# J3 forward flip and bounce spins (procedural, on top of the clip).
 	if _flip_speed > 0.0 and not grounded:
 		_flip_angle += _flip_speed * delta
 		if _flip_angle >= TAU:
@@ -982,42 +1058,75 @@ func _update_visual(delta: float) -> void:
 	else:
 		_flip_angle = 0.0
 	body_pivot.rotation = Vector3(-_flip_angle, 0.0, 0.0)
-	# Lean into turns / skid.
-	visual.rotation.z = 0.0
 	if _skidding:
-		body_pivot.rotation.x = 0.35
+		body_pivot.rotation.x = 0.3
 	# Hurtbox shrinks during the J3 tuck-flip.
 	hurt_shape.height = 0.8 if _flip_speed > 0.0 else 1.2
-	# Sword pose by attack phase.
-	_trail.visible = false
-	var sword_rot := Vector3(-0.4, 0.9, 0.0)
-	if state == State.ATTACK and attack != null:
-		var phase := attack.phase_at(attack_tick)
-		var t_active := clampf(float(attack_tick - attack.startup) / maxf(attack.active, 1), 0.0, 1.0)
-		match attack.id:
-			&"slash_1":
-				sword_rot = Vector3(0.0, lerpf(1.8, -1.8, t_active) if phase != AttackDef.Phase.STARTUP else 1.8, 0.0)
-			&"slash_2":
-				sword_rot = Vector3(0.0, lerpf(-1.8, 1.8, t_active) if phase != AttackDef.Phase.STARTUP else -1.8, 0.0)
-			&"spin_finisher":
-				sword_rot = Vector3(0.0, PI * 0.5, 0.0)
-				if phase == AttackDef.Phase.ACTIVE:
-					body_pivot.rotation.y = -t_active * TAU
-			&"air_slash":
-				sword_rot = Vector3(lerpf(1.6, -1.6, t_active) if phase != AttackDef.Phase.STARTUP else 1.6, 0.0, 0.0)
-		_trail.visible = phase == AttackDef.Phase.ACTIVE
-		if attack.id == &"spin_finisher":
-			_trail.scale = Vector3(1.4, 0.05, 1.4)
-		elif attack.id == &"air_slash":
-			_trail.scale = Vector3(1.0, 0.05, 1.0)
-		else:
-			_trail.scale = Vector3(1.05, 0.05, 1.05)
-	elif state == State.PLUNGE:
-		sword_rot = Vector3(PI * 0.5, 0.0, 0.0)
-		body_pivot.scale = Vector3(0.85, 1.15, 0.85)
-	sword_pivot.rotation = sword_rot
+	_land_anim_left = maxf(_land_anim_left - delta, 0.0)
+	_cheer_left = maxf(_cheer_left - delta, 0.0)
+	_sword_trail.emitting = state == State.ATTACK and attack != null and attack.phase_at(attack_tick) != AttackDef.Phase.STARTUP and attack.phase_at(attack_tick) != AttackDef.Phase.DONE and attack_tick < attack.startup + attack.active + 3
+	if sword != null and state != State.PLUNGE:
+		sword.transform = _sword_rest
+	_animate(grounded, h_speed)
+	# Footsteps while running.
+	if grounded and h_speed > 2.0 and state == State.NORMAL:
+		_step_timer -= delta * h_speed / 7.0
+		if _step_timer <= 0.0:
+			_step_timer = 0.32
+			AudioDirector.play(&"step" if randf() < 0.5 else &"step2", -14.0)
 	# Invulnerability blink.
 	visual.visible = state != State.FROZEN and (invuln_left <= 0.0 or int(invuln_left * 20.0) % 2 == 0)
-	if state == State.DEAD:
-		body_pivot.rotation.x = -PI * 0.5
-		body_pivot.position.y = 0.3
+
+
+func _point_sword_down() -> void:
+	if sword == null:
+		return
+	var sc := sword.global_basis.get_scale()
+	var y := Vector3.DOWN
+	var z := facing
+	var x := y.cross(z).normalized()
+	sword.global_basis = Basis(x * sc.x, y * sc.y, x.cross(y).normalized() * sc.z)
+
+
+## Picks the hero clip from state. Attacks are retimed so the clip spans the attack's ticks.
+func _animate(grounded: bool, h_speed: float) -> void:
+	if hero == null:
+		return
+	match state:
+		State.DEAD:
+			hero.play(&"Death_A", 0.1)
+			return
+		State.HURT:
+			hero.play(&"Hit_A", 0.05, 1.6)
+			return
+		State.TALK:
+			hero.play(&"Idle", 0.2)
+			return
+		State.PLUNGE:
+			# Downward plunge: tucked, sword held point-down under the hero.
+			hero.play(&"1H_Melee_Attack_Stab", 0.05, 0.0 if plunge_tick > 3 else 1.0, plunge_tick <= 1)
+			if plunge_tick > settings.plunge_hang_ticks:
+				body_pivot.scale = Vector3(0.8, 1.22, 0.8)
+			_point_sword_down()
+			return
+		State.PLUNGE_LAND:
+			hero.play(&"Jump_Land", 0.05, 1.4)
+			return
+		State.ATTACK:
+			if attack != null:
+				var clip: StringName = ATTACK_CLIPS.get(attack.id, &"1H_Melee_Attack_Slice_Diagonal")
+				var dur := attack.total() / 60.0
+				hero.play(clip, 0.06, hero.clip_length(clip) / dur, attack_tick <= 1)
+			return
+	if _cheer_left > 0.0 and grounded and h_speed < 0.5:
+		hero.play(&"Cheer", 0.2)
+	elif not grounded:
+		hero.play(&"Jump_Idle", 0.15)
+	elif _land_anim_left > 0.0 and h_speed < 1.0:
+		hero.play(&"Jump_Land", 0.05, 1.5)
+	elif h_speed > settings.run_speed * settings.walk_speed_scale + 0.5:
+		hero.play(&"Running_A", 0.15, clampf(h_speed / 8.0, 0.8, 1.7))
+	elif h_speed > 0.4:
+		hero.play(&"Walking_A", 0.15, clampf(h_speed / 3.0, 0.7, 1.5))
+	else:
+		hero.play(&"Idle", 0.2)

@@ -4,7 +4,7 @@ Source of truth: docs/contracts/*.md · Board: docs/board.md · Decisions: docs/
 Build notes for the human live in the vault: Zelda-like game/OpusPlatformer/
 
 ## Commands (use these; add new ones to the Makefile, don't improvise)
-make run | test | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | assets
+make run | test | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets
 make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 
 ## Godot
@@ -20,8 +20,11 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 
 ## Assets
 - Colours come only from art/palette/palette.json via Palette (generated) and the toon shader.
-- No downloads without the human's approval (plan §7.6). Everything here is code-built gray-box.
-- Sounds and music are synthesised by audio/synth/*.py (stdlib Python).
+- Ashwin approved sourcing CC0 packs end to end (2026-10-05). Downloads stay untouched in
+  art/sourced/<pack>/ with their licence; every one is listed in docs/assets/LICENSES.md.
+- Sourced models are wrapped, never edited: Props (scripts/world/props.gd) for scenery,
+  CharacterModel for rigged KayKit characters; Toon.apply gives them the one toon look.
+- Sounds: synthesised by audio/synth/*.py, then tools/source_audio.py overrides some with Kenney.
 
 ## Done means
 Evidence: `make test` green with a clean log, plus captures/clips for anything visual.

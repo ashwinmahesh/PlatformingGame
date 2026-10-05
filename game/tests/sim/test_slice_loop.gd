@@ -19,11 +19,11 @@ func test_world_loop_victory_and_resume() -> void:
 	var lvl := await _level("res://scenes/levels/w1/glimmerbrook.tscn", &"w1_cp_lily_gate")
 	var p := lvl.player
 	check(p != null, "hero spawned")
-	check(p.global_position.distance_to(Vector3(0.0, 11.0, -140.0)) < 1.5, "spawned at the Lily Gate checkpoint")
+	check(p.global_position.distance_to(lvl.spawns[&"w1_cp_lily_gate"][0] as Vector3) < 1.5, "spawned at the Lily Gate checkpoint")
 	var boss := lvl.get("boss") as MotherGloop
 	check(boss != null, "Mother Gloop is waiting")
 	# Walk through the gate into the arena.
-	p.respawn_at(Vector3(0.0, 11.05, -153.0))
+	p.respawn_at(Vector3(0.0, Glimmerbrook.RIDGE_Y + 0.05, Glimmerbrook.FIGHT_TRIGGER_Z - 3.0))
 	p.invuln_left = 9999.0
 	await ticks(3)
 	check(bool(lvl.get("fight_started")), "entering the arena starts the fight")
@@ -36,12 +36,12 @@ func test_world_loop_victory_and_resume() -> void:
 			windows += 1
 			while boss.state == MotherGloop.S.CORE_WINDOW:
 				boss.core_invuln = 0
-				if boss.apply_core_damage(2) == 0:
+				if boss.apply_core_damage(1) == 0:
 					break
 		if boss.hp <= 0:
 			break
 	check_eq(boss.hp, 0, "defeated")
-	check(windows >= 3, "took at least 3 windows (%d)" % windows)
+	check_eq(windows, MotherGloop.MAX_HP, "one opening per hit point")
 	check_eq(boss.watchdog_trips, 0, "no watchdog trips during the whole fight")
 	await ticks(2)
 	check(Progress.is_world_complete(&"world_01"), "victory committed before the presentation")

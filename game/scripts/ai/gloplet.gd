@@ -9,6 +9,8 @@ enum S { IDLE, WANDER, NOTICE, APPROACH, WINDUP, LUNGE, RECOVER, RETURN_HOME, HU
 
 const GRAVITY := 30.0
 const BODY_RADIUS := 0.5
+## Build 2: Gloplets are 20% bigger. Body, hurtbox and contact all scale together.
+const SIZE := 1.2
 
 var def: EnemyDef = preload("res://data/enemies/gloplet.tres")
 var director: AttackDirector
@@ -57,12 +59,12 @@ func _ready() -> void:
 	floor_snap_length = 0.2
 	var cs := CollisionShape3D.new()
 	var shape := SphereShape3D.new()
-	shape.radius = 0.42
+	shape.radius = 0.42 * SIZE
 	cs.shape = shape
-	cs.position.y = 0.42
+	cs.position.y = 0.42 * SIZE
 	add_child(cs)
-	_hurtbox = _area(Layers.ENEMY_HURTBOX, 0.55, 0.45)
-	_bounce_area = _area(Layers.BOUNCE, 0.6, 0.55)
+	_hurtbox = _area(Layers.ENEMY_HURTBOX, 0.55 * SIZE, 0.45 * SIZE)
+	_bounce_area = _area(Layers.BOUNCE, 0.7 * SIZE, 0.4 * SIZE)
 	_bounce_area.monitorable = false
 	_build_visual()
 	hp = def.hp
@@ -370,9 +372,12 @@ func on_player_land(_p: Player) -> float:
 func damage_to_player(p: Player) -> Dictionary:
 	if state in [S.DEFEATED, S.DORMANT, S.RECOVER] or not visible:
 		return {}
-	var to := p.global_position - global_position
-	var flat := Vector2(to.x, to.z).length()
-	if flat > BODY_RADIUS * _visual.scale.x + 0.3 or p.global_position.y > global_position.y + 0.8 or p.global_position.y + 1.2 < global_position.y:
+	# Contact uses the drawn body (an ellipsoid that squashes) grown by the hero's capsule.
+	var sq := _visual.basis.get_scale()
+	var rx := BODY_RADIUS * sq.x + 0.33
+	var ry := 0.425 * sq.y + 0.6
+	var d := p.global_position + Vector3.UP * 0.6 - (global_position + Vector3.UP * 0.42 * sq.y)
+	if (d.x * d.x + d.z * d.z) / (rx * rx) + (d.y * d.y) / (ry * ry) >= 1.0:
 		return {}
 	var lunge := state == S.LUNGE
 	return {"halves": def.lunge_damage if lunge else def.contact_damage, "from": global_position, "cause": "gloplet_lunge" if lunge else "gloplet_contact"}
@@ -475,7 +480,8 @@ func _animate(delta: float) -> void:
 	if state != S.WINDUP and _mat.get_shader_parameter(&"flash_color") != Color.WHITE:
 		_mat.set_shader_parameter(&"flash_color", Color.WHITE)
 		_mat.set_shader_parameter(&"flash", 0.0)
-	_visual.basis = Basis.looking_at(_facing, Vector3.UP).scaled(s)
+	_visual.basis = Basis.looking_at(_facing, Vector3.UP).scaled(s * SIZE)
+	_hurtbox.position.y = 0.45 * SIZE * s.y
 	_bounce_area.monitorable = def.is_bouncer and state == S.RECOVER
 	_debug.visible = DevTools.ai_debug
 	if _debug.visible:

@@ -318,7 +318,7 @@ func _build_pause(root: Control) -> void:
 	title.add_theme_font_size_override(&"font_size", 52)
 	vb.add_child(title)
 	_button(vb, "Resume", func() -> void: set_paused(false))
-	_slider(vb, "Mouse sensitivity", 0.05, 0.8, Settings.mouse_sensitivity, func(v: float) -> void: Settings.mouse_sensitivity = v)
+	_slider(vb, "Camera turn speed", 0.8, 5.0, Settings.stick_sensitivity, func(v: float) -> void: Settings.stick_sensitivity = v)
 	_slider(vb, "Music volume", 0.0, 1.0, Settings.music_volume, func(v: float) -> void:
 		Settings.music_volume = v
 		AudioDirector.apply_volumes())
@@ -373,4 +373,4 @@ func set_paused(on: bool) -> void:
 		(_pause.get_child(1).get_child(0).get_child(1) as Button).grab_focus()
 	else:
 		Settings.save_settings()
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN

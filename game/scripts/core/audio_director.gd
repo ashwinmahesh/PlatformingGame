@@ -4,6 +4,7 @@ extends Node
 const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const POOL_SIZE := 14
+const ONE_SHOT_CUES: Array[StringName] = [&"victory"]
 
 var _sfx: Dictionary[StringName, AudioStream] = {}
 var _pool: Array[AudioStreamPlayer] = []
@@ -50,7 +51,7 @@ func _load_sfx() -> void:
 		return
 	for f in dir.get_files():
 		var base := f.trim_suffix(".import").trim_suffix(".remap")
-		if base.ends_with(".wav") and not _sfx.has(StringName(base.get_basename())):
+		if (base.ends_with(".wav") or base.ends_with(".ogg")) and not _sfx.has(StringName(base.get_basename())):
 			var stream := load(SFX_DIR + base) as AudioStream
 			if stream != null:
 				_sfx[StringName(base.get_basename())] = stream
@@ -79,15 +80,22 @@ func play_music(track: StringName, fade: float = 1.2) -> void:
 	if track == _current_music:
 		return
 	_current_music = track
-	var path := MUSIC_DIR + String(track) + ".wav"
+	var path := MUSIC_DIR + String(track) + ".ogg"
+	if not ResourceLoader.exists(path):
+		path = MUSIC_DIR + String(track) + ".wav"
 	var incoming := _music_b if _music_a.playing else _music_a
 	var outgoing := _music_a if incoming == _music_b else _music_b
+	var loop := track not in ONE_SHOT_CUES
 	if ResourceLoader.exists(path):
-		var stream := load(path) as AudioStreamWAV
+		var stream := load(path) as AudioStream
+		if stream is AudioStreamWAV:
+			var wav := stream as AudioStreamWAV
+			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD if loop else AudioStreamWAV.LOOP_DISABLED
+			wav.loop_begin = 0
+			wav.loop_end = int(wav.get_length() * wav.mix_rate)
+		elif stream is AudioStreamOggVorbis:
+			(stream as AudioStreamOggVorbis).loop = loop
 		if stream != null:
-			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-			stream.loop_begin = 0
-			stream.loop_end = int(stream.get_length() * stream.mix_rate)
 			incoming.stream = stream
 			incoming.volume_db = -40.0
 			incoming.play()

@@ -42,10 +42,13 @@ func _ready() -> void:
 	hud.bind_player(player)
 	hud.world_id = scene_id
 	player.died.connect(_on_player_died)
+	if DevTools.enabled:
+		add_child(HitboxDebug.new())
 	for area in get_tree().get_nodes_in_group(&"hazard"):
-		(area as Area3D).body_entered.connect(_on_hazard_body)
+		var a := area as Area3D
+		a.body_entered.connect(_on_hazard_body.bind(StringName(str(a.get_meta(&"kind", "water")))))
 	Router.current_scene_id = scene_id
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	if music != &"":
 		AudioDirector.play_music(music)
 	Telemetry.log_event("scene_enter", {"scene": String(scene_id), "spawn": String(spawn_id)})
@@ -119,12 +122,12 @@ func _build_environment() -> void:
 
 func _physics_process(_delta: float) -> void:
 	if player != null and player.global_position.y < kill_y and player.state not in [Player.State.FROZEN, Player.State.DEAD]:
-		player.on_hazard()
+		player.on_hazard(&"pit")
 
 
-func _on_hazard_body(body: Node3D) -> void:
+func _on_hazard_body(body: Node3D, kind: StringName) -> void:
 	if body is Player:
-		(body as Player).on_hazard()
+		(body as Player).on_hazard(kind)
 	elif body is Gloplet:
 		body.call_deferred(&"_defeat", false)
 

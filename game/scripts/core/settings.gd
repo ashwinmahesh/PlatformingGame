@@ -4,7 +4,7 @@ extends Node
 const PATH := "user://settings.cfg"
 
 var mouse_sensitivity: float = 0.25
-var stick_sensitivity: float = 2.6
+var stick_sensitivity: float = 2.4
 var invert_x: bool = false
 var invert_y: bool = false
 var auto_follow: float = 0.5

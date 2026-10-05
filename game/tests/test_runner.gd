@@ -55,6 +55,8 @@ func _ready() -> void:
 	print("")
 	print("%d tests, %d passed, %d failed" % [total, total - failed.size(), failed.size()])
 	Kit.clear_cache()
+	Toon.clear_cache()
+	Props.clear_cache()
 	AudioDirector.shutdown()
 	for i in 6:
 		OS.delay_msec(30)

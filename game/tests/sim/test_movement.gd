@@ -74,25 +74,32 @@ func test_05_walk_off_after_coyote_gives_j2_j3() -> void:
 	check_eq(jumps, [2, 3] as Array[int], "J2 then J3 then nothing")
 
 
-func test_06_buffer_010s_before_contact_gives_j1() -> void:
+## Ticks a buffered press stays valid (0.12 s in the plan; Build 2 tuning uses 0.04 s).
+func _buffer_ticks() -> int:
+	return int(p.settings.jump_buffer * 60.0 + 0.001)
+
+
+func test_06_press_within_buffer_before_contact_gives_j1() -> void:
+	var n := _buffer_ticks()
 	var land := await _drop_landing_tick()
 	await _reset_drop()
-	# The press is processed on tick land-6; contact is detected by tick land's move.
-	await ticks(land - 7)
+	# The press is processed on tick land+1-n; contact is detected by tick land's move.
+	await ticks(land - n)
 	inp.tap(&"jump")
-	await ticks(7)
+	await ticks(n)
 	check_eq(jumps.size(), 0, "no jump before contact")
 	await ticks(1)
 	check_eq(jumps, [1] as Array[int], "buffered J1 on the tick after contact")
 
 
-func test_07_buffer_020s_before_contact_expires() -> void:
+func test_07_press_beyond_buffer_expires() -> void:
+	var n := _buffer_ticks()
 	var land := await _drop_landing_tick()
 	await _reset_drop()
-	await ticks(land - 13)
+	await ticks(land - n - 3)
 	inp.tap(&"jump")
 	await ticks(30)
-	check_eq(jumps.size(), 0, "press 0.20 s early expired")
+	check_eq(jumps.size(), 0, "a press older than the buffer expired")
 
 
 func test_08_press_on_contact_tick_jumps_next_tick() -> void:

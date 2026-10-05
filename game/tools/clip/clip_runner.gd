@@ -25,7 +25,7 @@ func _ready() -> void:
 	_inp = ScriptedInput.new()
 	_level.player.input_source = _inp
 	if _scenario == "plunge_springcap":
-		_level.player.respawn_at(Vector3(0.0, 3.05, -42.3))
+		_level.player.respawn_at(Vector3(0.0, 5.05, -62.0))
 
 
 func _physics_process(_delta: float) -> void:
@@ -36,10 +36,10 @@ func _physics_process(_delta: float) -> void:
 			if _t in [40, 62, 84]:
 				_inp.tap(&"jump")
 		"plunge_springcap":
-			_inp.move = Vector2(0.0, 1.0) if (_t > 10 and _t < 32) or _t > 70 else Vector2.ZERO
-			if _t == 12:
+			_inp.move = Vector2(0.0, 0.6) if (_t > 10 and _t < 26) or _t > 80 else Vector2.ZERO
+			if _t == 10:
 				_inp.tap(&"jump")
-			if _t == 34:
+			if _t == 30:
 				_inp.tap(&"plunge")
 		"hub_portal":
 			# Turn around and walk into the Rootway arch; the world should load behind the wipe.

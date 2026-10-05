@@ -34,6 +34,8 @@ extends Resource
 @export_group("Plunge and bounces")
 @export var plunge_hang_ticks: int = 6
 @export var plunge_speed: float = 24.0
+@export var plunge_start_speed: float = 10.0
+@export var plunge_accel: float = 180.0
 @export var plunge_land_ticks: int = 14
 @export var plunge_bounce_height: float = 2.2
 @export var springcap_height: float = 3.0

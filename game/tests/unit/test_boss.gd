@@ -44,52 +44,57 @@ func test_forced_first_pattern_per_phase() -> void:
 	check_eq(b.choose_pattern(), MotherGloop.Pattern.ROLLING_CHARGE, "phase 3 opens with Rolling Charge")
 
 
-func test_thresholds_clamp_damage() -> void:
-	b.hp = 7
-	b.open_window(150)
-	check_eq(_hit(2), 1, "2 damage at 7 HP stops at 6")
-	check_eq(b.hp, 6, "hp at threshold")
-	check_eq(b.state, MotherGloop.S.PHASE_CHANGE, "window closes into the phase change")
+func test_thresholds_start_phases() -> void:
 	b.hp = 4
 	b.open_window(150)
-	check_eq(_hit(2), 1, "2 damage at 4 HP stops at 3")
-	check_eq(b.hp, 3, "hp at second threshold")
+	check_eq(_hit(1), 1, "a Plunge deals 1")
+	check_eq(b.hp, 3, "hp at the first threshold")
+	check_eq(b.state, MotherGloop.S.PHASE_CHANGE, "phase 2 starts")
+	b.hp = 2
+	b.open_window(150)
+	_hit(1)
+	check_eq(b.hp, 1, "hp at the second threshold")
+	check_eq(b.state, MotherGloop.S.PHASE_CHANGE, "phase 3 starts")
 
 
-func test_window_cap_and_no_threshold_crossing_fuzz() -> void:
+func test_one_plunge_per_opening() -> void:
+	b.windows_opened = 1
+	b.open_window(150)
+	check_eq(_hit(1), 1, "first Plunge lands")
+	check(b.state != MotherGloop.S.CORE_WINDOW, "the core closes as soon as it's hit")
+	check_eq(_hit(1), 0, "a second Plunge in the same opening does nothing")
+	check_eq(b.hp, MotherGloop.MAX_HP - 1, "exactly 1 damage")
+
+
+func test_window_cap_fuzz() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 5
 	for trial in 300:
 		b.free()
 		b = MotherGloop.new()
-		b.hp = rng.randi_range(1, 9)
+		b.hp = rng.randi_range(1, MotherGloop.MAX_HP)
 		b.windows_opened = 1
 		b.open_window(150)
-		var start := b.hp
 		var dealt := 0
 		for i in 8:
 			if b.state != MotherGloop.S.CORE_WINDOW:
 				break
 			dealt += _hit(rng.randi_range(1, 2))
-		check(dealt <= MotherGloop.WINDOW_CAP, "at most 3 damage per window")
-		for t in MotherGloop.THRESHOLDS:
-			if start > t:
-				check(b.hp >= t, "never crosses threshold %d in one window (from %d to %d)" % [t, start, b.hp])
-				break
+		check(dealt <= MotherGloop.WINDOW_CAP, "at most one hit per opening")
 		if not failures.is_empty():
 			return
 
 
-func test_win_needs_at_least_three_windows() -> void:
+func test_win_takes_five_clean_plunges() -> void:
 	var windows := 0
 	while b.hp > 0 and windows < 20:
 		b.open_window(150)
 		windows += 1
 		while b.state == MotherGloop.S.CORE_WINDOW:
-			if _hit(2) == 0:
+			if _hit(1) == 0:
 				break
 	check_eq(b.hp, 0, "defeated")
-	check(windows >= 3, "at least 3 windows (took %d)" % windows)
+	check_eq(windows, MotherGloop.MAX_HP, "exactly 5 openings, one Plunge each")
 
 
 func test_body_hits_extend_at_most_09s() -> void:

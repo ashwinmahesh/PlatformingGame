@@ -14,8 +14,9 @@ func _ready() -> void:
 	if hud != null and str(args.get("hud", "0")) != "1":
 		hud.visible = false
 	var cam := Camera3D.new()
-	cam.far = 400.0
+	cam.far = 600.0
 	add_child(cam)
+	CameraRig.add_outline_pass(cam)
 	DirAccess.make_dir_recursive_absolute(str(args["out"]))
 	var points := get_tree().get_nodes_in_group(&"capture_point")
 	if str(args.get("player_cam", "0")) == "1":

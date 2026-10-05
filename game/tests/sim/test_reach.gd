@@ -3,8 +3,8 @@ extends TestCase
 ## level facts that depend on it: the clearing's seed ledge needs a Bouncer, and the Springcap
 ## Plunge clears the Fernway cliff.
 
-const SEED_LEDGE_RISE := 6.8
-const CLIFF := 8.0
+const SEED_LEDGE_RISE := Glimmerbrook.SEED_LEDGE_RISE
+const CLIFF := Glimmerbrook.CLIFF
 
 
 func before_each() -> void:
@@ -34,12 +34,15 @@ func _apex(presses: Array[int]) -> float:
 
 func test_reach_heights() -> void:
 	var j1 := await _apex([])
-	var j2 := await _apex([22])
-	var j3 := await _apex([22, 40])
+	var s := (preload("res://data/movement/hero_movement.tres") as MovementSettings)
+	var t1 := int(s.jump_velocity(0) / s.gravity_up * 60.0)
+	var t2 := t1 + int(s.jump_velocity(1) / s.gravity_up * 60.0)
+	var j2 := await _apex([t1])
+	var j3 := await _apex([t1, t2])
 	print("    reach: J1 apex %.2f m, J1+J2 %.2f m, triple %.2f m" % [j1, j2, j3])
-	check(j1 > 1.7 and j1 < 2.4, "J1 about 1.8 m (plus hang)")
+	check(absf(j1 - s.jump_heights[0]) < 0.4, "J1 close to its tuned height (%.2f)" % j1)
 	check(j3 < SEED_LEDGE_RISE, "triple jump alone can't reach the clearing seed ledge (%.2f < %.1f)" % [j3, SEED_LEDGE_RISE])
-	check(j3 + 0.35 > 5.0, "triple jump comfortably clears 5 m")
+	check(j3 < CLIFF, "triple jump alone can't climb the Fernway cliff, so the Plunge stays required")
 
 
 func test_springcap_plunge_clears_cliff() -> void:
@@ -67,3 +70,7 @@ func test_springcap_plunge_clears_cliff() -> void:
 		await ticks(1)
 		best = maxf(best, p.global_position.y)
 	check(best < CLIFF - 2.0, "a plain landing bounce stays well under the cliff (%.2f)" % best)
+	# J1 onto the cap, small bounce, then J2 + J3: still short of the cliff top.
+	var s := (preload("res://data/movement/hero_movement.tres") as MovementSettings)
+	var reach := 1.2 + s.springcap_height + s.jump_heights[1] + s.jump_heights[2]
+	check(reach < CLIFF, "small bounce + two air jumps can't skip the Plunge (%.1f < %.1f)" % [reach, CLIFF])

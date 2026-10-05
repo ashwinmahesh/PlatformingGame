@@ -9,9 +9,18 @@ var tunic: StringName = &"roof_teal"
 var hat: StringName = &"thatch"
 var skin: StringName = &"skin_mid"
 var body_scale: float = 1.0
+## Villagers share one rig (KayKit Adventurers, CC0) and differ by outfit and scale (plan §11.4).
+const MODELS: Dictionary[String, Array] = {
+	"elder_fern": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand"]],
+	"pip": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.48, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"old_bramble": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.62, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+}
+
 ## Room for future services (plan §8.8); empty in Release 1.
 var services: Array[StringName] = []
 var _visual: Node3D
+var _model: CharacterModel
+var _talk_left: float = 0.0
 var _bubble: Label3D
 var _hop: float = 0.0
 
@@ -19,35 +28,22 @@ var _hop: float = 0.0
 func _ready() -> void:
 	add_to_group(&"interactable")
 	_visual = Node3D.new()
-	_visual.scale = Vector3.ONE * body_scale
 	add_child(_visual)
-	var torso := CapsuleMesh.new()
-	torso.radius = 0.32
-	torso.height = 0.85
-	Kit.mesh_instance(_visual, torso, Kit.mat(tunic, 0.025), Vector3(0.0, 0.45, 0.0))
-	var head := SphereMesh.new()
-	head.radius = 0.34
-	head.height = 0.64
-	Kit.mesh_instance(_visual, head, Kit.mat(skin, 0.025), Vector3(0.0, 1.05, 0.0))
-	var h := CylinderMesh.new()
-	h.top_radius = 0.1
-	h.bottom_radius = 0.45
-	h.height = 0.28
-	Kit.mesh_instance(_visual, h, Kit.mat(hat, 0.025), Vector3(0.0, 1.35, 0.0))
-	for side: float in [-1.0, 1.0]:
-		var eye := SphereMesh.new()
-		eye.radius = 0.05
-		eye.height = 0.1
-		Kit.mesh_instance(_visual, eye, Kit.mat(&"bark_dark"), Vector3(0.12 * side, 1.07, -0.3))
-	_bubble = Kit.label(self, Vector3(0.0, 2.1 * body_scale, 0.0), "...", 64)
+	var spec: Array = MODELS.get(npc_id, MODELS["elder_fern"])
+	var hidden: Array[String] = []
+	hidden.assign(spec[2] as Array)
+	_model = CharacterModel.create(str(spec[0]), float(spec[1]) * body_scale, hidden, 0.035)
+	_visual.add_child(_model)
+	_model.play(&"Idle")
+	_bubble = Kit.label(self, Vector3(0.0, 2.3 * body_scale, 0.0), "...", 64)
 	_bubble.visible = false
-	Kit.label(self, Vector3(0.0, 2.45 * body_scale, 0.0), display_name, 28)
+	Kit.label(self, Vector3(0.0, 2.75 * body_scale, 0.0), display_name, 28)
 	# Solid so you can't walk through villagers.
 	var body := Kit.static_body(self, Vector3.ZERO, Layers.WORLD)
 	var cap := CapsuleShape3D.new()
-	cap.radius = 0.35 * body_scale
-	cap.height = 1.5 * body_scale
-	Kit.add_shape(body, cap, Vector3(0.0, 0.75 * body_scale, 0.0))
+	cap.radius = 0.45 * body_scale
+	cap.height = 1.6 * body_scale
+	Kit.add_shape(body, cap, Vector3(0.0, 0.8 * body_scale, 0.0))
 
 
 func _process(delta: float) -> void:
@@ -59,10 +55,16 @@ func _process(delta: float) -> void:
 	var d := to.length()
 	if d < 4.0 and d > 0.1:
 		var want := Basis.looking_at(to.normalized(), Vector3.UP)
-		_visual.basis = _visual.basis.orthonormalized().slerp(want, 1.0 - exp(-6.0 * delta)).scaled(Vector3.ONE * body_scale)
+		_visual.basis = _visual.basis.orthonormalized().slerp(want, 1.0 - exp(-6.0 * delta))
 	_bubble.visible = d < 2.2 and p.state != Player.State.TALK
 	_hop = maxf(_hop - delta * 3.0, 0.0)
-	_visual.position.y = sin(_hop * PI) * 0.3 + sin(Time.get_ticks_msec() * 0.003) * 0.02
+	_talk_left = maxf(_talk_left - delta, 0.0)
+	if _hop > 0.0:
+		_model.play(&"Cheer", 0.15)
+	elif _talk_left > 0.0 or p.state == Player.State.TALK and d < 3.0:
+		_model.play(&"Interact", 0.2)
+	else:
+		_model.play(&"Idle", 0.3)
 
 
 func interact(p: Player) -> void:
@@ -70,11 +72,11 @@ func interact(p: Player) -> void:
 	var lines := DialogueData.pick_lines(data)
 	if lines.is_empty():
 		return
-	_hop = 1.0
+	_talk_left = 1.2
 	var hud := get_tree().get_first_node_in_group(&"hud") as Hud
 	if hud != null:
 		hud.open_dialogue(lines, p)
 
 
 func emote_joy() -> void:
-	_hop = 1.0
+	_hop = 2.5

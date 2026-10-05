@@ -61,7 +61,7 @@ void fragment() {
 	_button(vb, "Quit", func() -> void: AudioDirector.quit_game())
 	(_continue if _continue.visible else vb.get_child(4) as Button).grab_focus()
 	var help := Label.new()
-	help.text = "WASD move  ·  Mouse camera  ·  Space jump (x3)  ·  Left mouse / J attack\nShift / K Plunge  ·  E talk  ·  Q / Right mouse lock-on  ·  Esc pause  ·  F1 Feel Lab"
+	help.text = "WASD move  ·  Arrow keys camera  ·  Space jump (x3)  ·  F attack\nShift Plunge  ·  E talk  ·  Q lock-on  ·  Esc pause  ·  F1 Feel Lab"
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	help.add_theme_font_size_override(&"font_size", 24)
 	help.add_theme_color_override(&"font_outline_color", Palette.INK)

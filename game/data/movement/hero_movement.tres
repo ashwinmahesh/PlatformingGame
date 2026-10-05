@@ -2,5 +2,20 @@
 
 [ext_resource type="Script" path="res://scripts/player/movement_settings.gd" id="1"]
 
+; Build 2 tuning from Ashwin's feedback (Feedback - Build 1): faster, higher, more air control.
+; Bounce heights were raised in proportion so pogos still feel like a launch.
 [resource]
 script = ExtResource("1")
+run_speed = 12.0
+accel_time = 0.165
+air_control = 0.9
+gravity_up = 50.0
+gravity_down = 65.0
+terminal_fall = 30.0
+jump_heights = PackedFloat32Array(3.4, 3.2, 3.2)
+jump_buffer = 0.04
+plunge_speed = 40.0
+plunge_bounce_height = 3.5
+springcap_height = 3.0
+springcap_plunge_height = 15.0
+bouncer_height = 6.5
