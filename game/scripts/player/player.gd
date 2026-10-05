@@ -68,6 +68,10 @@ var _wall_normal: Vector3 = Vector3.ZERO
 var _wall_grace: int = 0
 var _wall_kick_left: int = 0
 var _locked_wall: Vector3 = Vector3.ZERO
+## The wall last kicked off: it gives no more wall jumps until you touch something else
+## (ground, another wall, a ladder, a bounce). Ashwin: no climbing one wall forever.
+var _locked_wall_id: int = 0
+var _wall_body_id: int = 0
 var _wall_lock_left: float = 0.0
 var _ladder_lock_left: float = 0.0
 var coyote_left: float = 0.0
@@ -271,6 +275,7 @@ func current_attack_dict() -> Dictionary:
 
 ## Plunge bounce off a hurtbox or bounce surface (plan §3.3 rule 8, §4.1).
 func bounce(height: float, from_plunge: bool = true) -> void:
+	_locked_wall_id = 0
 	state = State.NORMAL
 	attack = null
 	velocity.y = settings.launch_velocity(height)
@@ -586,8 +591,13 @@ func _update_wall(delta: float, inp: PlayerInput) -> void:
 		n = n.normalized()
 		if _wall_lock_left > 0.0 and n.dot(_locked_wall) > 0.8:
 			continue
-		_wall_normal = n
-		_wall_grace = settings.wall_grace_ticks
+		var same_wall := _locked_wall_id != 0 and body.get_instance_id() == _locked_wall_id and n.dot(_locked_wall) > 0.8
+		if not same_wall:
+			# Touching a different wall frees the last one again.
+			_locked_wall_id = 0
+			_wall_body_id = body.get_instance_id()
+			_wall_normal = n
+			_wall_grace = settings.wall_grace_ticks
 		var want := _move_basis() * Vector3(inp.move.x, 0.0, -inp.move.y)
 		if want.dot(-n) > 0.3 and velocity.y < 0.0:
 			wall_sliding = true
@@ -611,6 +621,7 @@ func _wall_jump() -> void:
 	_air_speed_cap = maxf(settings.run_speed, settings.wall_jump_push)
 	_wall_kick_left = settings.wall_kick_ticks
 	_locked_wall = n
+	_locked_wall_id = _wall_body_id
 	_wall_lock_left = settings.wall_lockout
 	_wall_grace = 0
 	wall_sliding = false
@@ -644,6 +655,7 @@ func _try_grab_ladder(inp: PlayerInput) -> bool:
 	if want.length() < 0.3 or want.normalized().dot(-l.out_dir()) < 0.3:
 		return false
 	ladder = l
+	_locked_wall_id = 0
 	state = State.CLIMB
 	velocity = Vector3.ZERO
 	jumps_used = 0
@@ -815,6 +827,7 @@ func _allows_jump_now() -> bool:
 
 
 func _on_landed() -> void:
+	_locked_wall_id = 0
 	jumps_used = 0
 	air_dash_used = false
 	gliding = false

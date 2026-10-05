@@ -99,3 +99,56 @@ func test_pickups_drift_in_when_close() -> void:
 	await ticks(60)
 	check(not is_instance_valid(pk) or pk.is_queued_for_deletion(), "a seed 2.6 m away is collected without stepping on it")
 	check(Progress.has_seed(&"w1_seed_fernway"), "and counted")
+
+
+## Ashwin: "we shouldn't be able to infinitely keep bouncing off the same wall". After a kick
+## the same wall only lets you slide until you touch something else.
+func test_same_wall_gives_no_second_kick() -> void:
+	floor_block(Vector3(0.0, 30.0, -4.0), Vector3(10.0, 30.0, 1.0))
+	p = spawn_player(Vector3(0.0, 0.05, 0.0))
+	inp = input_of(p)
+	await ticks(6)
+	inp.move = Vector2(0.0, 1.0)
+	inp.tap(&"jump")
+	await ticks(30)
+	inp.tap(&"jump")
+	await ticks(2)
+	check(p.velocity.z > 4.0 and p.jumps_used == 1, "first kick off the wall")
+	# Air jump straight back into the same wall, higher up, and try again.
+	await ticks(12)
+	inp.tap(&"jump")
+	for i in 40:
+		await ticks(1)
+		if p.is_on_wall():
+			break
+	check(p.is_on_wall() or p.global_position.z < -2.5, "back against the same wall")
+	await ticks(4)
+	var used := p.jumps_used
+	inp.tap(&"jump")
+	await ticks(2)
+	check(p.velocity.z < 2.0, "the same wall gives no second kick (vz %.1f)" % p.velocity.z)
+	check(p.jumps_used >= used, "and no jump reset (%d)" % p.jumps_used)
+
+
+## Zigzagging between two facing walls (a Lanternwick alley) still works.
+func test_zigzag_between_two_walls() -> void:
+	floor_block(Vector3(0.0, 30.0, -4.0), Vector3(10.0, 30.0, 1.0))
+	floor_block(Vector3(0.0, 30.0, 4.0), Vector3(10.0, 30.0, 1.0))
+	p = spawn_player(Vector3(0.0, 0.05, 0.0))
+	inp = input_of(p)
+	await ticks(6)
+	inp.move = Vector2(0.0, 1.0)
+	inp.tap(&"jump")
+	await ticks(30)
+	inp.tap(&"jump")
+	await ticks(2)
+	check(p.velocity.z > 4.0, "kick off the north wall")
+	inp.move = Vector2(0.0, -1.0)
+	for i in 40:
+		await ticks(1)
+		if p.is_on_wall() and p.global_position.z > 2.0:
+			break
+	await ticks(2)
+	inp.tap(&"jump")
+	await ticks(2)
+	check(p.velocity.z < -4.0 and p.jumps_used == 1, "then off the south wall (vz %.1f)" % p.velocity.z)
