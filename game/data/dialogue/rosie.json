@@ -1,0 +1,19 @@
+{
+  "id": "rosie",
+  "name": "rosie",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Rosie",
+          "text": "Flowers! Lovely flowers!"
+        },
+        {
+          "speaker": "Rosie",
+          "text": "The Old Bell Inn's cellar door only stays open while something heavy sits on the plate in High Street."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "id": "toll",
+  "name": "toll",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Toll",
+          "text": "I've rung St. Wick's bells for forty years. Pink, then gold, then blue."
+        },
+        {
+          "speaker": "Toll",
+          "text": "Ring them right and the crypt opens. Mind the crumbly bits down there."
+        }
+      ]
+    }
+  ]
+}

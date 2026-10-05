@@ -1,0 +1,24 @@
+{
+  "id": "bun",
+  "name": "bun",
+  "conversations": [
+    {
+      "when": "w6_found_pin",
+      "lines": [
+        {
+          "speaker": "Baker Bun",
+          "text": "My rolling pin! The bread will rise again. A seed, warm from the oven!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Baker Bun",
+          "text": "Disaster! A magpie made off with my best rolling pin and dropped it on the town wall, way up in the far north-east corner. The Gatehouse Stair goes up to the wall-walk."
+        }
+      ]
+    }
+  ]
+}

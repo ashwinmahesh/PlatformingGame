@@ -55,6 +55,12 @@ const MODELS: Dictionary[String, Array] = {
 	"ingrid": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.54, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"hoot": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.58, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 	"wren": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.48, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"pike": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.6, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"bun": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.58, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	"rosie": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.5, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"soot": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.46, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"toll": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"lumi": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.52, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 }
 
 ## Room for future services (plan §8.8); empty in Release 1.

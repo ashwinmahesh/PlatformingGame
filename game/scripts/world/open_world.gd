@@ -329,7 +329,7 @@ func water(center_local: Vector3, size: Vector2, depth: float = 5.0, basin: bool
 ## Build 6: deep water sits in a walled basin with a grassy rim at the waterline, so a lake
 ## never hangs in the air with the forest showing under it. Where the water is dug into
 ## ground the walls are simply buried. `size` is already world-aligned by S().
-func basin_at(center: Vector3, size: Vector2, depth: float) -> void:
+func basin_at(center: Vector3, size: Vector2, depth: float, wall_color: StringName = &"bark_mid", rim_color: StringName = &"grass_mid") -> void:
 	const T := 1.6
 	var top := center.y - 0.02
 	var h := depth + 1.4
@@ -341,7 +341,7 @@ func basin_at(center: Vector3, size: Vector2, depth: float) -> void:
 		[Vector3(half.x + T * 0.5, top, 0.0), Vector3(T, h, size.y)],
 	]
 	for side: Array in sides:
-		Kit.block(self, center * Vector3(1.0, 0.0, 1.0) + (side[0] as Vector3), side[1] as Vector3, &"bark_mid", Layers.WORLD | Layers.CAMERA_BLOCKER, &"grass_mid")
+		Kit.block(self, center * Vector3(1.0, 0.0, 1.0) + (side[0] as Vector3), side[1] as Vector3, wall_color, Layers.WORLD | Layers.CAMERA_BLOCKER, rim_color)
 	# A sandy bed under it all (any bed a world builds itself sits on or above this).
 	Kit.block(self, center + Vector3(0.0, -depth - 0.05, 0.0), Vector3(size.x, 1.4, size.y), &"sand_mid", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_light")
 

@@ -1,0 +1,19 @@
+{
+  "id": "pike",
+  "name": "pike",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Constable Pike",
+          "text": "Halt! Oh, a visitor. Welcome to Lanternwick, the busiest little town this side of the Rootway."
+        },
+        {
+          "speaker": "Constable Pike",
+          "text": "The Clock Tower on the green is the quickest way up to the rooftops. Folk up there say the whole north bank is one long terrace."
+        }
+      ]
+    }
+  ]
+}

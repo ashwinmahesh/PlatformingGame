@@ -1,0 +1,24 @@
+{
+  "id": "lumi",
+  "name": "lumi",
+  "conversations": [
+    {
+      "when": "w6_found_hook",
+      "lines": [
+        {
+          "speaker": "Lumi",
+          "text": "You dived all the way down for it? The streets will glow tonight. Here, a seed!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Lumi",
+          "text": "I dropped my lantern hook off the east bridge! It's at the bottom of the river. Without it I can't light the lamps tonight."
+        }
+      ]
+    }
+  ]
+}
