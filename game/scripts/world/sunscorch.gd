@@ -291,10 +291,11 @@ func _camp() -> void:
 	region(Vector3.ZERO)
 	var c := Vector3(0.0, 0.0, 70.0)
 	checkpoint(&"w3_cp_camp", c + Vector3(6.0, 0.0, 22.0))
-	water(c + Vector3(-17.0, -0.6, -4.0), Vector2(14.0, 12.0), 5.0)
-	Kit.block(self, c + Vector3(-17.0, -5.6, -4.0), Vector3(14.0, 12.4, 12.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_mid")
-	prop(&"statue_head", c + Vector3(-20.0, -5.6, -7.0), 0.6, 1.4, false)
-	seed_at(&"w3_seed_pond", c + Vector3(-15.0, -5.6, -2.0))
+	water(c + Vector3(-17.0, -0.6, -4.0), Vector2(14.0, 12.0), 8.0)
+	Kit.block(self, c + Vector3(-17.0, -8.6, -4.0), Vector3(14.0, 9.4, 12.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_mid")
+	prop(&"statue_head", c + Vector3(-20.0, -8.6, -7.0), 0.6, 1.4, false)
+	seed_at(&"w3_seed_pond", c + Vector3(-15.0, -8.6, -2.0))
+	Ambient.fish(self, c + Vector3(-17.0, -4.0, -4.0), 4.0, 5, &"sunset_orange")
 	for i in 8:
 		var a := float(i) / 8.0 * TAU
 		prop([&"palm", &"palm_tall", &"palm_bend", &"palm_detailed"][i % 4] as StringName, c + Vector3(-17.0 + cos(a) * 10.0, 0.0, -4.0 + sin(a) * 9.0), _rng.randf() * TAU, 1.2)
@@ -505,9 +506,9 @@ func _flats() -> void:
 func _side_canyons() -> void:
 	region(Vector3.ZERO)
 	# Second oasis (west).
-	water(Vector3(-108.0, -0.6, 42.0), Vector2(16.0, 16.0), 5.0)
-	Kit.block(self, Vector3(-108.0, -5.6, 42.0), Vector3(16.0, 12.4, 16.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_mid")
-	seed_at(&"w3_seed_oasis2", Vector3(-106.0, -5.6, 44.0))
+	water(Vector3(-108.0, -0.6, 42.0), Vector2(16.0, 16.0), 8.0)
+	Kit.block(self, Vector3(-108.0, -8.6, 42.0), Vector3(16.0, 9.4, 16.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_mid")
+	seed_at(&"w3_seed_oasis2", Vector3(-106.0, -8.6, 44.0))
 	for i in 6:
 		var a := float(i) / 6.0 * TAU
 		prop([&"palm", &"palm_tall", &"palm_bend"][i % 3] as StringName, Vector3(-108.0 + cos(a) * 11.5, 0.0, 42.0 + sin(a) * 11.5), a, 1.2)

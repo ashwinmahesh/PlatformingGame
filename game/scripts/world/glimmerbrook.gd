@@ -52,6 +52,7 @@ func build() -> void:
 	_glade_and_lake()
 	_links()
 	_build6()
+	_lake_depths()
 	_sky()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -254,8 +255,9 @@ func _river_and_falls() -> void:
 	plat(Vector3(0.0, 0.0, -6.0), Vector2(30.0, 16.0))
 	sign_post(Vector3(-6.0, 0.0, -10.0), "Rafts drift slowly. Lily pads\nsink a moment after you land.")
 	# The river: wide stones, slow rafts, sinking lily pads. You can swim, too.
-	water(Vector3(0.0, -1.0, -34.0), Vector2(44.0, 40.0), 4.0)
-	plat(Vector3(0.0, -5.0, -34.0), Vector2(44.0, 40.0), &"stone_dark", 0)
+	# Build 6 (Ashwin: "all the swimmable water should be deeper"): 9 m to the riverbed.
+	water(Vector3(0.0, -1.0, -34.0), Vector2(44.0, 40.0), 9.0)
+	plat(Vector3(0.0, -10.0, -34.0), Vector2(44.0, 40.0), &"stone_dark", 0)
 	plat(Vector3(-23.5, 0.0, -34.0), Vector2(3.0, 40.0), &"stone_dark", 0)
 	plat(Vector3(23.5, 0.0, -34.0), Vector2(3.0, 40.0), &"stone_dark", 0)
 	for spec: Array in [[0.0, -19.0], [6.0, -25.0], [-2.0, -31.0]]:
@@ -280,11 +282,15 @@ func _river_and_falls() -> void:
 	# Riverbed log ring (dive with Shift).
 	for i in 5:
 		var a := float(i) / 5.0 * TAU
-		prop(&"rock_large_c", Vector3(-12.0 + cos(a) * 3.2, -5.0, -30.0 + sin(a) * 3.2), a, 0.8, false)
-	prop(&"log_large", Vector3(-12.0, -5.0, -27.0), 0.4, 1.2, false)
-	seed_at(&"w1_seed_riverbed", Vector3(-12.0, -4.7, -30.0))
-	for i in 8:
-		prop(&"waterplant", Vector3(_rng.randf_range(-18.0, 18.0), -5.0, _rng.randf_range(-16.0, -52.0)), _rng.randf() * TAU, 1.6, false)
+		prop(&"rock_large_c", Vector3(-12.0 + cos(a) * 3.2, -10.0, -30.0 + sin(a) * 3.2), a, 0.8, false)
+	prop(&"log_large", Vector3(-12.0, -10.0, -27.0), 0.4, 1.2, false)
+	seed_at(&"w1_seed_riverbed", Vector3(-12.0, -9.7, -30.0))
+	for i in 14:
+		prop(&"waterplant", Vector3(_rng.randf_range(-18.0, 18.0), -10.0, _rng.randf_range(-16.0, -52.0)), _rng.randf() * TAU, 1.8, false)
+	for i in 6:
+		Whimsy.kelp(self, P(Vector3(_rng.randf_range(-18.0, 18.0), -10.0, _rng.randf_range(-18.0, -50.0))), _rng.randf_range(5.0, 8.0))
+	critter(Jellyfloat, Vector3(6.0, -5.0, -40.0))
+	Ambient.fish(self, P(Vector3(0.0, -5.0, -34.0)), 8.0, 7, &"gold")
 	for i in 3:
 		var duck := Duck.new()
 		duck.position = P(Vector3(-14.0 + i * 12.0, -1.0, -40.0 + i * 3.0))
@@ -412,8 +418,8 @@ func _glade_and_lake() -> void:
 	gate.set_closed.call_deferred(true)
 	sign_post(Vector3(-6.0, 0.0, -44.0), "The Lily Gate opens\nfor 3 Star Shards.")
 	# Gloop Lake.
-	water(Vector3(0.0, -1.0, -76.0), Vector2(80.0, 56.0))
-	plat(Vector3(0.0, -5.0, -76.0), Vector2(80.0, 56.0), &"stone_dark", 0)
+	water(Vector3(0.0, -1.0, -76.0), Vector2(80.0, 56.0), 11.0)
+	plat(Vector3(0.0, -12.0, -76.0), Vector2(80.0, 56.0), &"stone_dark", 0)
 	disc(Vector3(0.0, 0.0, -76.0), ARENA_RADIUS + 0.5, &"bark_mid", &"grass_mid", 60)
 	var stump_positions: Array[Vector3] = []
 	for i in 4:
@@ -554,6 +560,23 @@ func _build6() -> void:
 	villager("mossy", "Mossy", Vector3(6.0, 0.0, 14.0), &"w1_found_charm", &"w1_seed_errand", Vector3(26.0, CLIFF + 0.3, -82.0), "Acorn charm")
 	villager("reed", "Ranger Reed", Vector3(6.0, 0.0, -30.0))
 	villager("kip", "Pep", Vector3(-30.0, 0.0, 40.0))
+
+
+## Under Gloop Lake: a barnacle-crusted grotto (slash it open while swimming) with a seed,
+## kelp, fish and a few Jellyfloats drifting about.
+func _lake_depths() -> void:
+	region(Vector3.ZERO)
+	alcove(Vector3(30.0, -12.0, 124.0), -PI * 0.5, &"stone_dark")
+	seed_at(&"w1_seed_lake", Vector3(30.0, -12.0, 124.0))
+	for i in 12:
+		var p := Vector3(_rng.randf_range(-36.0, 36.0), -12.0, _rng.randf_range(88.0, 138.0))
+		if Vector2(p.x, p.z - 112.0).length() < 22.0:
+			continue
+		Whimsy.kelp(self, p, _rng.randf_range(6.0, 10.0))
+	for spec: Array in [[-26.0, -6.0, 100.0], [24.0, -7.0, 132.0], [-20.0, -5.0, 134.0]]:
+		critter(Jellyfloat, Vector3(spec[0] as float, spec[1] as float, spec[2] as float))
+	Ambient.fish(self, Vector3(0.0, -6.0, 112.0), 28.0, 10, &"slime_blue")
+	Ambient.bubbles(self, Vector3(0.0, -10.0, 112.0), Vector3(60.0, 2.0, 40.0), 30)
 
 
 func _sky() -> void:

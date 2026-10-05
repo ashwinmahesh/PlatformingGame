@@ -25,9 +25,23 @@ func build() -> void:
 	scene_id = Progress.HUB_SCENE
 	default_spawn = &"hub_arrival"
 	music = &"mossbrook"
-	kill_y = -10.0
+	kill_y = -30.0
 	_rng.seed = 7
-	Kit.water(self, Vector3(0.0, -1.0, 0.0), Vector2(320.0, 320.0))
+	# Build 6: a deep lake (12 m) with a sandy bed, kelp, coral, fish and a sunken boat.
+	Kit.water(self, Vector3(0.0, -1.0, 0.0), Vector2(320.0, 320.0), 12.0)
+	Kit.block(self, Vector3(0.0, -13.0, 0.0), Vector3(320.0, 2.0, 320.0), &"sand_mid", Layers.WORLD, &"sand_light")
+	for i in 30:
+		var a := _rng.randf() * TAU
+		var r := _rng.randf_range(48.0, 100.0)
+		var p := Vector3(cos(a) * r, -13.0, -4.0 + sin(a) * r)
+		if i % 2 == 0:
+			Whimsy.kelp(self, p, _rng.randf_range(6.0, 11.0))
+		else:
+			Whimsy.coral(self, p, [&"coral_pink", &"coral_orange", &"mush_purple"][i % 3] as StringName, 1.4)
+	var hull := Kit.block(self, Vector3(30.0, -10.5, 60.0), Vector3(4.0, 2.5, 9.0), &"bark_mid", Layers.WORLD, &"wood_plank")
+	hull.rotation = Vector3(0.0, 0.6, 0.35)
+	Ambient.fish(self, Vector3(20.0, -6.0, 50.0), 12.0, 10, &"gold")
+	Ambient.fish(self, Vector3(-40.0, -7.0, 20.0), 14.0, 10, &"slime_blue")
 	Kit.pillar(self, Vector3(0.0, 0.0, -4.0), 42.0, 5.0, &"bark_mid", &"grass_mid")
 	add_spawn(&"hub_arrival", Vector3(0.0, 0.0, 22.0))
 	add_spawn(&"hub_rootway_exit", Vector3(0.0, 0.0, -11.0), Vector3.BACK)

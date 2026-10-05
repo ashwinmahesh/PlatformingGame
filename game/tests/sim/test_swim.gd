@@ -54,3 +54,33 @@ func test_dive_uses_breath_then_hurts() -> void:
 	await ticks(240)
 	check(not p.head_underwater(), "floats back up when Shift is released")
 	check(p.breath > 1.0, "breath refills at the surface")
+
+
+class SwimTarget:
+	extends Node3D
+	var hits: int = 0
+
+	func receive_player_attack(_atk: Dictionary, _area: Area3D) -> Dictionary:
+		hits += 1
+		return {"hit": true}
+
+
+## Build 6 (Ashwin: "swinging the sword should also be allowed" while swimming).
+func test_sword_while_swimming() -> void:
+	await ticks(120)
+	check(p.is_swimming(), "swimming")
+	var t := SwimTarget.new()
+	t.position = p.global_position + Vector3.UP * 0.65 + p.facing * 2.0
+	add_child(t)
+	var a := Area3D.new()
+	a.collision_layer = Layers.ENEMY_HURTBOX
+	a.monitoring = false
+	a.set_meta(&"actor", t)
+	var s := SphereShape3D.new()
+	s.radius = 0.6
+	Kit.add_shape(a, s)
+	t.add_child(a)
+	inp.tap(&"attack")
+	await ticks(20)
+	check(t.hits >= 1, "a sword swing in the water hits")
+	check(p.is_swimming(), "and you keep swimming")

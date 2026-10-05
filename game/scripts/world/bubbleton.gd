@@ -66,7 +66,8 @@ func build() -> void:
 
 func _seafloor() -> void:
 	var trench := Rect2(-72.0, 18.0, 22.0, 44.0)
-	ground(Rect2(-150.0, -150.0, 300.0, 300.0), [trench], 0.0, 20.0, &"stone_dark", &"sand_light", 0.02)
+	var lagoon := Rect2(72.0, 12.0, 16.0, 16.0)
+	ground(Rect2(-150.0, -150.0, 300.0, 300.0), [trench, lagoon], 0.0, 20.0, &"stone_dark", &"sand_light", 0.02)
 	var pit := Area3D.new()
 	pit.collision_layer = Layers.HAZARD
 	pit.collision_mask = Layers.PLAYER_BODY | Layers.ENEMY_BODY
@@ -518,10 +519,12 @@ func _coral_gardens() -> void:
 	var lc := Vector3(-20.0, 0.0, -40.0)
 	for spec: Array in [[0.0, -8.5, 18.0, 1.0], [0.0, 8.5, 18.0, 1.0], [-8.5, 0.0, 1.0, 16.0], [8.5, 0.0, 1.0, 16.0]]:
 		ledge(lc + Vector3(spec[0] as float, 2.5, spec[1] as float), Vector3(spec[2] as float, 2.5, spec[3] as float), &"coral_pink")
-	water(lc + Vector3(0.0, 2.2, 0.0), Vector2(16.0, 16.0), 2.2)
-	seed_at(&"w4_seed_lagoon", lc + Vector3(2.0, 0.0, 2.0))
+	water(lc + Vector3(0.0, 2.2, 0.0), Vector2(16.0, 16.0), 10.2)
+	Kit.block(self, Vector3(80.0, -8.0, 20.0), Vector3(16.0, 10.0, 16.0), &"sea_violet", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_light")
+	seed_at(&"w4_seed_lagoon", lc + Vector3(2.0, -8.0, 2.0))
+	critter(Jellyfloat, lc + Vector3(-3.0, -4.0, -3.0))
 	for i in 5:
-		Whimsy.anemone(self, P(lc + Vector3(_rng.randf_range(-6.0, 6.0), 0.0, _rng.randf_range(-6.0, 6.0))), &"candy_pink", 0.9)
+		Whimsy.anemone(self, P(lc + Vector3(_rng.randf_range(-6.0, 6.0), -8.0, _rng.randf_range(-6.0, 6.0))), &"candy_pink", 0.9)
 	# Anglerfish lanterns (Fireball) open a kelp-vine grotto.
 	var door := alcove(Vector3(20.0, 0.0, -44.0), -PI * 0.5, &"sea_violet", &"gate") as VineGate
 	seed_at(&"w4_seed_lanterns", Vector3(20.0, 0.0, -44.0))

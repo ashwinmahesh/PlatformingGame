@@ -83,7 +83,8 @@ func slippery(body: Node) -> void:
 func _mountain() -> void:
 	var lake := Rect2(-100.0, -22.0, 30.0, 44.0)
 	var fishing := Rect2(-64.0, 56.0, 8.0, 8.0)
-	ground(Rect2(-150.0, -150.0, 300.0, 300.0), [lake, fishing], 0.0, 18.0, &"stone_dark", &"mush_spot", 0.004)
+	var spring := Rect2(-20.0, -15.5, 12.0, 11.0)
+	ground(Rect2(-150.0, -150.0, 300.0, 300.0), [lake, fishing, spring], 0.0, 18.0, &"stone_dark", &"mush_spot", 0.004)
 	for side in 4:
 		for i in 11:
 			var t := -150.0 + (i + 0.5) * 300.0 / 11.0
@@ -145,7 +146,9 @@ func _village() -> void:
 	var hs := Vector3(-14.0, 0.0, -10.0)
 	for spec: Array in [[0.0, -6.0, 14.0, 1.0], [0.0, 6.0, 14.0, 1.0], [-6.5, 0.0, 1.0, 11.0], [6.5, 0.0, 1.0, 11.0]]:
 		ledge(hs + Vector3(spec[0] as float, 1.8, spec[1] as float), Vector3(spec[2] as float, 1.8, spec[3] as float), &"stone_dark")
-	water(hs + Vector3(0.0, 1.5, 0.0), Vector2(12.0, 11.0), 1.5)
+	water(hs + Vector3(0.0, 1.5, 0.0), Vector2(12.0, 11.0), 8.5)
+	Kit.block(self, hs + Vector3(0.0, -7.0, 0.0), Vector3(12.0, 9.0, 11.0), &"stone_dark", Layers.WORLD, &"stone_light")
+	seed_at(&"w5_seed_spring", hs + Vector3(2.0, -7.0, 2.0))
 	Ambient.motes(self, hs + Vector3(0.0, 3.0, 0.0), Vector3(12.0, 4.0, 10.0), Color(1.0, 1.0, 1.0, 0.45))
 	Whimsy.igloo(self, Vector3(16.0, 0.0, -12.0), deg_to_rad(-120.0), 4.0)
 	Whimsy.igloo(self, Vector3(19.0, 0.0, 8.0), deg_to_rad(-70.0), 3.5)
@@ -317,9 +320,18 @@ func _pine_heights() -> void:
 	sign_post(Vector3(6.0, 0.0, -4.0), "Hop across on the drifting floes!")
 	# Ice sheet on the shore, then the frozen lake (swimmable, if chilly).
 	slippery(ledge(Vector3(0.0, 0.08, -19.0), Vector3(44.0, 0.3, 22.0), &"bubble"))
-	Kit.block(self, Vector3(-85.0, -6.0, 0.0), Vector3(30.0, 12.0, 44.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"water_light")
-	Kit.water(self, Vector3(-85.0, -0.6, 0.0), Vector2(30.0, 44.0), 5.4)
-	seed_at(&"w5_seed_lake_bottom", Vector3(8.0, -6.0, -45.0))
+	Kit.block(self, Vector3(-85.0, -11.0, 0.0), Vector3(30.0, 7.0, 44.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"water_light")
+	Kit.water(self, Vector3(-85.0, -0.6, 0.0), Vector2(30.0, 44.0), 10.4)
+	seed_at(&"w5_seed_lake_bottom", Vector3(8.0, -11.0, -45.0))
+	# An ice-crusted grotto on the lake bed: slash it open while swimming.
+	var saved := _frame
+	region(Vector3.ZERO)
+	alcove(Vector3(-92.0, -11.0, 12.0), PI * 0.5, &"water_light")
+	seed_at(&"w5_seed_lake_grotto", Vector3(-92.0, -11.0, 12.0))
+	for spec: Array in [[-80.0, -6.0, -8.0], [-90.0, -5.0, -14.0]]:
+		critter(Jellyfloat, Vector3(spec[0] as float, spec[1] as float, spec[2] as float))
+	Ambient.fish(self, Vector3(-85.0, -5.0, 0.0), 10.0, 8, &"slime_blue")
+	_frame = saved
 	for spec: Array in [[-8.0, -34.0, 16.0, 6.0], [8.0, -41.0, -16.0, 6.5], [-8.0, -48.0, 16.0, 6.0], [8.0, -55.0, -16.0, 7.0]]:
 		mover(Vector3(spec[0] as float, 0.0, spec[1] as float), Vector3(5.0, 1.0, 5.0), Vector3(spec[2] as float, 0.0, 0.0), spec[3] as float, &"bubble")
 	stone(Vector3(20.0, 0.2, -46.0), 2.0, 1.0, &"bubble", &"mush_spot")
@@ -362,9 +374,9 @@ func _side_spots() -> void:
 		Whimsy.snowman(self, Vector3(62.0 + cos(a) * 6.5, 3.0, 72.0 + sin(a) * 5.0), _rng.randf_range(0.7, 1.1), [&"slime_blue", &"candy_pink", &"gold", &"lime_pop", &"roof_red"][i] as StringName)
 	critter(Hoppy, Vector3(58.0, 3.5, 74.0))
 	# The ice-fishing hole: dive for a seed; penguins keep watch.
-	Kit.water(self, Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 5.0)
-	Kit.block(self, Vector3(-60.0, -5.4, 60.0), Vector3(8.0, 12.6, 8.0), &"stone_dark", Layers.WORLD, &"water_light")
-	seed_at(&"w5_seed_fishing", Vector3(-60.0, -5.4, 60.0))
+	Kit.water(self, Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 10.0)
+	Kit.block(self, Vector3(-60.0, -10.4, 60.0), Vector3(8.0, 7.6, 8.0), &"stone_dark", Layers.WORLD, &"water_light")
+	seed_at(&"w5_seed_fishing", Vector3(-60.0, -10.4, 60.0))
 	for i in 4:
 		var pg := Penguin.new()
 		pg.position = Vector3(-60.0 + cos(i * 1.6) * 7.0, 0.5, 60.0 + sin(i * 1.6) * 7.0)

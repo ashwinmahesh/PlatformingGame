@@ -102,6 +102,8 @@ var _fireball_pending: bool = false
 var _clap_pending: bool = false
 var _dash_pending: bool = false
 var _cast_anim_left: float = 0.0
+## Build 6 (Ashwin: "swinging the sword should also be allowed" in water): a swim slash.
+var swim_attack_tick: int = -1
 var _glider: Node3D
 
 # Combat (plan §4.1)
@@ -222,6 +224,8 @@ func is_plunge_active() -> bool:
 
 
 func is_sword_active() -> bool:
+	if state == State.SWIM:
+		return swim_attack_tick >= 0 and attack != null and attack.phase_at(swim_attack_tick) == AttackDef.Phase.ACTIVE
 	return state == State.ATTACK and attack != null and attack.phase_at(attack_tick) == AttackDef.Phase.ACTIVE
 
 
@@ -439,6 +443,11 @@ func _physics_process(delta: float) -> void:
 		buffer_age += 1
 	if inp.jump_pressed and _accepts_jump_press():
 		buffer_age = 0
+	if inp.attack_pressed and state == State.SWIM and swim_attack_tick < 0:
+		attack = ATTACK_SLASH_1
+		attack_id += 1
+		swim_attack_tick = 0
+		AudioDirector.play(attack.sfx, -2.0)
 	if inp.attack_pressed and state in [State.NORMAL, State.ATTACK]:
 		_attack_press_pending = true
 		if state == State.ATTACK and attack.phase_at(attack_tick) != AttackDef.Phase.STARTUP:
@@ -563,6 +572,7 @@ func head_underwater() -> bool:
 
 func _enter_swim() -> void:
 	state = State.SWIM
+	swim_attack_tick = -1
 	attack = null
 	stored_attack_tick = -1
 	buffer_age = -1
@@ -584,6 +594,11 @@ func _swim_tick(delta: float, inp: PlayerInput) -> void:
 	if invuln_left > 0.0:
 		invuln_left -= delta
 	var float_y := water_surface - 1.05
+	if swim_attack_tick >= 0:
+		swim_attack_tick += 1
+		if attack == null or attack.phase_at(swim_attack_tick) == AttackDef.Phase.DONE:
+			swim_attack_tick = -1
+			attack = null
 	# Breath: drains with your head under, refills fast at the surface.
 	if head_underwater():
 		breath = maxf(breath - delta, 0.0)
@@ -608,6 +623,8 @@ func _swim_tick(delta: float, inp: PlayerInput) -> void:
 	# Hop out from the surface (high enough to climb a bank).
 	if inp.jump_pressed and global_position.y > float_y - 0.4:
 		state = State.NORMAL
+		swim_attack_tick = -1
+		attack = null
 		_swim_grace = 0.35
 		velocity.y = settings.launch_velocity(SWIM_HOP_HEIGHT)
 		jumps_used = 1
@@ -1466,6 +1483,10 @@ func _animate(grounded: bool, h_speed: float) -> void:
 			hero.play(&"Jump_Land", 0.05, 1.4)
 			return
 		State.SWIM:
+			if swim_attack_tick >= 0 and attack != null:
+				hero.play(&"1H_Melee_Attack_Slice_Horizontal", 0.05, 1.6, swim_attack_tick <= 1)
+				body_pivot.rotation.x = -0.4
+				return
 			var moving := h_speed > 0.8
 			hero.play(&"Running_A" if moving else &"Idle", 0.2, 0.55 if moving else 0.6)
 			body_pivot.rotation.x = -1.15 if moving or head_underwater() else -0.15
