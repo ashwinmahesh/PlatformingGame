@@ -1,0 +1,19 @@
+{
+  "id": "nimbus",
+  "name": "nimbus",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Captain Nimbus",
+          "text": "Captain Nimbus here. The Rainbow Ring links every route; no need to trek back to the plaza."
+        },
+        {
+          "speaker": "Captain Nimbus",
+          "text": "Ring the plaza bells in order and the Sky Vault south of the gardens opens. Pink, gold, blue!"
+        }
+      ]
+    }
+  ]
+}

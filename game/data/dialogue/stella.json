@@ -1,0 +1,19 @@
+{
+  "id": "stella",
+  "name": "stella",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Stella",
+          "text": "I study the stars. Well. The Grand Star mostly. It only shines once three shards come home."
+        },
+        {
+          "speaker": "Stella",
+          "text": "That crate by the spire? Push it onto the plate and the little cage pops open. I've tried. I'm not strong enough."
+        }
+      ]
+    }
+  ]
+}

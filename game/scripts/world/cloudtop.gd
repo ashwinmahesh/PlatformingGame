@@ -46,6 +46,7 @@ func build() -> void:
 	_windmill_isles()
 	_bounce_gardens()
 	_rainbow_ring()
+	_build6()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life()
@@ -365,6 +366,35 @@ func _ring_secret(q: int, pts: Array[Vector4]) -> void:
 			seed_at(&"w2_seed_ring_nw", p2 + out * 19.0 + Vector3(0.0, 9.0, 0.0))
 	Whimsy.tree(self, p1 - out * 3.0, tree_kinds[q % tree_kinds.size()], 1.0)
 	Whimsy.flower(self, p3 - out * 3.0, 2.0, 1.5, [&"candy_pink", &"gold", &"slime_blue", &"mush_purple"][q] as StringName, false)
+
+
+# --- Build 6: puzzles, the Sky Vault and villagers --------------------------------------------------
+
+func _build6() -> void:
+	region(Vector3.ZERO)
+	# Plaza bells open the Sky Vault, a big room on its own island beside the Bounce Gardens.
+	var bells := bell_puzzle(Vector3(16.0, 0.0, -10.0), 3.5, "Ring pink, gold, blue:\nthe Sky Vault opens (south-west).")
+	island(Vector3(-30.0, 0.0, 52.0), 12.0)
+	cloud(Vector3(-15.0, 0.0, 48.0), Vector2(6.0, 6.0))
+	var vault: Array = secret_cave(Vector3(-30.0, 0.0, 52.0), PI * 0.5, Vector3(14.0, 9.0, 12.0), &"stone_light", &"gate")
+	cloud(Vector3(-3.0, 1.6, 2.0), Vector2(3.0, 3.0))
+	crumble(Vector3(1.0, 3.6, -1.5), Vector3(3.0, 0.6, 3.0))
+	cloud(Vector3(4.5, 5.6, 2.0), Vector2(3.0, 3.0))
+	cloud(Vector3(0.0, 7.6, 4.0), Vector2(3.0, 3.0))
+	seed_at(&"w2_seed_vault", Vector3(0.0, 7.6, 4.0))
+	_frame = vault[0]
+	var vault_door := vault[1] as VineGate
+	bells.solved.connect(func() -> void:
+		vault_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("The Sky Vault opens!", 2.0))
+	# A cage by the spire: shove the crate onto the plate.
+	var cage := alcove(Vector3(-20.0, 0.0, 8.0), PI * 0.5, &"stone_light", &"gate") as VineGate
+	seed_at(&"w2_seed_cage", Vector3(-20.0, 0.0, 8.0))
+	crate_puzzle(Vector3(-12.0, 0.0, 14.0), Vector3(-12.0, 0.0, 8.0), cage)
+	villager("nimbus", "Captain Nimbus", Vector3(8.0, 0.0, 16.0))
+	villager("stella", "Stella", Vector3(-6.0, 0.0, 16.0))
+	villager("puffy", "Puffy", Vector3(4.0, 0.0, -18.0), &"w2_found_kite", &"w2_seed_errand", Vector3(-146.0, 8.3, 3.0), "Puffy's kite")
 
 
 func _on_shards_complete() -> void:

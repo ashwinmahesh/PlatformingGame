@@ -60,6 +60,7 @@ func build() -> void:
 	_pine_heights()
 	_summit_gate()
 	_side_spots()
+	_build6()
 	finish_boss_world()
 	finish_life(&"bubble")
 
@@ -116,7 +117,7 @@ func _mountain() -> void:
 func _busy(p: Vector3) -> bool:
 	if p.x < -66.0 and p.x > -150.0 and absf(p.z) < 30.0:
 		return true
-	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, -30.0), Vector3(-110.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA, Vector3(62.0, 0.0, 70.0), Vector3(-60.0, 0.0, 60.0)]:
+	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, -30.0), Vector3(-110.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA, Vector3(62.0, 0.0, 70.0), Vector3(-60.0, 0.0, 60.0), Vector3(30.0, 0.0, -36.0), Vector3(-70.0, 0.0, -70.0), Vector3(48.0, 0.0, 76.0), Vector3(26.0, 0.0, 14.0)]:
 		if Vector2(p.x - c.x, p.z - c.z).length() < 42.0:
 			return true
 	return absf(p.x) < 10.0 or absf(p.z) < 8.0
@@ -370,6 +371,42 @@ func _side_spots() -> void:
 		add_child(pg)
 	Whimsy.igloo(self, Vector3(-70.0, 0.0, 66.0), deg_to_rad(60.0), 3.0)
 	add_capture_point("snowman_hill", Vector3(62.0, 14.0, 96.0), Vector3(62.0, 3.0, 68.0))
+
+
+# --- Build 6: puzzles, secret rooms and villagers ---------------------------------------------------
+
+func _build6() -> void:
+	region(Vector3.ZERO)
+	# Village bells open the Toy Workshop.
+	var bells := bell_puzzle(Vector3(26.0, 0.0, 14.0), 3.5, "Ring pink, gold, blue:\nthe Toy Workshop opens.")
+	var shop: Array = secret_cave(Vector3(30.0, 0.0, -36.0), -PI * 0.5, Vector3(14.0, 9.0, 12.0), &"roof_red", &"gate")
+	var gift_cols: Array[StringName] = [&"slime_blue", &"candy_pink", &"gold", &"lime_pop"]
+	for i in 4:
+		ledge(Vector3(-4.5 + i * 3.0, 1.5 + i * 2.0, 2.0 - i * 1.8), Vector3(2.6, 0.8, 2.6), gift_cols[i])
+	seed_at(&"w5_seed_workshop", Vector3(4.5, 7.5, -3.4))
+	Whimsy.snowman(self, P(Vector3(-4.0, 0.3, -3.0)), 0.8, &"gold")
+	_frame = shop[0]
+	var shop_door := shop[1] as VineGate
+	bells.solved.connect(func() -> void:
+		shop_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("The Toy Workshop opens!", 2.0))
+	# The Ice Grotto: a cracked ice wall (Fireball melts it in one) and a slippery climb inside.
+	var grotto: Array = secret_cave(Vector3(-70.0, 0.0, -70.0), PI * 0.25, Vector3(16.0, 10.0, 14.0), &"water_light", &"break")
+	slippery(ledge(Vector3(-5.0, 1.5, 3.0), Vector3(3.0, 1.5, 3.0), &"bubble"))
+	crumble(Vector3(-2.0, 3.8, -1.5), Vector3(3.0, 0.6, 3.0), CrumblePlatform.Look.ICE)
+	ledge(Vector3(2.5, 5.8, -4.0), Vector3(3.0, 0.5, 2.4), &"bubble")
+	ledge(Vector3(5.5, 7.8, 0.5), Vector3(2.4, 0.5, 3.0), &"bubble")
+	seed_at(&"w5_seed_grotto", Vector3(5.5, 7.8, 0.5))
+	for i in 4:
+		Whimsy.crystal(self, P(Vector3(-6.0 + i * 4.0, 0.3, -6.0)), &"water_light", 0.8, false)
+	_frame = grotto[0]
+	# An ice cage: shove the crate onto the plate.
+	var cage := alcove(Vector3(48.0, 0.0, 84.0), PI, &"water_light", &"gate") as VineGate
+	seed_at(&"w5_seed_cage", Vector3(48.0, 0.0, 84.0))
+	crate_puzzle(Vector3(48.0, 0.0, 66.0), Vector3(48.0, 0.0, 75.0), cage)
+	villager("frost", "Frost", Vector3(4.0, 0.0, 2.0), &"w5_found_carrot", &"w5_seed_errand", Vector3(3.0, 12.3, -128.0), "Carrot nose")
+	villager("penny", "Penny", Vector3(-4.0, 0.0, 10.0))
 
 
 # --- South: Summit Gate and the Avalanche Ape's ring ---------------------------------------------------

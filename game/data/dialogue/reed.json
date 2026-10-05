@@ -1,0 +1,19 @@
+{
+  "id": "reed",
+  "name": "reed",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Ranger Reed",
+          "text": "Ranger Reed, at your service. Blue slimes bounce you sky-high if you land on them flat."
+        },
+        {
+          "speaker": "Ranger Reed",
+          "text": "And those three bells by the old stump? Pink, gold, blue. Don't ask me why. Forest's got its ways."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "frost",
+  "name": "frost",
+  "conversations": [
+    {
+      "when": "w5_found_carrot",
+      "lines": [
+        {
+          "speaker": "Frost",
+          "text": "A carrot! Now my snowman can finally smell the flowers. Take this for your trouble."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Frost",
+          "text": "My snowman's missing his nose! I left the carrot up on the far shelf of the Ice Slide. Fetch it for me?"
+        }
+      ]
+    }
+  ]
+}

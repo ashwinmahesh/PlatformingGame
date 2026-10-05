@@ -1,0 +1,24 @@
+{
+  "id": "puffy",
+  "name": "puffy",
+  "conversations": [
+    {
+      "when": "w2_found_kite",
+      "lines": [
+        {
+          "speaker": "Puffy",
+          "text": "My kite! You're the best! Here's my favourite seed. Don't plant it in the clouds."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Puffy",
+          "text": "My kite flew off past the windmills, all the way to the last island! Can you get it back?"
+        }
+      ]
+    }
+  ]
+}

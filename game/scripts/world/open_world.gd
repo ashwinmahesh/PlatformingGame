@@ -269,6 +269,55 @@ func secret_cave(center_local: Vector3, yaw: float, size: Vector3, color: String
 	return [saved, d]
 
 
+## Build 6 puzzle kits ---------------------------------------------------------------------------
+
+## Three coloured bells to ring in order (sword, Fireball or Thunderclap). Returns the sequence.
+func bell_puzzle(center_local: Vector3, radius: float, hint: String) -> BellSequence:
+	var bells := BellSequence.new()
+	bells.order = [0, 1, 2]
+	add_child(bells)
+	var cols: Array[StringName] = [&"candy_pink", &"gold", &"slime_blue"]
+	for i in 3:
+		var a := -PI * 0.5 + (i - 1) * 0.7
+		var post := center_local + Vector3(cos(a) * radius, 0.0, sin(a) * radius)
+		var b := CrystalSwitch.new()
+		b.position = P(post)
+		add_child(b)
+		Kit.blob(self, P(post + Vector3(0.0, 2.6, 0.0)), 0.35, cols[i])
+		bells.add(b)
+	sign_post(center_local + Vector3(0.0, 0.0, radius * 0.4), hint)
+	return bells
+
+
+## A crate to shove onto a plate; the plate holds `door` open while pressed.
+func crate_puzzle(crate_local: Vector3, plate_local: Vector3, door: VineGate) -> void:
+	var crate := PushBlock.new()
+	crate.position = P(crate_local)
+	add_child(crate)
+	var plate := PressurePlate.new()
+	plate.position = P(plate_local)
+	add_child(plate)
+	plate.changed.connect(func(on: bool) -> void: door.set_closed(not on))
+
+
+## A villager; with an errand, `item_local` places the lost thing and talking hands over `reward`.
+func villager(id: String, display: String, base_local: Vector3, errand: StringName = &"", reward: StringName = &"", item_local: Vector3 = Vector3.ZERO, item_name: String = "") -> Npc:
+	var n := Npc.new()
+	n.npc_id = id
+	n.display_name = display
+	n.errand_flag = errand
+	n.reward_seed = reward
+	n.position = P(base_local)
+	add_child(n)
+	if errand != &"":
+		var item := ErrandItem.new()
+		item.flag = errand
+		item.label_text = item_name
+		item.position = P(item_local)
+		add_child(item)
+	return n
+
+
 func water(center_local: Vector3, size: Vector2, depth: float = 5.0) -> Area3D:
 	var s := S(Vector3(size.x, 0.0, size.y))
 	return Kit.water(self, P(center_local), Vector2(s.x, s.z), depth)

@@ -51,6 +51,7 @@ func build() -> void:
 	_bonk_grove()
 	_glade_and_lake()
 	_links()
+	_build6()
 	_sky()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -471,8 +472,13 @@ func _links() -> void:
 	# North-west: Fernway <-> Mushroom Grove. A bramble hut (Fireball) hides a seed.
 	plat(Vector3(-27.0, 0.0, -50.0), Vector2(20.0, 18.0))
 	disc(Vector3(-44.0, 0.0, -36.0), 9.0)
-	alcove(Vector3(-27.0, 0.0, -54.0), 0.0, &"stone_dark", &"bramble")
-	seed_at(&"w1_seed_link_nw", Vector3(-27.0, 0.0, -54.0))
+	# A bramble-sealed burrow (Fireball) with a climb inside.
+	var burrow: Array = secret_cave(Vector3(-27.0, 0.0, -52.0), 0.0, Vector3(14.0, 9.0, 11.0), &"bark_mid", &"bramble")
+	ledge(Vector3(-4.0, 1.4, 2.0), Vector3(3.0, 1.4, 3.0), &"bark_light")
+	mushroom_platform(Vector3(0.0, 4.0, -2.5), 0.0, 2.0, &"pink")
+	ledge(Vector3(4.0, 6.6, 1.0), Vector3(3.0, 0.5, 3.0), &"bark_light")
+	seed_at(&"w1_seed_link_nw", Vector3(4.0, 6.6, 1.0))
+	_frame = burrow[0]
 	gloplets(Vector3(-44.0, 0.0, -36.0), 7.0, [Vector3(-2.0, 0.0, 2.0), Vector3(3.0, 0.0, -2.0)])
 	heart_bush(Vector3(-20.0, 0.0, -44.0))
 	giant_mushroom(Vector3(-48.0, 0.0, -40.0), 10.0, 5.5, &"purple")
@@ -511,6 +517,43 @@ func _links() -> void:
 	Pickup.spawn_seed(self, tall, &"w1_seed_link_ne")
 	tree_line(Vector3(40.0, 0.0, -18.0), Vector3(40.0, 0.0, -42.0), 7.0, TREES)
 	add_capture_point("links", Vector3(60.0, 26.0, -10.0), Vector3(30.0, 4.0, -60.0))
+
+
+# --- Build 6: puzzles, a secret vault and villagers ------------------------------------------------
+
+func _build6() -> void:
+	region(Vector3.ZERO)
+	# Meadow bells: ring them in order and a stair of light climbs to a floating isle.
+	var bells := bell_puzzle(Vector3(-18.0, 0.0, -4.0), 4.0, "Ring pink, then gold, then blue.")
+	var steps: Array[GhostPlatform] = []
+	for i in 5:
+		var gp := GhostPlatform.new()
+		gp.size = Vector3(3.6, 0.6, 3.6)
+		gp.color_name = &"portal_teal"
+		gp.position = Vector3(-21.0 - i * 1.0, 2.5 + i * 2.5, -11.0 - i * 3.0)
+		add_child(gp)
+		steps.append(gp)
+	stone(Vector3(-25.0, 14.5, -27.5), 3.6, 1.5, &"bark_mid", &"grass_mid")
+	seed_at(&"w1_seed_bells", Vector3(-25.0, 14.5, -27.5))
+	Whimsy.flower(self, Vector3(-26.0, 14.5, -29.0), 1.5, 1.0, &"candy_pink", false)
+	bells.solved.connect(func() -> void:
+		for st in steps:
+			st.set_solid(true)
+		if hud != null:
+			hud.show_banner("A stair of light appears!", 2.0))
+	# The Glade Vault: shove the crate onto the plate to hold the vines open.
+	var vault: Array = secret_cave(Vector3(-11.0, 0.0, 70.0), PI * 0.5, Vector3(12.0, 8.0, 10.0), &"stone_dark", &"gate")
+	stone(Vector3(-3.0, 1.2, -1.0), 1.6, 1.2, &"bark_light", &"moss")
+	ledge(Vector3(0.0, 3.2, -2.5), Vector3(3.0, 0.5, 2.4), &"bark_light")
+	ledge(Vector3(3.5, 5.4, 0.0), Vector3(2.4, 0.5, 3.0), &"bark_light")
+	seed_at(&"w1_seed_vault", Vector3(3.5, 5.4, 0.0))
+	_frame = vault[0]
+	crate_puzzle(Vector3(6.0, 0.0, 74.0), Vector3(6.0, 0.0, 65.0), vault[1] as VineGate)
+	sign_post(Vector3(10.0, 0.0, 70.0), "Weigh down the plate and\nthe vines hold open.", -PI * 0.5)
+	# Villagers, one with an errand up the mushroom stair.
+	villager("mossy", "Mossy", Vector3(6.0, 0.0, 14.0), &"w1_found_charm", &"w1_seed_errand", Vector3(26.0, CLIFF + 0.3, -82.0), "Acorn charm")
+	villager("reed", "Ranger Reed", Vector3(6.0, 0.0, -30.0))
+	villager("kip", "Pep", Vector3(-30.0, 0.0, 40.0))
 
 
 func _sky() -> void:

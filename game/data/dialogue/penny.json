@@ -1,0 +1,19 @@
+{
+  "id": "penny",
+  "name": "penny",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Penny",
+          "text": "Ice walls melt if you throw fire at them. My big brother says so. He's very smart."
+        },
+        {
+          "speaker": "Penny",
+          "text": "Ring the village bells pink, gold, blue and the toy workshop opens. It's full of presents!"
+        }
+      ]
+    }
+  ]
+}

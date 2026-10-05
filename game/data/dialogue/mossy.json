@@ -1,0 +1,24 @@
+{
+  "id": "mossy",
+  "name": "mossy",
+  "conversations": [
+    {
+      "when": "w1_found_charm",
+      "lines": [
+        {
+          "speaker": "Mossy",
+          "text": "My acorn charm! I'd have cried into my mushrooms for a week. Here, a seed for you!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Mossy",
+          "text": "My lucky acorn charm rolled off and a bird carried it up the mushroom stair, east of the Fernway. Could you fetch it?"
+        }
+      ]
+    }
+  ]
+}
