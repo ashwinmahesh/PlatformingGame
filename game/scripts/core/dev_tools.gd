@@ -95,6 +95,11 @@ func _build_panel() -> void:
 	_slider(vb, s, "apex_gravity_scale", 0.2, 1.0)
 	_slider(vb, s, "coyote_time", 0.0, 0.3)
 	_slider(vb, s, "jump_buffer", 0.0, 0.3)
+	_slider(vb, s, "wall_slide_speed", 0.5, 8.0)
+	_slider(vb, s, "wall_jump_height", 1.0, 5.0)
+	_slider(vb, s, "wall_jump_push", 3.0, 14.0)
+	_slider(vb, s, "wall_lockout", 0.0, 0.6)
+	_slider(vb, s, "ladder_speed", 2.0, 8.0)
 	for i in 3:
 		var l := Label.new()
 		vb.add_child(l)

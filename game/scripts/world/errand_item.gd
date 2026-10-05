@@ -17,7 +17,7 @@ func _ready() -> void:
 	collision_layer = Layers.INTERACT
 	collision_mask = Layers.PLAYER_BODY
 	var s := SphereShape3D.new()
-	s.radius = 1.0
+	s.radius = 1.8
 	Kit.add_shape(self, s, Vector3(0.0, 0.8, 0.0))
 	_visual = Node3D.new()
 	add_child(_visual)

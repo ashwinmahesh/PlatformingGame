@@ -425,6 +425,16 @@ func ramp_tower(center: Vector3, base_y: float, top_y: float, core: float = 8.0,
 	HighTier.ramp_tower(self, center, base_y, top_y, core, width, color, lane_color, top_color)
 
 
+## A ladder whose foot is at `base` (world) against a wall, climbing side facing `yaw` (0 = +Z).
+func ladder(base: Vector3, height: float, yaw: float = 0.0) -> Ladder:
+	var l := Ladder.new()
+	l.height = height
+	l.position = base
+	l.rotation.y = yaw
+	add_child(l)
+	return l
+
+
 ## A platform that rides straight up and down between base and top_y.
 func lift(base: Vector3, top_y: float, period: float = 7.0, color: StringName = &"wood_plank") -> MovingPlatform:
 	return HighTier.lift(self, base, top_y, period, color)

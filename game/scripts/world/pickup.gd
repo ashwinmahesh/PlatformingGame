@@ -1,6 +1,8 @@
 class_name Pickup
 extends Area3D
 ## Hearts and Glimmer Seeds. They bob and glint so they read as interactive (plan §10.1).
+## Build 6 (Ashwin: "we shouldn't have to perfectly touch the center of them"): twice the reach,
+## and once you're close they drift to you.
 
 enum Kind { HEART, SEED, SHARD }
 
@@ -8,6 +10,9 @@ var kind: Kind = Kind.HEART
 var seed_id: StringName = &""
 var _visual: Node3D
 var _t: float = 0.0
+
+const MAGNET := 3.5
+const MAGNET_SPEED := 9.0
 
 
 static func spawn_heart(parent: Node, at: Vector3) -> Pickup:
@@ -45,7 +50,7 @@ func _ready() -> void:
 	collision_layer = Layers.PICKUP
 	collision_mask = Layers.PLAYER_BODY
 	var s := SphereShape3D.new()
-	s.radius = 0.8 if kind == Kind.SHARD else (0.6 if kind == Kind.SEED else 0.5)
+	s.radius = 1.6 if kind == Kind.SHARD else (1.3 if kind == Kind.SEED else 1.1)
 	var cs := CollisionShape3D.new()
 	cs.shape = s
 	cs.position.y = 0.4
@@ -109,6 +114,17 @@ func _process(delta: float) -> void:
 	_t += delta
 	_visual.position.y = sin(_t * 2.5) * 0.12
 	_visual.rotation.y += delta * 1.8
+
+
+## The magnet: within MAGNET metres, drift toward the hero (hearts only when they'd heal).
+func _physics_process(delta: float) -> void:
+	var p := get_tree().get_first_node_in_group(&"player") as Player
+	if p == null or p.state == Player.State.DEAD or (kind == Kind.HEART and p.hp >= p.max_hp):
+		return
+	var to := p.global_position + Vector3.UP * 0.4 - global_position
+	var d := to.length()
+	if d < MAGNET and d > 0.05:
+		global_position += to / d * minf(MAGNET_SPEED * (1.0 - d / MAGNET * 0.6) * delta, d)
 
 
 func _on_body_entered(body: Node3D) -> void:

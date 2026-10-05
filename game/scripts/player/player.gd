@@ -9,7 +9,7 @@ signal hp_changed(hp: int, max_hp: int)
 signal died
 signal bounced(height: float)
 
-enum State { NORMAL, ATTACK, PLUNGE, PLUNGE_LAND, HURT, TALK, FROZEN, DEAD, SWIM }
+enum State { NORMAL, ATTACK, PLUNGE, PLUNGE_LAND, HURT, TALK, FROZEN, DEAD, SWIM, CLIMB }
 
 const ATTACK_SLASH_1 := preload("res://data/attacks/slash_1.tres")
 const ATTACK_AIR := preload("res://data/attacks/air_slash.tres")
@@ -61,6 +61,15 @@ var facing: Vector3 = Vector3.FORWARD
 
 # Movement (plan §3.3)
 var jumps_used: int = 0
+## Build 6 walls and ladders.
+var wall_sliding: bool = false
+var ladder: Ladder = null
+var _wall_normal: Vector3 = Vector3.ZERO
+var _wall_grace: int = 0
+var _wall_kick_left: int = 0
+var _locked_wall: Vector3 = Vector3.ZERO
+var _wall_lock_left: float = 0.0
+var _ladder_lock_left: float = 0.0
 var coyote_left: float = 0.0
 ## Ticks since the buffered jump press; -1 when empty. A press stays valid for jump_buffer s.
 var buffer_age: int = -1
@@ -484,6 +493,13 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 	if state == State.SWIM:
 		_swim_tick(delta, inp)
 		return
+	if state == State.CLIMB:
+		_climb_tick(delta, inp)
+		return
+	if _ladder_lock_left > 0.0:
+		_ladder_lock_left -= delta
+	if state == State.NORMAL and dash_left <= 0 and _ladder_lock_left <= 0.0 and _try_grab_ladder(inp):
+		return
 	if breath < BREATH_MAX:
 		breath = minf(breath + delta * 4.0, BREATH_MAX)
 	# 2. Read contact from last tick's move.
@@ -532,6 +548,7 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 		_step_move()
 	else:
 		move_and_slide()
+	_update_wall(delta, inp)
 	on_ice = false
 	for i in get_slide_collision_count():
 		var c := get_slide_collision(i)
@@ -544,6 +561,130 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 	was_grounded = grounded
 	if grounded and tick % SAFE_GROUND_INTERVAL == 0:
 		_sample_safe_ground()
+
+
+# --- Wall jumps and ladders (Build 6) ----------------------------------------------------------
+
+## Reads wall contact from this tick's move: pressing into a wall while falling slides slowly down
+## it, and for a few ticks after touching one, a jump kicks off it.
+func _update_wall(delta: float, inp: PlayerInput) -> void:
+	if _wall_lock_left > 0.0:
+		_wall_lock_left -= delta
+	if _wall_grace > 0:
+		_wall_grace -= 1
+	wall_sliding = false
+	if is_grounded() or state != State.NORMAL or dash_left > 0:
+		_wall_grace = 0
+		return
+	for i in get_slide_collision_count():
+		var c := get_slide_collision(i)
+		var n := c.get_normal()
+		var body := c.get_collider() as CollisionObject3D
+		if absf(n.y) > 0.3 or body == null or (body.collision_layer & Layers.WORLD) == 0:
+			continue
+		n.y = 0.0
+		n = n.normalized()
+		if _wall_lock_left > 0.0 and n.dot(_locked_wall) > 0.8:
+			continue
+		_wall_normal = n
+		_wall_grace = settings.wall_grace_ticks
+		var want := _move_basis() * Vector3(inp.move.x, 0.0, -inp.move.y)
+		if want.dot(-n) > 0.3 and velocity.y < 0.0:
+			wall_sliding = true
+			velocity.y = maxf(velocity.y, -settings.wall_slide_speed)
+		break
+
+
+## Kick off the wall: up and away, and the jump count resets so two more air jumps follow.
+func _wall_jump() -> void:
+	var n := _wall_normal
+	velocity = n * settings.wall_jump_push
+	velocity.y = settings.launch_velocity(settings.wall_jump_height)
+	facing = n
+	jumps_used = 1
+	last_jump_index = 1
+	buffer_age = -1
+	coyote_left = 0.0
+	air_slash_ready = true
+	_short_hop_ok = false
+	_left_ground_by_launch = true
+	_air_speed_cap = maxf(settings.run_speed, settings.wall_jump_push)
+	_wall_kick_left = settings.wall_kick_ticks
+	_locked_wall = n
+	_wall_lock_left = settings.wall_lockout
+	_wall_grace = 0
+	wall_sliding = false
+	AudioDirector.play(&"jump2", -2.0, 1.1)
+	Fx.burst(get_parent(), global_position + Vector3.UP * 0.9 - n * 0.3, Palette.color(&"cloth_cream"), 8, 2.5, 0.1)
+	Telemetry.log_event("wall_jump", {"pos": global_position})
+
+
+## The ladder under the hero's chest or feet, if any.
+func _ladder_here() -> Ladder:
+	var space := get_world_3d().direct_space_state
+	for h: float in [0.9, 0.2]:
+		var pq := PhysicsPointQueryParameters3D.new()
+		pq.position = global_position + Vector3.UP * h
+		pq.collide_with_areas = true
+		pq.collide_with_bodies = false
+		pq.collision_mask = Layers.HAZARD
+		for r in space.intersect_point(pq, 4):
+			var a := r["collider"] as Area3D
+			if a != null and a.has_meta(&"ladder"):
+				return a.get_meta(&"ladder") as Ladder
+	return null
+
+
+## Walk (or fall) into a ladder while pushing toward it and you grab on.
+func _try_grab_ladder(inp: PlayerInput) -> bool:
+	var l := _ladder_here()
+	if l == null:
+		return false
+	var want := _move_basis() * Vector3(inp.move.x, 0.0, -inp.move.y)
+	if want.length() < 0.3 or want.normalized().dot(-l.out_dir()) < 0.3:
+		return false
+	ladder = l
+	state = State.CLIMB
+	velocity = Vector3.ZERO
+	jumps_used = 0
+	gliding = false
+	wall_sliding = false
+	AudioDirector.play(&"step", -4.0, 1.3)
+	return true
+
+
+## On a ladder: up and down with forward/back (W/S), jump to let go, step off at the top.
+func _climb_tick(delta: float, inp: PlayerInput) -> void:
+	var l := ladder
+	if l == null or not is_instance_valid(l):
+		state = State.NORMAL
+		return
+	var out := l.out_dir()
+	var anchor := l.global_position + out * 0.55
+	var climb := clampf(inp.move.y, -1.0, 1.0) * settings.ladder_speed
+	velocity = Vector3((anchor.x - global_position.x) * 10.0, climb, (anchor.z - global_position.z) * 10.0)
+	facing = -out
+	if has_buffered_jump():
+		_leave_ladder(out * 5.0 + Vector3.UP * settings.jump_velocity(0))
+		buffer_age = -1
+		AudioDirector.play(&"jump1", -2.0)
+		return
+	move_and_slide()
+	if climb > 0.0 and global_position.y >= l.top_y() - 0.3:
+		_leave_ladder(-out * 4.0 + Vector3.UP * 7.0)
+	elif climb < 0.0 and is_on_floor():
+		_leave_ladder(Vector3.ZERO)
+
+
+func _leave_ladder(v: Vector3) -> void:
+	state = State.NORMAL
+	ladder = null
+	velocity = v
+	jumps_used = 1 if v.y > 0.0 else 0
+	_ladder_lock_left = 0.35
+	_left_ground_by_launch = v.y > 0.0
+	_air_speed_cap = maxf(settings.run_speed, Vector2(v.x, v.z).length())
+	_ignore_floor_ticks = 1 if v.y > 0.0 else 0
 
 
 # --- Swimming (Build 3) -------------------------------------------------------------------------
@@ -658,7 +799,7 @@ func _swim_tick(delta: float, inp: PlayerInput) -> void:
 
 
 func _accepts_jump_press() -> bool:
-	return state in [State.NORMAL, State.ATTACK, State.SWIM]
+	return state in [State.NORMAL, State.ATTACK, State.SWIM, State.CLIMB]
 
 
 func _buffer_paused() -> bool:
@@ -867,6 +1008,9 @@ func _start_plunge() -> void:
 func _resolve_jump(grounded: bool) -> void:
 	if not has_buffered_jump() or not _allows_jump_now():
 		return
+	if not grounded and coyote_left <= 0.0 and _wall_grace > 0 and state == State.NORMAL and dash_left <= 0:
+		_wall_jump()
+		return
 	if settings.mario_chain_mode:
 		if jumps_used == 0 and (grounded or coyote_left > 0.0):
 			var chained := tick - _landed_at_tick <= int(settings.chain_window * 60.0) and _speed_at_landing >= settings.chain_min_speed * settings.run_speed
@@ -987,6 +1131,9 @@ func _apply_horizontal(delta: float, move: Vector2, grounded: bool) -> void:
 	if state == State.PLUNGE_LAND:
 		velocity.x = 0.0
 		velocity.z = 0.0
+		return
+	if _wall_kick_left > 0:
+		_wall_kick_left -= 1
 		return
 	if dash_left > 0:
 		dash_left -= 1
@@ -1482,6 +1629,10 @@ func _animate(grounded: bool, h_speed: float) -> void:
 		State.PLUNGE_LAND:
 			hero.play(&"Jump_Land", 0.05, 1.4)
 			return
+		State.CLIMB:
+			hero.play(&"Jump_Idle", 0.1, 0.0 if absf(velocity.y) < 0.2 else 1.0)
+			body_pivot.position.y = sin(global_position.y * 3.0) * 0.05
+			return
 		State.SWIM:
 			if swim_attack_tick >= 0 and attack != null:
 				hero.play(&"1H_Melee_Attack_Slice_Horizontal", 0.05, 1.6, swim_attack_tick <= 1)
@@ -1503,6 +1654,9 @@ func _animate(grounded: bool, h_speed: float) -> void:
 		return
 	if _cast_anim_left > 0.0:
 		hero.play(&"Spellcast_Raise" if clap_tick >= 0 else &"Spellcast_Shoot", 0.05, 1.6)
+		return
+	if wall_sliding:
+		hero.play(&"Jump_Idle", 0.1, 0.0)
 		return
 	if gliding:
 		hero.play(&"Jump_Idle", 0.15, 0.5)

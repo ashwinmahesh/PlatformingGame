@@ -31,6 +31,19 @@ extends Resource
 @export var step_height: float = 0.35
 @export var max_floor_angle_deg: float = 45.0
 
+@export_group("Walls and ladders")
+## Build 6 (Ashwin: "jump off a wall into a different direction... reset the jump count").
+@export var wall_slide_speed: float = 3.0
+@export var wall_jump_height: float = 3.0
+@export var wall_jump_push: float = 8.0
+## Ticks after a wall jump with no steering (so the kick carries you away).
+@export var wall_kick_ticks: int = 10
+## Seconds before the same wall can be grabbed again.
+@export var wall_lockout: float = 0.25
+## Ticks after leaving a wall that a jump still counts as a wall jump.
+@export var wall_grace_ticks: int = 6
+@export var ladder_speed: float = 4.5
+
 @export_group("Plunge and bounces")
 @export var plunge_hang_ticks: int = 6
 @export var plunge_speed: float = 24.0

@@ -160,15 +160,15 @@ func test_11_ceiling_bonk() -> void:
 	check_eq(p.jumps_used, 0, "landing resets normally")
 
 
-func test_12_walls_never_reset_jumps() -> void:
+## Build 6 changed this rule (Ashwin asked for wall jumps): touching a wall still never gives
+## jumps back by itself; only kicking off it does (tests/sim/test_walls.gd).
+func test_12_wall_contact_alone_never_resets_jumps() -> void:
 	floor_block(Vector3(0.0, 8.0, -1.2), Vector3(6.0, 8.0, 1.0))
 	inp.move = Vector2(0.0, 1.0)
 	inp.tap(&"jump")
-	await ticks(10)
-	inp.tap(&"jump")
-	await ticks(12)
+	await ticks(24)
 	check(p.is_on_wall() or p.global_position.z < -0.2, "pressed against the wall")
-	check_eq(p.jumps_used, 2, "wall contact never resets jumps")
+	check_eq(p.jumps_used, 1, "wall contact alone never resets jumps")
 
 
 func test_13_moving_platforms() -> void:
