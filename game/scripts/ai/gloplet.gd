@@ -418,6 +418,29 @@ func respawn() -> void:
 
 # --- Visuals (procedural, no rig) -------------------------------------------------------------
 
+## Build 6 asset swap: the Quaternius blob model (green, or pink tinted to this slime's colour)
+## replaces the built body. Its material takes over the flash, so hits still read.
+func _use_model() -> void:
+	for n in _visual.find_children("*", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).visible = false
+	var green := def.color == &"slime_green"
+	var path := Models.Q_MONSTERS + ("GreenBlob" if green else "PinkBlob") + ".gltf"
+	var h := 1.05 if not def.is_bouncer else 1.25
+	var model := Models.spawn(_visual, path, Vector3.ZERO, PI, h / maxf(Models.model_bounds(path).size.y, 0.01), 0.03)
+	Models.play(model, [&"Idle"])
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		for i in mi.get_surface_override_material_count():
+			var m := mi.get_surface_override_material(i) as ShaderMaterial
+			if m == null:
+				continue
+			m = m.duplicate() as ShaderMaterial
+			if not green and def.color != &"gloop_pink":
+				m.set_shader_parameter(&"albedo_color", Palette.color(def.color).lerp(Color.WHITE, 0.25))
+			mi.set_surface_override_material(i, m)
+			_mat = m
+
+
 func _build_visual() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
@@ -447,6 +470,7 @@ func _build_visual() -> void:
 	stem.bottom_radius = 0.035
 	stem.height = 0.14
 	Kit.mesh_instance(_visual, stem, Kit.mat(&"leaf_dark"), Vector3(0.0, 0.84, 0.0))
+	_use_model()
 	_bang = Kit.label(self, Vector3(0.0, 1.5, 0.0), "!", 96)
 	_bang.modulate = Palette.color(&"gold")
 	_bang.visible = false

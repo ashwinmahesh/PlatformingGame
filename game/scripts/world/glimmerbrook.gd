@@ -33,6 +33,8 @@ var _victory_running: bool = false
 
 func configure() -> void:
 	world_id = WORLD
+	platform_colour = &"green"
+	model_tint = Color(1.04, 1.0, 0.94)
 	tree_kinds = [&"green", &"lime", &"green", &"blossom", &"green", &"teal", &"lime", &"autumn"]
 
 

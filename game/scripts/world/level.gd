@@ -34,6 +34,8 @@ var fog_begin: float = 80.0
 var fog_end: float = 320.0
 var saturation: float = 1.06
 ## Puffball-tree colours for this level (Props draws every tree as a Whimsy tree).
+## Build 6: colour ramp for textured (sourced) models in this level.
+var model_tint: Color = Color(1.03, 1.0, 0.97)
 var tree_kinds: Array[StringName] = [&"green", &"lime", &"green", &"teal", &"blossom", &"green", &"autumn"]
 
 
@@ -41,6 +43,7 @@ func _ready() -> void:
 	configure()
 	_build_environment()
 	Props.tree_kinds = tree_kinds
+	Toon.world_tint = model_tint
 	build()
 	resolver = CombatResolver.new()
 	resolver.name = "CombatResolver"

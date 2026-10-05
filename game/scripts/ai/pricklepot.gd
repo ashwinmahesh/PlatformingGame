@@ -15,6 +15,7 @@ var _spin: float = 0.0
 
 
 func _init() -> void:
+	model_spec = ["Cactoro", 1.8, PI]
 	max_hp = 2
 	body_radius = 0.7
 	body_half_height = 0.75
@@ -61,6 +62,10 @@ func build_body() -> void:
 		root.scale = Vector3.ONE * 0.3
 		_spikes.append(root)
 	_body.position.y = -1.3
+
+
+func model_parent() -> Node3D:
+	return _body
 
 
 func state_name() -> String:

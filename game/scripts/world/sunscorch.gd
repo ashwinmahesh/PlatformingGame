@@ -20,6 +20,8 @@ const ROCKS: Array[StringName] = [&"roof_red", &"sunset_orange", &"wood_warm"]
 
 func configure() -> void:
 	world_id = WORLD
+	platform_colour = &"yellow"
+	model_tint = Color(1.08, 0.98, 0.86)
 	# Deep blue sky over pale sand and red-orange cliffs (contrast, not one orange wash).
 	sky_top = Color(0.08, 0.38, 0.95)
 	sky_horizon = Color(0.72, 0.88, 1.0)

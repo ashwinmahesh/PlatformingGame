@@ -12,6 +12,13 @@ are **CC0 1.0** (public domain). Credit is optional; we credit anyway.
 | Impact Sounds | Kenney | CC0 | https://kenney.nl/assets/impact-sounds | 2026-10-05 | Hit, land, gate, boss bonk, coconut break | Same |
 | Interface Sounds | Kenney | CC0 | https://kenney.nl/assets/interface-sounds | 2026-10-05 | UI blip, checkpoint, heart | Same |
 | Music Jingles | Kenney | CC0 | https://kenney.nl/assets/music-jingles | 2026-10-05 | Seed pickup, victory sting | Same |
+| Ultimate Monsters | Quaternius (quaternius.com) | CC0 | https://quaternius.com/packs/ultimatemonsters.html | 2026-10-05 | Slimes (Green/Pink Blob), Mushnub, Bunny (Hoppy), Squidle (Jellyfloat), Orc (Armorling), Cactoro (Pricklepot), Yeti (Avalanche Ape) | Toon shader with outline; tinted per world; behaviour unchanged |
+| Stylized Nature MegaKit (Standard) | Quaternius | CC0 | https://quaternius.itch.io/stylized-nature-megakit | 2026-10-05 | Green trees and pines, flowers, ferns, mushrooms, rocks, pebbles | Toon/foliage shader; vertex colours kept; leaves drawn outside the ink outline |
+| Medieval Village MegaKit (Standard) | Quaternius | CC0 | https://quaternius.itch.io/medieval-village-megakit | 2026-10-05 | Imported for the town buildings (World 6 and Mossbrook) | Toon shader |
+| Fantasy Props MegaKit (Standard) | Quaternius | CC0 | https://quaternius.itch.io/fantasy-props-megakit | 2026-10-05 | Barrels, crates, carts, stalls, benches, banners, chests | Toon shader |
+| Universal Base Characters (Standard) | Quaternius | CC0 | https://quaternius.itch.io/universal-base-characters | 2026-10-05 | Not used yet: the free tier has no animations or fantasy outfits, so the KayKit hero stays | — |
+| Platformer Pack 1.0 (Free) | Kay Lousberg | CC0 | https://kaylousberg.itch.io/kaykit-platformer | 2026-10-05 | Jump platforms and moving platforms in per-world colours | Stretched to each platform's collision box; toon shader |
+| Watercolor Terrain Textures | Jonas Voland / Voxel Core Lab | CC0 | https://voxelcorelab.itch.io/watercolor-terrain-textures | 2026-10-05 | Painted brush texture on all terrain tops and sides | Used as brightness only, so palette colours stay in charge |
 
 Synthesised in-house (`audio/synth/`): jumps, bounce, Springcap, Plunge, slime and boss sounds,
 splash, warp, and the three music loops. Built in-house: slimes, Mother Gloop, Bonk monkey,

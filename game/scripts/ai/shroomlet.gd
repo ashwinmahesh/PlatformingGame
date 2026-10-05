@@ -11,6 +11,7 @@ var _step: float = 0.0
 
 
 func _init() -> void:
+	model_spec = ["Mushnub", 1.5, PI]
 	max_hp = 2
 	body_radius = 0.65
 	body_half_height = 0.7

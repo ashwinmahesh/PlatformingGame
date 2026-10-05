@@ -6,6 +6,7 @@ extends RefCounted
 
 const TEXTURED := preload("res://shaders/toon_textured.gdshader")
 const COLORED := preload("res://shaders/toon_color.gdshader")
+const FOLIAGE := preload("res://shaders/toon_foliage.gdshader")
 
 ## Kenney Nature Kit material name -> palette colour (the pack's palette_map, plan §10.2).
 const KENNEY_PALETTE_MAP: Dictionary[String, StringName] = {
@@ -19,6 +20,8 @@ const KENNEY_PALETTE_MAP: Dictionary[String, StringName] = {
 }
 
 static var _cache: Dictionary[int, Material] = {}
+## Build 6: a per-world colour ramp for textured models (sourced packs), set by each Level.
+static var world_tint: Color = Color(1.03, 1.0, 0.97)
 
 
 static func clear_cache() -> void:
@@ -37,7 +40,7 @@ static func apply(root: Node, outline_width: float = 0.0, leaf_override: StringN
 
 
 static func to_toon(src: Material, outline_width: float = 0.0, leaf_override: StringName = &"") -> Material:
-	var key := (src.get_instance_id() if src != null else 0) ^ hash(outline_width) ^ hash(leaf_override)
+	var key := (src.get_instance_id() if src != null else 0) ^ hash(outline_width) ^ hash(leaf_override) ^ hash(world_tint)
 	if _cache.has(key):
 		return _cache[key]
 	var out := ShaderMaterial.new()
@@ -46,6 +49,12 @@ static func to_toon(src: Material, outline_width: float = 0.0, leaf_override: St
 		out.shader = TEXTURED
 		out.set_shader_parameter(&"albedo_tex", bm.albedo_texture)
 		out.set_shader_parameter(&"albedo_color", bm.albedo_color)
+		out.set_shader_parameter(&"warm_tint", world_tint)
+		if bm.vertex_color_use_as_albedo:
+			out.set_shader_parameter(&"use_vertex_color", 1.0)
+		if bm.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR or bm.transparency == BaseMaterial3D.TRANSPARENCY_ALPHA:
+			out.shader = FOLIAGE
+			out.set_shader_parameter(&"alpha_cut", maxf(bm.alpha_scissor_threshold, 0.3))
 	else:
 		out.shader = COLORED
 		var name := src.resource_name if src != null else ""

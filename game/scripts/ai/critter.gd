@@ -18,6 +18,10 @@ var body_center: float = 0.5
 var uses_gravity: bool = true
 var drop_heart_chance: float = 0.3
 var color_name: StringName = &"slime_green"
+## Build 6 asset swap: a Quaternius monster model shown instead of the built body
+## ([path, height in metres, yaw]); behaviour is unchanged.
+var model_spec: Array = []
+var _model: Node3D
 var home: Vector3
 var state: int = 0
 var state_ticks: int = 0
@@ -52,6 +56,8 @@ func _ready() -> void:
 	_visual = Node3D.new()
 	add_child(_visual)
 	build_body()
+	if not model_spec.is_empty():
+		_use_model()
 	_hurtbox = Area3D.new()
 	_hurtbox.collision_layer = Layers.ENEMY_HURTBOX
 	_hurtbox.collision_mask = 0
@@ -91,6 +97,41 @@ func harmful() -> bool:
 func on_hit(atk: Dictionary) -> Dictionary:
 	take(int(atk.get("damage", 1)), atk.get("from", global_position) as Vector3)
 	return {"hit": true}
+
+
+## Where the model goes (subclasses that move a sub-node, like the Pricklepot's pop-up, override).
+func model_parent() -> Node3D:
+	return _visual
+
+
+func _use_model() -> void:
+	var parent := model_parent()
+	for n in parent.find_children("*", "MeshInstance3D", true, false):
+		(n as MeshInstance3D).visible = false
+	var path := Models.Q_MONSTERS + str(model_spec[0]) + ".gltf"
+	var h := float(model_spec[1])
+	var b := Models.model_bounds(path)
+	_model = Models.spawn(parent, path, Vector3.ZERO, float(model_spec[2]) if model_spec.size() > 2 else 0.0, h / maxf(b.size.y, 0.01), 0.03)
+	Models.play(_model, [&"Idle", &"Flying_Idle"])
+	for n in _model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		for i in mi.get_surface_override_material_count():
+			var m := mi.get_surface_override_material(i) as ShaderMaterial
+			if m != null:
+				m = m.duplicate() as ShaderMaterial
+				mi.set_surface_override_material(i, m)
+				_flash_mats.append(m)
+
+
+## Picks walk/idle clips from movement (models only).
+func _animate_model() -> void:
+	if _model == null:
+		return
+	var moving := Vector2(velocity.x, velocity.z).length() > 0.6
+	if moving:
+		Models.play(_model, [&"Run" if Vector2(velocity.x, velocity.z).length() > 5.0 else &"Walk", &"Fast_Flying", &"Walk"])
+	else:
+		Models.play(_model, [&"Idle", &"Flying_Idle"])
 
 
 # --- Helpers ----------------------------------------------------------------------------------
@@ -203,6 +244,7 @@ func _physics_process(delta: float) -> void:
 	if global_position.y < home.y - 30.0:
 		defeat()
 	animate(delta)
+	_animate_model()
 	_visual.basis = Basis.looking_at(facing, Vector3.UP).scaled(_visual.basis.get_scale())
 	_debug.visible = DevTools.ai_debug
 	if _debug.visible:

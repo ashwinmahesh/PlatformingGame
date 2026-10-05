@@ -17,6 +17,8 @@ var _spire_steps: Array[GhostPlatform] = []
 
 func configure() -> void:
 	world_id = WORLD
+	platform_colour = &"blue"
+	model_tint = Color(1.05, 0.97, 1.04)
 	# Build 5: a candy-bright sky world, deep blue above, pink-lilac at the horizon.
 	sky_top = Color(0.18, 0.48, 0.98)
 	sky_horizon = Color(0.98, 0.82, 0.95)

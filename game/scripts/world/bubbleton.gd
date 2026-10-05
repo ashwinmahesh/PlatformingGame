@@ -19,6 +19,8 @@ var _great_bubble: Updraft
 
 func configure() -> void:
 	world_id = WORLD
+	platform_colour = &"blue"
+	model_tint = Color(0.9, 1.02, 1.08)
 	# Under the sea: teal light from above, aqua haze, no clouds.
 	sky_top = Color(0.04, 0.32, 0.58)
 	sky_horizon = Color(0.22, 0.72, 0.82)
@@ -210,17 +212,17 @@ func _town() -> void:
 
 ## The Kelp Shake Diner: an old brass diving helmet with portholes. Its dome hides a seed.
 func _diner(base: Vector3) -> void:
-	var body := Kit.static_body(self, base + Vector3(0.0, 4.5, 0.0))
+	var body := Kit.static_body(self, base + Vector3(0.0, 5.6, 0.0))
 	var sph := SphereShape3D.new()
-	sph.radius = 5.0
+	sph.radius = 6.25
 	Kit.add_shape(body, sph)
 	var dome := SphereMesh.new()
-	dome.radius = 5.0
-	dome.height = 10.0
+	dome.radius = 6.25
+	dome.height = 12.5
 	Kit.mesh_instance(body, dome, Kit.mat(&"gold", 0.04))
 	var collar := TorusMesh.new()
-	collar.inner_radius = 3.6
-	collar.outer_radius = 4.6
+	collar.inner_radius = 4.5
+	collar.outer_radius = 5.8
 	Kit.mesh_instance(self, collar, Kit.mat(&"wood_warm", 0.03), base + Vector3(0.0, 0.6, 0.0))
 	for i in 3:
 		var a := -0.6 + i * 0.6
@@ -231,20 +233,21 @@ func _diner(base: Vector3) -> void:
 		var pm := Kit.unique_mat(&"water_light")
 		pm.set_shader_parameter(&"flash", 0.25)
 		pm.set_shader_parameter(&"flash_color", Palette.color(&"bubble"))
-		var p := Kit.mesh_instance(self, port, pm, base + Vector3(sin(a) * 4.9, 4.5, cos(a) * 4.9))
+		var p := Kit.mesh_instance(self, port, pm, base + Vector3(sin(a) * 6.1, 5.6, cos(a) * 6.1))
 		p.rotation = Vector3(PI * 0.5, a, 0.0)
 		var rim := TorusMesh.new()
 		rim.inner_radius = 1.15
 		rim.outer_radius = 1.45
-		var r := Kit.mesh_instance(self, rim, Kit.mat(&"wood_warm"), base + Vector3(sin(a) * 4.95, 4.5, cos(a) * 4.95))
+		var r := Kit.mesh_instance(self, rim, Kit.mat(&"wood_warm"), base + Vector3(sin(a) * 6.15, 5.6, cos(a) * 6.15))
 		r.rotation = Vector3(PI * 0.5, a, 0.0)
-	var title := Kit.label(self, base + Vector3(0.0, 11.0, 0.0), "Kelp Shake Diner", 64)
+	var title := Kit.label(self, base + Vector3(0.0, 13.5, 0.0), "Kelp Shake Diner", 64)
 	title.modulate = Palette.color(&"candy_pink")
 	# Barrels up to the roof.
-	ledge(base + Vector3(-6.5, 1.5, 3.0), Vector3(2.4, 1.5, 2.4), &"wood_warm")
-	ledge(base + Vector3(-7.0, 4.0, -0.5), Vector3(2.4, 1.0, 2.4), &"wood_warm")
-	ledge(base + Vector3(-5.5, 6.5, -4.0), Vector3(2.4, 1.0, 2.4), &"wood_warm")
-	seed_at(&"w4_seed_diner", base + Vector3(0.0, 9.5, 0.0))
+	ledge(base + Vector3(-8.0, 1.5, 3.0), Vector3(2.4, 1.5, 2.4), &"wood_warm")
+	ledge(base + Vector3(-8.5, 4.0, -0.5), Vector3(2.4, 1.0, 2.4), &"wood_warm")
+	ledge(base + Vector3(-7.0, 6.5, -4.5), Vector3(2.4, 1.0, 2.4), &"wood_warm")
+	ledge(base + Vector3(-4.5, 9.0, -6.5), Vector3(2.4, 1.0, 2.4), &"wood_warm")
+	seed_at(&"w4_seed_diner", base + Vector3(0.0, 11.85, 0.0))
 
 
 # --- North: Jellyfish Fields ------------------------------------------------------------------------

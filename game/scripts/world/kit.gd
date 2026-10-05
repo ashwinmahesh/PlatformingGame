@@ -32,10 +32,28 @@ static func mat(color_name: StringName, outline_width: float = 0.0, top: StringN
 		m.set_shader_parameter(&"top_cell", Vector2(Palette.cell(top)))
 		m.set_shader_parameter(&"top_amount", 1.0)
 		m.set_shader_parameter(&"variation", 1.0)
+		m.set_shader_parameter(&"top_tex", paint_for(top))
+		m.set_shader_parameter(&"side_tex", paint_for(color_name, true))
+		m.set_shader_parameter(&"paint_amount", 0.55)
 	if outline_width > 0.0:
 		m.next_pass = outline(outline_width)
 	_cache[key] = m
 	return m
+
+
+## Watercolor texture for a terrain colour (Build 6, VoxelCoreLab Watercolor Terrain, CC0).
+static func paint_for(color_name: StringName, side: bool = false) -> Texture2D:
+	var n := String(color_name)
+	var file := "Stone_02"
+	if side:
+		file = "Dirt_02" if n.begins_with("bark") or n.begins_with("wood") else "Stone_03"
+	elif n.begins_with("grass") or n == "moss" or n.begins_with("leaf") or n == "lime_pop":
+		file = "Grass_02"
+	elif n.begins_with("sand") or n == "thatch" or n.begins_with("wood") or n.begins_with("bark"):
+		file = "Dirt_01"
+	elif n == "mush_spot" or n == "bubble" or n == "foam":
+		file = "Stone_01"
+	return load("res://assets/textures/watercolor/%s.png" % file) as Texture2D
 
 
 ## A material the caller owns (for flashes and fades).

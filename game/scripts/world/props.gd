@@ -6,6 +6,8 @@ extends RefCounted
 
 const K := "res://assets/models/kenney_nature/"
 const M := "res://assets/models/kaykit_medieval/"
+const Q := "res://assets/models/q_nature/"
+const P := "res://assets/models/q_props/"
 
 enum Col { NONE, BOX, TRUNK, CONVEX }
 
@@ -84,6 +86,47 @@ const TABLE: Dictionary[StringName, Array] = {
 	&"pine_small": [K + "tree_pineSmallA.glb", 4.0, Col.TRUNK],
 	&"tree_blocks": [K + "tree_blocks.glb", 5.0, Col.TRUNK],
 	&"tree_plateau": [K + "tree_plateau.glb", 5.0, Col.TRUNK],
+	# Build 6 asset swap: Quaternius Stylized Nature MegaKit and Fantasy Props MegaKit (CC0).
+	&"q_bush": [Q + "Bush_Common.gltf", 1.0, Col.NONE],
+	&"q_bush_flowers": [Q + "Bush_Common_Flowers.gltf", 1.0, Col.NONE],
+	&"q_flowers_3": [Q + "Flower_3_Group.gltf", 1.4, Col.NONE],
+	&"q_flowers_4": [Q + "Flower_4_Group.gltf", 1.4, Col.NONE],
+	&"q_fern": [Q + "Fern_1.gltf", 1.3, Col.NONE],
+	&"q_mushrooms": [Q + "Mushroom_Common.gltf", 1.6, Col.NONE],
+	&"q_mushroom_shelf": [Q + "Mushroom_Laetiporus.gltf", 1.6, Col.NONE],
+	&"q_pebble": [Q + "Pebble_Round_2.gltf", 1.6, Col.NONE],
+	&"q_pebble_square": [Q + "Pebble_Square_3.gltf", 1.6, Col.NONE],
+	&"q_rock_1": [Q + "Rock_Medium_1.gltf", 1.2, Col.CONVEX],
+	&"q_rock_2": [Q + "Rock_Medium_2.gltf", 1.2, Col.CONVEX],
+	&"q_rock_3": [Q + "Rock_Medium_3.gltf", 1.2, Col.CONVEX],
+	&"q_plant": [Q + "Plant_1_Big.gltf", 1.2, Col.NONE],
+	&"q_clover": [Q + "Clover_1.gltf", 1.5, Col.NONE],
+	&"q_tree_1": [Q + "CommonTree_1.gltf", 1.0, Col.TRUNK],
+	&"q_tree_2": [Q + "CommonTree_2.gltf", 1.0, Col.TRUNK],
+	&"q_tree_3": [Q + "CommonTree_3.gltf", 1.0, Col.TRUNK],
+	&"q_tree_4": [Q + "CommonTree_4.gltf", 1.0, Col.TRUNK],
+	&"q_tree_5": [Q + "CommonTree_5.gltf", 1.0, Col.TRUNK],
+	&"q_pine_1": [Q + "Pine_1.gltf", 1.0, Col.TRUNK],
+	&"q_pine_2": [Q + "Pine_2.gltf", 1.0, Col.TRUNK],
+	&"q_pine_3": [Q + "Pine_3.gltf", 1.0, Col.TRUNK],
+	&"q_twisted_1": [Q + "TwistedTree_1.gltf", 1.0, Col.TRUNK],
+	&"q_twisted_2": [Q + "TwistedTree_2.gltf", 1.0, Col.TRUNK],
+	&"q_barrel": [P + "Barrel.gltf", 1.0, Col.BOX],
+	&"q_barrel_apples": [P + "Barrel_Apples.gltf", 1.0, Col.BOX],
+	&"q_crate": [P + "Crate_Wooden.gltf", 1.0, Col.BOX],
+	&"q_farm_crate": [P + "FarmCrate_Apple.gltf", 1.0, Col.BOX],
+	&"q_cart": [P + "Stall_Cart_Empty.gltf", 1.0, Col.BOX],
+	&"q_stall": [P + "Stall_Empty.gltf", 1.0, Col.BOX],
+	&"q_bench": [P + "Bench.gltf", 1.0, Col.BOX],
+	&"q_cauldron": [P + "Cauldron.gltf", 1.0, Col.BOX],
+	&"q_chest": [P + "Chest_Wood.gltf", 1.0, Col.BOX],
+	&"q_banner_1": [P + "Banner_1.gltf", 1.0, Col.NONE],
+	&"q_banner_2": [P + "Banner_2.gltf", 1.0, Col.NONE],
+	&"q_table": [P + "Table_Large.gltf", 1.0, Col.BOX],
+	&"q_anvil": [P + "Anvil.gltf", 1.0, Col.BOX],
+	&"q_workbench": [P + "Workbench.gltf", 1.0, Col.BOX],
+	&"q_bucket": [P + "Bucket_Wooden_1.gltf", 1.0, Col.NONE],
+	&"q_torch": [P + "Torch_Metal.gltf", 1.0, Col.NONE],
 	&"home_a_blue": [M + "building_home_A_blue.gltf", 6.0, Col.BOX],
 	&"home_a_green": [M + "building_home_A_green.gltf", 6.0, Col.BOX],
 	&"home_b_red": [M + "building_home_B_red.gltf", 6.0, Col.BOX],
@@ -127,6 +170,21 @@ const WHIMSY_TREES: Dictionary[StringName, int] = {
 	&"tree_simple": 0, &"tree_blocks": 0, &"tree_plateau": 0,
 	&"tree_pine": 1, &"tree_cone": 1, &"pine_tall": 1, &"pine_default": 1, &"pine_small": 1,
 }
+## Build 6 asset swap: Kenney decoration ids now draw the Quaternius equivalents.
+const SWAP: Dictionary[StringName, Array] = {
+	&"flower_red": [&"q_flowers_3", 1.0], &"flower_red_b": [&"q_flowers_4", 1.0],
+	&"flower_yellow": [&"q_flowers_4", 1.0], &"flower_yellow_b": [&"q_flowers_3", 1.0], &"flower_purple": [&"q_flowers_3", 1.0],
+	&"grass_leafs": [&"q_fern", 1.0], &"mushroom_red_group": [&"q_mushrooms", 1.0], &"mushroom_tan_group": [&"q_mushrooms", 0.9],
+	&"mushroom_red": [&"q_mushroom_shelf", 1.0], &"rock_small": [&"q_pebble", 1.0], &"rock_small_c": [&"q_pebble_square", 1.0],
+	&"rock_large_a": [&"q_rock_1", 1.0], &"rock_large_b": [&"q_rock_2", 1.0], &"rock_large_c": [&"q_rock_3", 1.0],
+	&"barrel": [&"q_barrel", 1.0], &"crate": [&"q_crate", 1.0], &"crate_small": [&"q_crate", 0.7], &"wheelbarrow": [&"q_cart", 0.9],
+}
+const Q_TREES: Array[StringName] = [&"q_tree_1", &"q_tree_2", &"q_tree_3", &"q_tree_4", &"q_tree_5"]
+const Q_PINES: Array[StringName] = [&"q_pine_1", &"q_pine_2", &"q_pine_3"]
+## Buildings are drawn 25% bigger (Ashwin: "all the buildings should be a little bigger").
+const BUILDING_SCALE := 1.25
+const BUILDINGS: Array[StringName] = [&"home_a_blue", &"home_a_green", &"home_b_red", &"market", &"windmill", &"well", &"tent_big", &"tent_small", &"tent"]
+
 ## Tree colours a level wants (set in its build()); picked per tree by position.
 static var tree_kinds: Array[StringName] = [&"green", &"lime", &"green", &"teal", &"blossom", &"green", &"autumn"]
 ## Leaf overrides map to tree kinds.
@@ -144,8 +202,18 @@ static func exists(id: StringName) -> bool:
 ## Spawn a prop with its base at `pos`. scale_mul multiplies the table scale.
 static func spawn(parent: Node, id: StringName, pos: Vector3, yaw: float = 0.0, scale_mul: float = 1.0, collide: bool = true, leaf: StringName = &"") -> Node3D:
 	assert(TABLE.has(id), "Unknown prop %s" % id)
+	if SWAP.has(id):
+		var sw: Array = SWAP[id]
+		return spawn(parent, sw[0] as StringName, pos, yaw, scale_mul * float(sw[1]), collide, leaf)
+	if id in BUILDINGS:
+		scale_mul *= BUILDING_SCALE
 	if WHIMSY_TREES.has(id):
-		var kind: StringName = LEAF_KINDS.get(leaf, tree_kinds[absi(hash(Vector2i(int(pos.x), int(pos.z)))) % tree_kinds.size()])
+		var h := absi(hash(Vector2i(int(pos.x), int(pos.z))))
+		var kind: StringName = LEAF_KINDS.get(leaf, tree_kinds[h % tree_kinds.size()])
+		# Green trees and pines use the Quaternius models; the colourful kinds stay storybook.
+		if kind in [&"green", &"lime"]:
+			var qid: StringName = Q_PINES[h % Q_PINES.size()] if WHIMSY_TREES[id] == 1 else Q_TREES[h % Q_TREES.size()]
+			return spawn(parent, qid, pos, yaw, scale_mul * 0.95, collide)
 		if WHIMSY_TREES[id] == 1:
 			return Whimsy.pine(parent, pos, kind, scale_mul * 0.9, collide)
 		return Whimsy.tree(parent, pos, kind, scale_mul * 0.85, -1, yaw, collide)
@@ -162,7 +230,7 @@ static func spawn(parent: Node, id: StringName, pos: Vector3, yaw: float = 0.0, 
 	model.scale = Vector3.ONE * s
 	holder.add_child(model)
 	Toon.apply(model, 0.0, leaf)
-	if id not in KEEP_FACETS:
+	if id not in KEEP_FACETS and not String(id).begins_with("q_"):
 		for n in model.find_children("*", "MeshInstance3D", true, false):
 			var mi := n as MeshInstance3D
 			mi.mesh = RoundMesh.smoothed(mi.mesh)

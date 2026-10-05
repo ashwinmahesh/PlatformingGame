@@ -143,6 +143,8 @@ func _training_yard() -> void:
 ## Pip's rooftop course: crates -> Pip's roof -> two tall posts -> the tower top. Best time saved.
 func _rooftop_course() -> void:
 	Props.spawn(self, &"crate", Vector3(22.0, 0.0, -1.0), 0.3, 2.3)
+	# Houses are 25% bigger now (Build 6): a taller crate keeps Pip's roof in reach.
+	Props.spawn(self, &"crate", Vector3(19.5, 0.0, -5.0), 0.6, 3.4)
 	Props.spawn(self, &"column", Vector3(21.0, 0.0, -16.0), 0.0, 3.0)
 	Props.spawn(self, &"column", Vector3(27.0, 0.0, -22.5), 0.0, 4.0)
 	Props.spawn(self, &"tower", Vector3(31.0, 0.0, -31.0), -0.5, 1.2)

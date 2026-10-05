@@ -20,6 +20,8 @@ var _pillars: Array[Vector3] = []
 
 func configure() -> void:
 	world_id = WORLD
+	platform_colour = &"blue"
+	model_tint = Color(0.95, 1.0, 1.08)
 	sky_top = Color(0.1, 0.32, 0.82)
 	sky_horizon = Color(0.78, 0.88, 1.0)
 	sky_bottom = Color(0.9, 0.95, 1.0)

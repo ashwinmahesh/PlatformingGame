@@ -58,6 +58,7 @@ func _ready() -> void:
 	Toon.clear_cache()
 	Props.clear_cache()
 	Whimsy.clear_cache()
+	Models.clear_cache()
 	Ambient.clear_cache()
 	AudioDirector.shutdown()
 	for i in 6:

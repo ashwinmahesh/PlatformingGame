@@ -8,6 +8,7 @@ var _t: float = 0.0
 
 
 func _init() -> void:
+	model_spec = ["Squidle", 1.4, PI]
 	max_hp = 1
 	body_radius = 0.7
 	body_half_height = 0.5

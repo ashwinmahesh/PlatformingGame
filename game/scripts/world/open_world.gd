@@ -9,6 +9,10 @@ extends Level
 ## free-standing platforms from these helpers are widened by this factor.
 const PLATFORM_GROW := 1.35
 
+## Build 6 asset swap: jump platforms and moving platforms wear KayKit Platformer pieces in this
+## colour (green, blue, red, yellow, neutral); &"" keeps the plain rounded blocks.
+var platform_colour: StringName = &"green"
+
 var world_id: StringName
 var floor_y: float = -14.0
 var lock: ShardLock
@@ -127,11 +131,33 @@ func disc(top_local: Vector3, radius: float, color: StringName = &"bark_mid", to
 
 ## A floating ledge of `size` (y = thickness) with its top at top_local.
 func ledge(top_local: Vector3, size: Vector3, color: StringName = &"stone_light", yaw: float = 0.0) -> StaticBody3D:
+	var platformish := grown(size) != size
 	size = grown(size)
-	var b := Kit.block(self, P(top_local), S(size) if yaw == 0.0 else size, color, Layers.WORLD | Layers.CAMERA_BLOCKER, top_of(color))
+	var actual := S(size) if yaw == 0.0 else size
+	var b := Kit.block(self, P(top_local), actual, color, Layers.WORLD | Layers.CAMERA_BLOCKER, top_of(color))
 	if yaw != 0.0:
 		b.rotation.y = Y(yaw)
+	if platformish:
+		skin_platform(b, actual)
 	return b
+
+
+## Swaps a platform body's rounded block for a KayKit Platformer piece stretched to the same box.
+func skin_platform(body: Node3D, size: Vector3) -> void:
+	if platform_colour == &"":
+		return
+	for n in body.get_children():
+		if n is MeshInstance3D:
+			(n as MeshInstance3D).visible = false
+	var long := maxf(size.x, size.z) > minf(size.x, size.z) * 2.2
+	var piece := ("platform_6x2x1_%s" if long else "platform_4x4x1_%s") % platform_colour
+	var holder := Node3D.new()
+	body.add_child(holder)
+	var fit := size
+	if long and size.z > size.x:
+		holder.rotation.y = PI * 0.5
+		fit = Vector3(size.z, size.y, size.x)
+	Models.fit(holder, "%s%s/%s.gltf" % [Models.KK_PLATFORM, platform_colour, piece], Vector3(0.0, size.y * 0.5, 0.0), fit)
 
 
 ## A round floating stepping-stone.
@@ -204,6 +230,7 @@ func mover(top_local: Vector3, size: Vector3, travel_local: Vector3, period: flo
 	m.position = P(top_local) + Vector3.DOWN * size.y * 0.5
 	m.rotation.y = Y()
 	add_child(m)
+	skin_platform(m, m.size)
 	return m
 
 

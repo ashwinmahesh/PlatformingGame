@@ -10,6 +10,7 @@ var _sword: Node3D
 
 
 func _init() -> void:
+	model_spec = ["Orc", 2.0, PI]
 	max_hp = 3
 	body_radius = 0.6
 	body_half_height = 0.95

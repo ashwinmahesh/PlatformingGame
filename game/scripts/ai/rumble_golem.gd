@@ -66,6 +66,26 @@ func build_body() -> void:
 	_weak_area = area(Layers.ENEMY_HURTBOX | Layers.BOUNCE, w, Vector3(0.0, 5.2, 1.0))
 
 
+## Build 6 asset swap: the Quaternius model replaces the built body (hit areas unchanged).
+
+func _use_model() -> void:
+	for n in _body.find_children("*", "MeshInstance3D", true, false):
+		if (n as MeshInstance3D).mesh is PrismMesh and n.get_parent() == _body:
+			continue
+		(n as MeshInstance3D).visible = false
+	var path := Models.Q_MONSTERS + "Goleling_Evolved.gltf"
+	var model := Models.spawn(_body, path, Vector3.ZERO, PI, 6.2 / maxf(Models.model_bounds(path).size.y, 0.01), 0.04)
+	Models.play(model, [&"Idle", &"Flying_Idle"])
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		var mi := n as MeshInstance3D
+		for i in mi.get_surface_override_material_count():
+			var m := mi.get_surface_override_material(i) as ShaderMaterial
+			if m != null:
+				m = m.duplicate() as ShaderMaterial
+				mi.set_surface_override_material(i, m)
+				_flash_mats.append(m)
+
+
 func max_ticks_for(s: int) -> int:
 	match s:
 		S.INTRO:

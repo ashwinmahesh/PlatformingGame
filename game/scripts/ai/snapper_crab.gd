@@ -9,6 +9,7 @@ var _pivot: Node3D
 
 
 func _init() -> void:
+	model_spec = []
 	max_hp = 3
 	body_radius = 0.75
 	body_half_height = 0.45

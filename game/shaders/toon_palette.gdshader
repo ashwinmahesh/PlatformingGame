@@ -10,6 +10,11 @@ uniform vec2 cell = vec2(0.0);
 uniform vec2 top_cell = vec2(0.0);
 uniform float top_amount = 0.0;
 uniform float variation = 0.0;
+// Build 6: hand-painted watercolor textures (VoxelCoreLab, CC0) brushed over terrain, top and sides.
+uniform sampler2D top_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform sampler2D side_tex : hint_default_white, filter_linear_mipmap, repeat_enable;
+uniform float paint_amount = 0.0;
+uniform float paint_scale = 0.09;
 uniform float flash = 0.0;
 uniform vec3 flash_color : source_color = vec3(1.0);
 uniform float fade = 0.0;
@@ -55,6 +60,16 @@ void fragment() {
 			// Wavy rock layers on cliff sides.
 			float layer = fract(world_pos.y / 2.4 + vnoise(world_pos.xz * 0.08) * 0.8);
 			base *= mix(0.9, 1.04, smoothstep(0.42, 0.5, layer));
+		}
+		if (paint_amount > 0.0) {
+			// Use each texture's brightness around its average, so palette colours stay in charge.
+			vec3 wn = abs((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+			float tl = dot(texture(top_tex, world_pos.xz * paint_scale).rgb, vec3(0.333));
+			float sx = dot(texture(side_tex, world_pos.zy * paint_scale).rgb, vec3(0.333));
+			float sz = dot(texture(side_tex, world_pos.xy * paint_scale).rgb, vec3(0.333));
+			float sl = mix(sz, sx, smoothstep(0.3, 0.7, wn.x / max(wn.x + wn.z, 0.001)));
+			top *= mix(1.0, tl / 0.55, paint_amount);
+			base *= mix(1.0, sl / 0.55, paint_amount * 0.8);
 		}
 		base = mix(base, top, k * top_amount);
 	}

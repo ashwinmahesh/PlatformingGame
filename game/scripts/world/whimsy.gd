@@ -490,6 +490,7 @@ static func mushroom_house(parent: Node, pos: Vector3, yaw: float, kind: StringN
 	var root := Node3D.new()
 	root.position = pos
 	root.rotation.y = yaw
+	root.scale = Vector3.ONE * Props.BUILDING_SCALE
 	parent.add_child(root)
 	var key := "mhouse|%s|%.1f|%.1f|%.1f" % [kind, stem_r, stem_h, cap_r]
 	if not _meshes.has(key):
@@ -611,6 +612,7 @@ static func stall(parent: Node, pos: Vector3, yaw: float, stripe: StringName = &
 	var root := Node3D.new()
 	root.position = pos
 	root.rotation.y = yaw
+	root.scale = Vector3.ONE * Props.BUILDING_SCALE
 	parent.add_child(root)
 	Kit.block(root, Vector3(0.0, 1.1, 0.0), Vector3(3.2, 1.1, 1.2), &"wood_plank", Layers.WORLD, &"")
 	for x: float in [-1.5, 1.5]:
@@ -808,7 +810,7 @@ static func shell_house(parent: Node, pos: Vector3, yaw: float, color: StringNam
 	var root := Node3D.new()
 	root.position = pos
 	root.rotation.y = yaw
-	root.scale = Vector3.ONE * s
+	root.scale = Vector3.ONE * s * Props.BUILDING_SCALE
 	parent.add_child(root)
 	var key := "shellhouse|%s" % color
 	if not _meshes.has(key):
@@ -879,6 +881,7 @@ static func turtle_on(platform: Node3D, size: Vector3) -> void:
 
 ## A snow-block igloo you can stand on, door facing +Z.
 static func igloo(parent: Node, pos: Vector3, yaw: float, r: float = 4.0) -> Node3D:
+	r *= Props.BUILDING_SCALE
 	var root := Node3D.new()
 	root.position = pos
 	root.rotation.y = yaw
