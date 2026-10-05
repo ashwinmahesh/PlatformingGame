@@ -119,7 +119,7 @@ func tumbleweed(start: Vector3, dir: Vector3, span: float, phase: float) -> void
 # --- The canyon: sand floor, the eastern gorge, striped cliffs all round ------------------------
 
 func _canyon() -> void:
-	var holes: Array[Rect2] = [Rect2(-22.0, -18.0, 16.0, 14.0), Rect2(98.0, -50.0, 52.0, 100.0)]
+	var holes: Array[Rect2] = [Rect2(-22.0, -18.0, 16.0, 14.0), Rect2(98.0, -50.0, 52.0, 100.0), Rect2(-100.0, 52.0, 16.0, 16.0)]
 	ground(Rect2(-150.0, -160.0, 300.0, 320.0), holes, 0.0, 18.0, &"wood_warm", &"sand_light", 0.012)
 	# The gorge: a long drop to a ribbon of river (a pit; falling costs ½ heart).
 	var pit := Area3D.new()
@@ -269,6 +269,8 @@ func _mesa_climb() -> void:
 	mesa(Vector3(-10.0, 12.0, -70.0), Vector2(14.0, 12.0))
 	critter(Batling, Vector3(-10.0, 16.0, -70.0))
 	balloon_lift(Vector3(1.0, 13.5, -72.0), Vector3(0.0, 0.0, -6.0), 5.0, [&"slime_blue", &"mush_spot"])
+	# A second way up: a tall balloon lift from the sand straight to the fourth mesa.
+	balloon_lift(Vector3(-23.0, 0.5, -72.0), Vector3(0.0, 11.5, 0.0), 8.0, [&"candy_pink", &"gold"])
 	mesa(Vector3(12.0, 15.0, -82.0), Vector2(15.0, 15.0))
 	stone(Vector3(12.0, 16.5, -82.0), 3.0, 1.5, &"stone_light", &"gold")
 	shard_at(&"w3_shard_mesa", Vector3(12.0, 16.5, -82.0))
@@ -490,6 +492,16 @@ func _wilds() -> void:
 		Whimsy.crystal(self, Vector3(-60.0 + cos(a) * 4.0, 0.0, 66.0 + sin(a) * 4.0), [&"crystal_violet", &"candy_pink", &"portal_teal"][i % 3] as StringName, _rng.randf_range(1.0, 1.8))
 	critter(Pricklepot, Vector3(-52.0, 0.0, 56.0))
 	critter(Pricklepot, Vector3(-66.0, 0.0, 52.0))
+	# South-west: a hidden second oasis with a seed at the bottom of the pool.
+	water(Vector3(-92.0, -0.6, 60.0), Vector2(16.0, 16.0), 4.0)
+	Kit.block(self, Vector3(-92.0, -4.5, 60.0), Vector3(16.0, 13.5, 16.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_mid")
+	seed_at(&"w3_seed_oasis2", Vector3(-90.0, -4.5, 62.0))
+	for i in 7:
+		var a := float(i) / 7.0 * TAU
+		prop([&"palm", &"palm_tall", &"palm_bend"][i % 3] as StringName, Vector3(-92.0 + cos(a) * 12.0, 0.0, 60.0 + sin(a) * 12.0), a, 1.2)
+	heart_bush(Vector3(-80.0, 0.0, 50.0))
+	# South-east: a chest in the cactus garden, guarded by ember slimes.
+	chest(Vector3(64.0, 0.0, 72.0), PI * 0.8, &"w3_seed_cactus")
 	# Scattered life everywhere.
 	for i in 40:
 		var p := Vector3(_rng.randf_range(-140.0, 140.0), 0.0, _rng.randf_range(-150.0, 150.0))
@@ -511,7 +523,7 @@ func _wilds() -> void:
 func _busy(p: Vector3) -> bool:
 	if p.x > 92.0 and absf(p.z) < 56.0:
 		return true
-	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, 0.0), Vector3(-72.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA]:
+	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, 0.0), Vector3(-72.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA, Vector3(-92.0, 0.0, 60.0)]:
 		if Vector2(p.x - c.x, p.z - c.z).length() < 40.0:
 			return true
 	return absf(p.x) < 14.0 or absf(p.z) < 10.0

@@ -19,6 +19,8 @@ const REGIONS: Dictionary[String, Vector3] = {
 	"meadow": Vector3.ZERO, "fernway": Vector3(0.0, 0.0, -60.0), "cliff_garden": Vector3(0.0, 0.0, -100.0),
 	"river": Vector3(70.0, 0.0, 0.0), "falls": Vector3(128.0, 0.0, 0.0), "grove": Vector3(-66.0, 0.0, 0.0),
 	"glade": Vector3(0.0, 0.0, 58.0), "gloop_lake": ARENA_CENTER,
+	"nw_link": Vector3(-36.0, 0.0, -44.0), "sw_link": Vector3(-34.0, 0.0, 38.0), "se_link": Vector3(33.0, 0.0, 30.0),
+	"ne_link": Vector3(30.0, 0.0, -36.0), "mushroom_stair": Vector3(32.0, 0.0, -66.0),
 }
 
 var boss: MotherGloop
@@ -46,6 +48,7 @@ func build() -> void:
 	_river_and_falls()
 	_bonk_grove()
 	_glade_and_lake()
+	_links()
 	_sky()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -454,6 +457,58 @@ func _spawn_boss(stump_positions: Array[Vector3] = []) -> void:
 	boss.rng.seed = 1234
 	boss.position = ARENA_CENTER + Vector3(0.0, 0.0, 5.0)
 	add_child(boss)
+
+
+# --- Ring links (Build 5: "less linear, small open worlds") ----------------------------------------
+# Wide plateaus join neighbouring regions at their outer ends, so the world is a loop you can
+# explore in any order, each with something to find. The north-east link also climbs a stair of
+# giant mushrooms to the Cliff Garden: a second way up besides the Springcap.
+
+func _links() -> void:
+	region(Vector3.ZERO)
+	# North-west: Fernway <-> Mushroom Grove. A bramble hut (Fireball) hides a seed.
+	plat(Vector3(-27.0, 0.0, -50.0), Vector2(20.0, 18.0))
+	disc(Vector3(-44.0, 0.0, -36.0), 9.0)
+	alcove(Vector3(-27.0, 0.0, -54.0), 0.0, &"stone_dark", &"bramble")
+	seed_at(&"w1_seed_link_nw", Vector3(-27.0, 0.0, -54.0))
+	gloplets(Vector3(-44.0, 0.0, -36.0), 7.0, [Vector3(-2.0, 0.0, 2.0), Vector3(3.0, 0.0, -2.0)])
+	heart_bush(Vector3(-20.0, 0.0, -44.0))
+	giant_mushroom(Vector3(-48.0, 0.0, -40.0), 10.0, 5.5, &"purple")
+	butterflies(Vector3(-36.0, 0.0, -44.0), 10.0, 6)
+	# South-west: Grove <-> Glade. A picnic clearing with a chest.
+	plat(Vector3(-34.0, 0.0, 38.0), Vector2(28.0, 20.0))
+	chest(Vector3(-38.0, 0.0, 42.0), PI * 0.75, &"w1_seed_link_sw")
+	gloplets(Vector3(-30.0, 0.0, 36.0), 8.0, [Vector3.ZERO, Vector3(-3.0, 0.0, 3.0)], [Vector3(3.0, 0.0, -2.0)])
+	prop(&"log", Vector3(-32.0, 0.0, 44.0), 0.3, 1.4)
+	prop(&"stump", Vector3(-29.0, 0.0, 44.0), 0.0, 1.2)
+	for i in 6:
+		Whimsy.flower(self, Vector3(-44.0 + i * 4.0, 0.0, 31.0), 0.8, 0.8, [&"candy_pink", &"gold", &"slime_blue"][i % 3] as StringName, false)
+	animals(Bunny, Vector3(-34.0, 0.0, 38.0), 9.0, 4)
+	# South-east: Glade <-> River. Giant flowers to climb for a seed.
+	plat(Vector3(33.0, 0.0, 30.0), Vector2(26.0, 28.0))
+	Whimsy.flower(self, Vector3(28.0, 0.0, 34.0), 3.0, 3.0, &"candy_pink")
+	Whimsy.flower(self, Vector3(34.0, 0.0, 40.0), 5.5, 3.0, &"gold")
+	Whimsy.flower(self, Vector3(40.0, 0.0, 34.0), 8.0, 3.0, &"slime_blue")
+	seed_at(&"w1_seed_link_se", Vector3(40.0, 8.2, 34.0))
+	heart_bush(Vector3(26.0, 0.0, 22.0))
+	for i in 2:
+		var duck := Duck.new()
+		duck.position = Vector3(36.0 + i * 4.0, -1.0, 20.0)
+		duck.radius = 2.0
+		add_child(duck)
+	sparkles(Vector3(34.0, 3.0, 34.0), Vector3(20.0, 6.0, 20.0), 24)
+	# North-east: River <-> Fernway, and a stair of giant mushrooms up to the Cliff Garden.
+	plat(Vector3(28.5, 0.0, -30.0), Vector2(27.0, 30.0))
+	gloplets(Vector3(30.0, 0.0, -30.0), 8.0, [Vector3(-3.0, 0.0, 0.0), Vector3(3.0, 0.0, 3.0)])
+	sign_post(Vector3(30.0, 0.0, -40.0), "A mushroom stair to the Cliff Garden!")
+	mushroom_platform(Vector3(34.0, 3.0, -52.0), floor_y, 3.5, &"orange")
+	mushroom_platform(Vector3(36.0, 6.0, -62.0), floor_y, 3.5, &"pink")
+	var c3 := mushroom_platform(Vector3(32.0, 9.0, -72.0), floor_y, 3.5, &"teal")
+	mushroom_platform(Vector3(26.0, CLIFF, -82.0), floor_y, 3.5, &"red")
+	var tall := mushroom_platform(Vector3(44.0, c3.y + 5.0, -70.0), floor_y, 3.0, &"gold")
+	Pickup.spawn_seed(self, tall, &"w1_seed_link_ne")
+	tree_line(Vector3(40.0, 0.0, -18.0), Vector3(40.0, 0.0, -42.0), 7.0, TREES)
+	add_capture_point("links", Vector3(60.0, 26.0, -10.0), Vector3(30.0, 4.0, -60.0))
 
 
 func _sky() -> void:

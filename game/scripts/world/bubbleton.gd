@@ -50,6 +50,7 @@ func build() -> void:
 	_kelp_forest()
 	_shipwreck()
 	_coral_gardens()
+	_side_spots()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life(&"kelp")
@@ -126,7 +127,7 @@ func _seafloor() -> void:
 func _busy(p: Vector3) -> bool:
 	if p.x > -76.0 and p.x < -46.0 and absf(p.z) < 26.0:
 		return true
-	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, 0.0), Vector3(-100.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0)]:
+	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, 0.0), Vector3(-100.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), Vector3(60.0, 0.0, 62.0), Vector3(-62.0, 0.0, 70.0)]:
 		if Vector2(p.x - c.x, p.z - c.z).length() < 36.0:
 			return true
 	return absf(p.x) < 10.0 or absf(p.z) < 8.0
@@ -263,6 +264,8 @@ func _jellyfish_fields() -> void:
 	for spec: Array in [[-10.0, 6.0, -20.0, &"mush_purple"], [9.0, 6.0, -29.0, &"gold"], [-19.0, 12.0, -36.0, &"coral_orange"], [9.0, 18.0, -52.0, &"candy_pink"], [-4.0, 24.0, -75.0, &"slime_blue"]]:
 		Whimsy.coral(self, P(Vector3(spec[0] as float, spec[1] as float, spec[2] as float)), spec[3] as StringName, 1.2)
 	stone(Vector3(0.0, 25.5, -72.0), 3.0, 1.5, &"stone_light", &"gold")
+	# A second way up: a bubble column beside the summit.
+	updraft(Vector3(12.0, 0.0, -72.0), Vector3(4.0, 26.0, 4.0), 11.0, &"bubbles")
 	shard_at(&"w4_shard_jelly", Vector3(0.0, 25.5, -72.0))
 	# A high coral perch for a seed: Plunge off a drifting Jellyfloat.
 	Kit.pillar(self, P(Vector3(24.0, 23.0, -50.0)), 2.2, 4.0, &"coral_pink", &"coral_orange")
@@ -289,14 +292,14 @@ func _kelp_forest() -> void:
 	for spec: Array in [[-6.0, -28.0, 0.0], [10.0, -52.0, 1.5]]:
 		var c := Vector3(spec[0] as float, 0.0, spec[1] as float)
 		Kit.pillar(self, P(c + Vector3(0.0, 30.0, 0.0)), 1.6, 30.0, &"kelp", &"lime_pop")
-		for i in 10:
+		for i in 11:
 			var a := float(i) * 1.15 + (spec[2] as float)
-			var y := 2.6 + i * 2.7
+			var y := 2.6 + i * 2.4
 			ledge(c + Vector3(cos(a) * 3.4, y, sin(a) * 3.4), Vector3(3.6, 0.5, 3.0), &"lime_pop")
 	critter(SnapperCrab, Vector3(4.0, 0.5, -18.0))
 	critter(SnapperCrab, Vector3(-8.0, 0.5, -40.0))
 	critter(SnapperCrab, Vector3(14.0, 0.5, -36.0))
-	seed_at(&"w4_seed_kelp_low", Vector3(-6.0 + cos(4.0 * 1.15) * 3.4, 2.6 + 4.0 * 2.7, -28.0 + sin(4.0 * 1.15) * 3.4))
+	seed_at(&"w4_seed_kelp_low", Vector3(-6.0 + cos(4.0 * 1.15) * 3.4, 2.6 + 4.0 * 2.4, -28.0 + sin(4.0 * 1.15) * 3.4))
 	# A bubble column between the trunks to a floating clam.
 	updraft(Vector3(4.0, 0.0, -38.0), Vector3(4.0, 20.0, 4.0), 10.0, &"bubbles")
 	stone(Vector3(8.5, 20.0, -38.0), 2.4, 1.0, &"mush_spot", &"candy_pink")
@@ -431,6 +434,33 @@ func _coral_gardens() -> void:
 	critter(SnapperCrab, Vector3(-10.0, 0.5, -28.0))
 	Ambient.fish(self, P(Vector3(0.0, 8.0, -30.0)), 10.0, 10, &"candy_pink")
 	add_capture_point("coral", Vector3(-30.0, 16.0, 30.0), Vector3(0.0, 4.0, 80.0))
+
+
+# --- Side spots between the routes (Build 5: "less linear") ------------------------------------------
+
+func _side_spots() -> void:
+	region(Vector3.ZERO)
+	# The Clam Beds: jellyfish pads up two rock pillars to a seed.
+	bouncer(Vector3(52.0, 0.0, 60.0), Springcap.Look.JELLY, 7.5, 12.0)
+	Kit.pillar(self, Vector3(60.0, 6.0, 64.0), 3.6, 6.0, &"coral_orange", &"sand_light")
+	bouncer(Vector3(61.0, 6.0, 64.0), Springcap.Look.JELLY, 7.5, 12.0)
+	Kit.pillar(self, Vector3(69.0, 12.0, 57.0), 3.2, 12.0, &"mush_purple", &"sand_light")
+	seed_at(&"w4_seed_clams", Vector3(69.0, 12.0, 57.0))
+	for i in 8:
+		var clam := SphereMesh.new()
+		clam.radius = 1.0
+		clam.height = 0.9
+		clam.is_hemisphere = true
+		Kit.mesh_instance(self, clam, Kit.mat([&"candy_pink", &"mush_spot", &"coral_orange"][i % 3] as StringName, 0.02), Vector3(48.0 + _rng.randf_range(0.0, 24.0), 0.0, 52.0 + _rng.randf_range(0.0, 20.0)))
+	critter(SnapperCrab, Vector3(56.0, 0.5, 70.0))
+	# The Sunken Statue: a cracked door in its plinth hides a seed.
+	prop(&"statue_head", Vector3(-62.0, 5.0, 70.0), 0.7, 3.5, false)
+	alcove(Vector3(-62.0, 0.0, 70.0), PI * 0.25, &"sea_violet")
+	seed_at(&"w4_seed_statue", Vector3(-62.0, 0.0, 70.0))
+	for i in 5:
+		Whimsy.anemone(self, Vector3(-62.0 + _rng.randf_range(-9.0, 9.0), 0.0, 70.0 + _rng.randf_range(-9.0, 9.0)), &"candy_pink", 1.2)
+	Ambient.fish(self, Vector3(-62.0, 8.0, 70.0), 8.0, 7, &"gold")
+	add_capture_point("clam_beds", Vector3(40.0, 16.0, 84.0), Vector3(62.0, 6.0, 60.0))
 
 
 func _on_shards_complete() -> void:

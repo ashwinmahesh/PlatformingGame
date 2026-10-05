@@ -5,6 +5,10 @@ extends Level
 ## order open the world's goal. Helpers build big, low, forgiving platforms (Ashwin: "bigger
 ## platforms, lower heights") and fill the world with life (grass, animals, birds, butterflies).
 
+## Build 5 pass (Ashwin: "make the platforms we can jump on larger... bring the heights down"):
+## free-standing platforms from these helpers are widened by this factor.
+const PLATFORM_GROW := 1.35
+
 var world_id: StringName
 var floor_y: float = -14.0
 var lock: ShardLock
@@ -41,6 +45,13 @@ func S(size: Vector3) -> Vector3:
 
 func top_of(color: StringName) -> StringName:
 	return tops.get(color, Kit.TOPS.get(color, &""))
+
+
+## Widens platform-like sizes (both sides under `limit`, thin enough to stand on, not walls).
+func grown(size: Vector3, limit: float = 8.0, max_thick: float = 2.6) -> Vector3:
+	if size.x < limit and size.z < limit and size.y <= max_thick:
+		return Vector3(size.x * PLATFORM_GROW, size.y, size.z * PLATFORM_GROW)
+	return size
 
 
 func make_lock() -> void:
@@ -116,6 +127,7 @@ func disc(top_local: Vector3, radius: float, color: StringName = &"bark_mid", to
 
 ## A floating ledge of `size` (y = thickness) with its top at top_local.
 func ledge(top_local: Vector3, size: Vector3, color: StringName = &"stone_light", yaw: float = 0.0) -> StaticBody3D:
+	size = grown(size)
 	var b := Kit.block(self, P(top_local), S(size) if yaw == 0.0 else size, color, Layers.WORLD | Layers.CAMERA_BLOCKER, top_of(color))
 	if yaw != 0.0:
 		b.rotation.y = Y(yaw)
@@ -124,6 +136,8 @@ func ledge(top_local: Vector3, size: Vector3, color: StringName = &"stone_light"
 
 ## A round floating stepping-stone.
 func stone(top_local: Vector3, radius: float, thickness: float = 1.6, color: StringName = &"stone_light", top_color: StringName = &"moss") -> StaticBody3D:
+	if radius < 4.0:
+		radius *= 1.3
 	return Kit.pillar(self, P(top_local), radius, thickness, color, top_color)
 
 
@@ -181,7 +195,7 @@ func water(center_local: Vector3, size: Vector2, depth: float = 5.0) -> Area3D:
 func mover(top_local: Vector3, size: Vector3, travel_local: Vector3, period: float, color: StringName = &"wood_plank", phase: float = 0.0, spin: float = 0.0) -> MovingPlatform:
 	var m := MovingPlatform.new()
 	m.rounded = false
-	m.size = size
+	m.size = grown(size, 10.0, 99.0)
 	m.travel = _frame.basis * travel_local
 	m.period = period
 	m.phase = phase
@@ -195,7 +209,7 @@ func mover(top_local: Vector3, size: Vector3, travel_local: Vector3, period: flo
 
 func crumble(top_local: Vector3, size: Vector3, look: CrumblePlatform.Look = CrumblePlatform.Look.CLOUD) -> CrumblePlatform:
 	var c := CrumblePlatform.new()
-	c.size = size
+	c.size = grown(size)
 	c.look = look
 	c.position = P(top_local)
 	add_child(c)
@@ -339,6 +353,8 @@ func giant_mushroom(base_local: Vector3, height: float, cap_r: float, kind: Stri
 ## A giant mushroom whose cap top lands at top_local (height is worked out). Returns the
 ## actual (snapped) top in world space.
 func mushroom_platform(top_local: Vector3, ground_y: float, cap_r: float, kind: StringName = &"red") -> Vector3:
+	if cap_r < 5.0:
+		cap_r *= 1.2
 	var base := Vector3(top_local.x, ground_y, top_local.z)
 	var h := top_local.y - ground_y - snappedf(cap_r, 0.5) * 0.56
 	return giant_mushroom(base, maxf(h, 1.0), cap_r, kind)

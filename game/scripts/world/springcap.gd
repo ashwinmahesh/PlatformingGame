@@ -5,6 +5,9 @@ extends Node3D
 
 enum Look { MUSHROOM, CLOUD, GLOWCAP, JELLY }
 
+## Build 5 (Ashwin: "make the platforms larger"): the bounce pad is widened by this factor.
+const PAD := 1.5
+
 var look: Look = Look.MUSHROOM
 ## 0 = use the hero's MovementSettings values.
 var land_height: float = 0.0
@@ -23,6 +26,7 @@ func _ready() -> void:
 		stem.collision_layer = Layers.WORLD
 	_cap = Node3D.new()
 	_cap.position.y = 0.7
+	_cap.scale = Vector3(PAD, 1.0, PAD)
 	add_child(_cap)
 	var body := StaticBody3D.new()
 	body.collision_layer = Layers.WORLD
@@ -120,4 +124,4 @@ func _boing() -> void:
 func _process(delta: float) -> void:
 	_squash = maxf(_squash - delta * 3.0, 0.0)
 	var k := sin(_squash * PI * 3.0) * _squash * 0.25
-	_cap.scale = Vector3(1.0 + k, 1.0 - k, 1.0 + k)
+	_cap.scale = Vector3(PAD * (1.0 + k), 1.0 - k, PAD * (1.0 + k))

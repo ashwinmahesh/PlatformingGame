@@ -43,6 +43,7 @@ func build() -> void:
 	_puffball_path()
 	_windmill_isles()
 	_bounce_gardens()
+	_rainbow_ring()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life()
@@ -78,7 +79,7 @@ func island_at(top: Vector3, radius: float) -> void:
 ## A solid cloud you can stand on.
 func cloud(top_local: Vector3, size: Vector2) -> void:
 	var top := P(top_local)
-	var s := S(Vector3(size.x, 1.2, size.y))
+	var s := S(grown(Vector3(size.x, 1.2, size.y)))
 	Kit.block(self, top, s, &"foam")
 	for i in 4:
 		var off := Vector3(_rng.randf_range(-0.4, 0.4) * s.x, -0.6, _rng.randf_range(-0.4, 0.4) * s.z)
@@ -276,6 +277,92 @@ func _bounce_gardens() -> void:
 	sign_post(Vector3(-6.0, 0.0, -12.0), "Bouncy clouds! Plunge onto them\nto go even higher.")
 	butterflies(Vector3(0.0, 2.0, -18.0), 10.0, 6)
 	add_capture_point("gardens", Vector3(28.0, 24.0, 72.0), Vector3(0.0, 8.0, 60.0))
+
+
+# --- The Rainbow Ring (Build 5: "less linear, small open worlds") ------------------------------------
+# A loop of rainbow bridges and little islands round the plaza joins the four routes halfway out,
+# so you can roam from one to the next without going back to the centre. Each quarter hides a seed.
+
+func _rainbow_ring() -> void:
+	region(Vector3.ZERO)
+	var anchors: Array[Vector4] = [Vector4(-4.0, 8.0, -76.0, 8.0), Vector4(82.0, 5.0, 0.0, 9.0), Vector4(10.0, 9.0, 64.0, 7.0), Vector4(-88.0, 1.0, 0.0, 9.0)]
+	for q in 4:
+		var a := anchors[q]
+		var b := anchors[(q + 1) % 4]
+		var ang_a := atan2(a.z, a.x)
+		var d := wrapf(atan2(b.z, b.x) - ang_a, -PI, PI)
+		var ra := Vector2(a.x, a.z).length()
+		var rb := Vector2(b.x, b.z).length()
+		var pts: Array[Vector4] = [a]
+		for k in 3:
+			var t := (k + 1) / 4.0
+			var ang := ang_a + d * t
+			var r := lerpf(ra, rb, t) + 6.0 * sin(t * PI)
+			pts.append(Vector4(cos(ang) * r, lerpf(a.y, b.y, t) + 2.0 * sin(t * PI), sin(ang) * r, 6.5))
+		pts.append(b)
+		for k in range(1, 4):
+			island(Vector3(pts[k].x, pts[k].y, pts[k].z), pts[k].w)
+		for k in pts.size() - 1:
+			_bridge(pts[k], pts[k + 1])
+		_ring_secret(q, pts)
+	var first := anchors[0]
+	sign_post(Vector3(first.x + 5.0, first.y, first.z + 3.0), "The Rainbow Ring links every route!")
+	add_capture_point("ring", Vector3(110.0, 40.0, 110.0), Vector3(0.0, 4.0, 0.0))
+
+
+## A rainbow bridge from island a's rim to island b's rim (x, y, z = top centre, w = radius).
+func _bridge(a: Vector4, b: Vector4) -> void:
+	var pa := Vector3(a.x, a.y, a.z)
+	var pb := Vector3(b.x, b.y, b.z)
+	var flat := Vector3(pb.x - pa.x, 0.0, pb.z - pa.z).normalized()
+	var start := pa + flat * (a.w - 1.0)
+	var end := pb - flat * (b.w - 1.0)
+	var length := start.distance_to(end)
+	var basis := Basis.looking_at(end - start, Vector3.UP)
+	var width := 5.0
+	var body := Kit.static_body(self, (start + end) * 0.5 - basis.y * 0.3)
+	body.basis = basis
+	var box := BoxShape3D.new()
+	box.size = Vector3(width, 0.6, length)
+	Kit.add_shape(body, box)
+	var bands: Array[StringName] = [&"roof_red", &"sunset_orange", &"gold", &"grass_light", &"slime_blue", &"mush_purple"]
+	for i in bands.size():
+		var stripe := RoundMesh.box(Vector3(width / bands.size(), 0.6, length), 0.08)
+		Kit.mesh_instance(body, stripe, Kit.mat(bands[i]), Vector3(-width * 0.5 + (i + 0.5) * width / bands.size(), 0.0, 0.0))
+
+
+func _ring_secret(q: int, pts: Array[Vector4]) -> void:
+	var p1 := Vector3(pts[1].x, pts[1].y, pts[1].z)
+	var p2 := Vector3(pts[2].x, pts[2].y, pts[2].z)
+	var p3 := Vector3(pts[3].x, pts[3].y, pts[3].z)
+	var out := Vector3(p2.x, 0.0, p2.z).normalized()
+	match q:
+		0:
+			# A wind column up to a high cloud.
+			updraft(p2 + out * 3.0, Vector3(4.0, 14.0, 4.0), 10.0)
+			cloud(p2 + out * 9.0 + Vector3(0.0, 13.0, 0.0), Vector2(6.0, 6.0))
+			seed_at(&"w2_seed_ring_ne", p2 + out * 9.0 + Vector3(0.0, 13.0, 0.0))
+			critter(Batling, p1 + Vector3(0.0, 5.0, 0.0))
+		1:
+			# A bouncy cloud up to a seed.
+			heart_bush(p1 + Vector3(2.0, 0.0, 0.0))
+			bouncer(p2 + out * 2.0, Springcap.Look.CLOUD, 7.0, 12.0)
+			cloud(p2 + out * 8.0 + Vector3(0.0, 10.0, 0.0), Vector2(6.0, 6.0))
+			seed_at(&"w2_seed_ring_se", p2 + out * 8.0 + Vector3(0.0, 10.0, 0.0))
+			critter(Jellyfloat, p3 + Vector3(0.0, 4.0, 0.0))
+		2:
+			# A chest, with a Hoppy and a Mimic about.
+			chest(p2 + out * 2.0, atan2(out.x, out.z), &"w2_seed_ring_sw")
+			critter(Hoppy, p1 + Vector3(0.0, 0.5, 0.0))
+			critter(Mimic, p3 + out * 2.0)
+		3:
+			# Vanishing clouds up to a seed.
+			for k in 3:
+				crumble(p2 + out * (5.0 + k * 4.5) + Vector3(0.0, 2.5 + k * 2.5, 0.0), Vector3(4.5, 0.8, 4.5))
+			cloud(p2 + out * 19.0 + Vector3(0.0, 9.0, 0.0), Vector2(6.0, 6.0))
+			seed_at(&"w2_seed_ring_nw", p2 + out * 19.0 + Vector3(0.0, 9.0, 0.0))
+	Whimsy.tree(self, p1 - out * 3.0, tree_kinds[q % tree_kinds.size()], 1.0)
+	Whimsy.flower(self, p3 - out * 3.0, 2.0, 1.5, [&"candy_pink", &"gold", &"slime_blue", &"mush_purple"][q] as StringName, false)
 
 
 func _on_shards_complete() -> void:

@@ -57,6 +57,7 @@ func build() -> void:
 	_crystal_caverns()
 	_pine_heights()
 	_summit_gate()
+	_side_spots()
 	finish_boss_world()
 	finish_life(&"bubble")
 
@@ -78,7 +79,8 @@ func slippery(body: Node) -> void:
 
 func _mountain() -> void:
 	var lake := Rect2(-100.0, -22.0, 30.0, 44.0)
-	ground(Rect2(-150.0, -150.0, 300.0, 300.0), [lake], 0.0, 18.0, &"stone_dark", &"mush_spot", 0.004)
+	var fishing := Rect2(-64.0, 56.0, 8.0, 8.0)
+	ground(Rect2(-150.0, -150.0, 300.0, 300.0), [lake, fishing], 0.0, 18.0, &"stone_dark", &"mush_spot", 0.004)
 	for side in 4:
 		for i in 11:
 			var t := -150.0 + (i + 0.5) * 300.0 / 11.0
@@ -112,7 +114,7 @@ func _mountain() -> void:
 func _busy(p: Vector3) -> bool:
 	if p.x < -66.0 and p.x > -150.0 and absf(p.z) < 30.0:
 		return true
-	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, -30.0), Vector3(-110.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA]:
+	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, -30.0), Vector3(-110.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA, Vector3(62.0, 0.0, 70.0), Vector3(-60.0, 0.0, 60.0)]:
 		if Vector2(p.x - c.x, p.z - c.z).length() < 42.0:
 			return true
 	return absf(p.x) < 10.0 or absf(p.z) < 8.0
@@ -211,6 +213,16 @@ func _ice_slide() -> void:
 	stone(Vector3(0.0, 13.5, -94.0), 3.0, 1.5, &"stone_light", &"gold")
 	shard_at(&"w5_shard_slide", Vector3(0.0, 13.5, -94.0))
 	critter(Armorling, Vector3(-4.0, 12.5, -86.0))
+	# A second way to the far shelf: ice ledges up a frozen waterfall on the east side.
+	for spec: Array in [[17.0, 3.0, -88.0], [19.0, 6.0, -96.0], [16.0, 9.0, -104.0]]:
+		ledge(Vector3(spec[0] as float, spec[1] as float, spec[2] as float), Vector3(5.0, 1.0, 5.0), &"water_light")
+	var fall := BoxMesh.new()
+	fall.size = Vector3(1.0, 14.0, 22.0)
+	var wm := ShaderMaterial.new()
+	wm.shader = preload("res://shaders/water.gdshader")
+	wm.set_shader_parameter(&"vertical", true)
+	wm.set_shader_parameter(&"flow", Vector2(0.0, 0.4))
+	Kit.mesh_instance(self, fall, wm, P(Vector3(23.5, 7.0, -96.0)))
 	# An ice cave at the foot of the gap.
 	alcove(Vector3(0.0, 0.0, -76.0), 0.0, &"water_light")
 	seed_at(&"w5_seed_crevasse", Vector3(0.0, 0.0, -76.0))
@@ -311,16 +323,16 @@ func _pine_heights() -> void:
 	seed_at(&"w5_seed_floe", Vector3(20.0, 0.2, -46.0))
 	# Pine-topped tiers up to the shard.
 	plat(Vector3(0.0, 3.0, -68.0), Vector2(24.0, 14.0), &"stone_dark")
-	plat(Vector3(-8.0, 7.0, -84.0), Vector2(16.0, 14.0), &"stone_dark")
-	plat(Vector3(8.0, 11.0, -98.0), Vector2(14.0, 12.0), &"stone_dark")
-	stone(Vector3(8.0, 12.5, -100.0), 3.0, 1.5, &"stone_light", &"gold")
-	shard_at(&"w5_shard_pines", Vector3(8.0, 12.5, -100.0))
+	plat(Vector3(-8.0, 6.0, -84.0), Vector2(16.0, 14.0), &"stone_dark")
+	plat(Vector3(8.0, 9.0, -98.0), Vector2(14.0, 12.0), &"stone_dark")
+	stone(Vector3(8.0, 10.5, -100.0), 3.0, 1.5, &"stone_light", &"gold")
+	shard_at(&"w5_shard_pines", Vector3(8.0, 10.5, -100.0))
 	critter(Hoppy, Vector3(4.0, 3.5, -68.0))
-	critter(Hoppy, Vector3(-8.0, 7.5, -84.0))
-	bouncer(Vector3(3.0, 11.0, -95.0), Springcap.Look.MUSHROOM, 6.0, 11.0)
-	ledge(Vector3(-4.0, 17.0, -96.0), Vector3(3.0, 0.6, 3.0), &"water_light")
-	seed_at(&"w5_seed_pine_top", Vector3(-4.0, 17.0, -96.0))
-	Whimsy.pine(self, P(Vector3(-12.0, 7.0, -88.0)), &"frost", 3.0)
+	critter(Hoppy, Vector3(-8.0, 6.5, -84.0))
+	bouncer(Vector3(3.0, 9.0, -95.0), Springcap.Look.MUSHROOM, 6.0, 11.0)
+	ledge(Vector3(-4.0, 15.0, -96.0), Vector3(3.0, 0.6, 3.0), &"water_light")
+	seed_at(&"w5_seed_pine_top", Vector3(-4.0, 15.0, -96.0))
+	Whimsy.pine(self, P(Vector3(-12.0, 6.0, -88.0)), &"frost", 3.0)
 	Whimsy.pine(self, P(Vector3(-6.0, 3.0, -72.0)), &"blossom", 1.6)
 	for i in 6:
 		var pg := Penguin.new()
@@ -330,6 +342,32 @@ func _pine_heights() -> void:
 	tree_line(Vector3(-24.0, 0.0, -8.0), Vector3(-24.0, 0.0, -28.0), 6.0, [&"tree_pine", &"tree_cone"], 1.2)
 	tree_line(Vector3(24.0, 0.0, -8.0), Vector3(24.0, 0.0, -28.0), 6.0, [&"tree_pine", &"tree_cone"], 1.2)
 	add_capture_point("pines", Vector3(-40.0, 22.0, 30.0), Vector3(-100.0, 4.0, 0.0))
+
+
+# --- Side spots between the routes (Build 5: "less linear") ------------------------------------------
+
+func _side_spots() -> void:
+	region(Vector3.ZERO)
+	# Snowman Hill: a little rise crowded with snowmen; the big one has a door.
+	plat(Vector3(62.0, 3.0, 70.0), Vector2(18.0, 18.0), &"stone_dark")
+	ramp(Vector3(62.0, 0.0, 85.0), 6.0, 3.0, 6.0, &"water_light")
+	alcove(Vector3(62.0, 3.0, 66.0), 0.0, &"bubble")
+	seed_at(&"w5_seed_snowman", Vector3(62.0, 3.0, 66.0))
+	Whimsy.snowman(self, Vector3(62.0, 8.0, 65.0), 1.6, &"roof_red")
+	for i in 5:
+		var a := float(i) / 5.0 * TAU + 0.4
+		Whimsy.snowman(self, Vector3(62.0 + cos(a) * 6.5, 3.0, 72.0 + sin(a) * 5.0), _rng.randf_range(0.7, 1.1), [&"slime_blue", &"candy_pink", &"gold", &"lime_pop", &"roof_red"][i] as StringName)
+	critter(Hoppy, Vector3(58.0, 3.5, 74.0))
+	# The ice-fishing hole: dive for a seed; penguins keep watch.
+	Kit.water(self, Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 5.0)
+	Kit.block(self, Vector3(-60.0, -5.4, 60.0), Vector3(8.0, 12.6, 8.0), &"stone_dark", Layers.WORLD, &"water_light")
+	seed_at(&"w5_seed_fishing", Vector3(-60.0, -5.4, 60.0))
+	for i in 4:
+		var pg := Penguin.new()
+		pg.position = Vector3(-60.0 + cos(i * 1.6) * 7.0, 0.5, 60.0 + sin(i * 1.6) * 7.0)
+		add_child(pg)
+	Whimsy.igloo(self, Vector3(-70.0, 0.0, 66.0), deg_to_rad(60.0), 3.0)
+	add_capture_point("snowman_hill", Vector3(62.0, 14.0, 96.0), Vector3(62.0, 3.0, 68.0))
 
 
 # --- South: Summit Gate and the Avalanche Ape's ring ---------------------------------------------------
