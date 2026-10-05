@@ -1,0 +1,14 @@
+{
+  "id": "tundra",
+  "name": "Tundra",
+  "conversations": [
+    { "when": "world_05_complete", "lines": [
+      { "speaker": "Tundra", "text": "The Avalanche Ape, sitting quietly in the hot spring. You tamed it! Or tired it out. Either way, well done." }
+    ]},
+    { "when": "", "lines": [
+      { "speaker": "Tundra", "text": "Brr! Welcome to Snowcap Village, top of Frostfang Peak. Warm your toes in the hot spring if you like." },
+      { "speaker": "Tundra", "text": "Three Star Shards open the Summit Gate: one up the Ice Slide, one in the Crystal Caverns, one on the Frosted Pine Heights." },
+      { "speaker": "Tundra", "text": "Beyond the gate lives the Avalanche Ape. Make it belly-slide into the frozen pillars, then PLUNGE on its head!" }
+    ]}
+  ]
+}

@@ -17,6 +17,7 @@ const TREE_KINDS: Dictionary[StringName, Array] = {
 	&"autumn": [&"sunset_orange", &"thatch"],
 	&"violet": [&"mush_purple", &"crystal_violet"],
 	&"gold": [&"wood_warm", &"gold"],
+	&"frost": [&"water_light", &"mush_spot"],
 }
 ## Cap colours per mushroom kind: [rim, crown].
 const MUSHROOM_KINDS: Dictionary[StringName, Array] = {
@@ -872,3 +873,109 @@ static func turtle_on(platform: Node3D, size: Vector3) -> void:
 			flip.height = 0.3
 			var f := Kit.mesh_instance(platform, flip, Kit.mat(&"lime_pop", 0.02), Vector3(size.x * 0.5 * side, -size.y * 0.6, fz * size.z))
 			f.scale = Vector3(1.6, 1.0, 0.8)
+
+
+# --- Snow pieces (Build 5, Frostfang Peak) --------------------------------------------------------
+
+## A snow-block igloo you can stand on, door facing +Z.
+static func igloo(parent: Node, pos: Vector3, yaw: float, r: float = 4.0) -> Node3D:
+	var root := Node3D.new()
+	root.position = pos
+	root.rotation.y = yaw
+	parent.add_child(root)
+	var key := "igloo"
+	if not _meshes.has(key):
+		var st := _begin()
+		var prof: Array[Vector2] = []
+		var pc: Array[Color] = []
+		for i in 9:
+			var t := float(i) / 8.0
+			prof.append(Vector2(cos(t * PI * 0.5), sin(t * PI * 0.5)))
+			pc.append(vcol(&"bubble" if i % 2 == 0 else &"mush_spot"))
+		prof[8] = Vector2(0.0, 1.0)
+		_lathe(st, Transform3D.IDENTITY, prof, pc, 24)
+		_meshes[key] = st.commit()
+	var mi := _place(root, _meshes[key], Vector3.ZERO, 0.0, r)
+	mi.scale = Vector3.ONE * r
+	var body := Kit.static_body(root, Vector3.ZERO)
+	var sph := SphereShape3D.new()
+	sph.radius = r
+	Kit.add_shape(body, sph)
+	var door := CylinderMesh.new()
+	door.top_radius = r * 0.32
+	door.bottom_radius = r * 0.32
+	door.height = r * 0.5
+	var d := Kit.mesh_instance(root, door, Kit.mat(&"ink_navy"), Vector3(0.0, 0.0, r * 0.82))
+	d.rotation.x = PI * 0.5
+	var tunnel := CylinderMesh.new()
+	tunnel.top_radius = r * 0.42
+	tunnel.bottom_radius = r * 0.42
+	tunnel.height = r * 0.6
+	var t := Kit.mesh_instance(root, tunnel, Kit.mat(&"mush_spot", 0.02), Vector3(0.0, r * 0.05, r * 0.95))
+	t.rotation.x = PI * 0.5
+	return root
+
+
+## A cheery snowman (decoration with a small collider).
+static func snowman(parent: Node, pos: Vector3, s: float = 1.0, scarf: StringName = &"roof_red") -> Node3D:
+	var root := Node3D.new()
+	root.position = pos
+	root.scale = Vector3.ONE * s
+	parent.add_child(root)
+	var key := "snowman|%s" % scarf
+	if not _meshes.has(key):
+		var st := _begin()
+		var snow := vcol(&"mush_spot")
+		var shade := vcol(&"bubble")
+		_sphere(st, Transform3D(Basis(), Vector3(0.0, 0.8, 0.0)), 0.9, shade, snow, 0.9)
+		_sphere(st, Transform3D(Basis(), Vector3(0.0, 2.0, 0.0)), 0.65, shade, snow, 0.95)
+		_sphere(st, Transform3D(Basis(), Vector3(0.0, 2.95, 0.0)), 0.48, shade, snow)
+		var nose: Array[Vector2] = [Vector2(0.09, 0.0), Vector2(0.0, 0.45)]
+		var nc: Array[Color] = [vcol(&"sunset_orange"), vcol(&"sunset_orange")]
+		_lathe(st, Transform3D(Basis(Vector3.RIGHT, -PI * 0.5), Vector3(0.0, 2.95, -0.42)), nose, nc, 6)
+		for side: float in [-1.0, 1.0]:
+			_sphere(st, Transform3D(Basis(), Vector3(0.17 * side, 3.08, -0.4)), 0.06, vcol(&"ink_navy"), vcol(&"ink_navy"), 1.0, 4, 6)
+		var scarf_p: Array[Vector2] = [Vector2(0.62, 0.0), Vector2(0.66, 0.12), Vector2(0.62, 0.24)]
+		var sc: Array[Color] = [vcol(scarf), vcol(scarf), vcol(scarf)]
+		_lathe(st, Transform3D(Basis(), Vector3(0.0, 2.48, 0.0)), scarf_p, sc, 12)
+		var hat: Array[Vector2] = [Vector2(0.55, 0.0), Vector2(0.55, 0.06), Vector2(0.34, 0.08), Vector2(0.34, 0.5), Vector2(0.0, 0.52)]
+		var hc: Array[Color] = [vcol(&"ink_navy"), vcol(&"ink_navy"), vcol(&"ink_navy"), vcol(&"ink_navy"), vcol(&"ink_navy")]
+		_lathe(st, Transform3D(Basis(), Vector3(0.0, 3.35, 0.0)), hat, hc, 12)
+		_meshes[key] = st.commit()
+	_place(root, _meshes[key], Vector3.ZERO, fposmod(pos.x, TAU), 1.0)
+	var body := Kit.static_body(root, Vector3(0.0, 1.0, 0.0), Layers.WORLD)
+	var c := CylinderShape3D.new()
+	c.radius = 0.8
+	c.height = 2.0
+	Kit.add_shape(body, c)
+	return root
+
+
+## Northern lights: soft glowing curtains high in the sky.
+static func aurora(parent: Node, center: Vector3, radius: float) -> void:
+	var colors: Array[StringName] = [&"portal_teal", &"lime_pop", &"candy_pink", &"crystal_violet"]
+	for band in 4:
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var c := Palette.color(colors[band])
+		var n := 48
+		var prev_lo := Vector3.ZERO
+		var prev_hi := Vector3.ZERO
+		for i in n + 1:
+			var t := float(i) / n
+			var a := lerpf(-1.1, 1.1, t) + band * 0.5
+			var wob := sin(t * 9.0 + band) * 0.06
+			var r := radius * (1.0 + wob)
+			var base := center + Vector3(cos(a) * r, band * 6.0, sin(a) * r)
+			var lo := base
+			var hi := base + Vector3(0.0, 22.0 + 6.0 * sin(t * 6.0 + band), 0.0)
+			if i > 0:
+				var fade_lo := Color(c, 0.0)
+				var fade_hi := Color(c * 1.6, 0.4 * sin(t * PI))
+				for v: Array in [[prev_lo, fade_lo], [prev_hi, fade_hi], [hi, fade_hi], [prev_lo, fade_lo], [hi, fade_hi], [lo, fade_lo]]:
+					st.set_color(v[1] as Color)
+					st.add_vertex(v[0] as Vector3)
+			prev_lo = lo
+			prev_hi = hi
+		var mi := Kit.mesh_instance(parent, st.commit(), Fx.fx_mat(Color(1.0, 1.0, 1.0, 1.0)))
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

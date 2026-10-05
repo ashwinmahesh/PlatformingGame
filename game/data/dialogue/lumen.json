@@ -1,0 +1,10 @@
+{
+  "id": "lumen",
+  "name": "Lumen",
+  "conversations": [
+    { "when": "", "lines": [
+      { "speaker": "Lumen", "text": "Ice walls melt in a blink if you throw fire at them. Very satisfying. Very drippy." },
+      { "speaker": "Lumen", "text": "And some crystals in the caverns only answer to thunder. They're dramatic like that." }
+    ]}
+  ]
+}

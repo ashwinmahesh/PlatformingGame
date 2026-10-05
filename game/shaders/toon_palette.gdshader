@@ -44,7 +44,12 @@ void fragment() {
 			float n = vnoise(world_pos.xz * 0.045) * 0.6 + vnoise(world_pos.xz * 0.17 + 7.3) * 0.4;
 			float patch = smoothstep(0.38, 0.62, n);
 			// Sunny yellow-green patches and deeper cool patches, like a painted lawn.
-			top *= mix(vec3(0.74, 0.86, 0.84), vec3(1.1, 1.08, 0.82), patch);
+			// Pale tops (snow, sand) get cool blue-white patches instead of lawn tints.
+			float sat = max(top.r, max(top.g, top.b)) - min(top.r, min(top.g, top.b));
+			float pale = smoothstep(0.2, 0.06, sat);
+			vec3 dark = mix(vec3(0.74, 0.86, 0.84), vec3(0.84, 0.9, 1.0), pale);
+			vec3 light = mix(vec3(1.1, 1.08, 0.82), vec3(1.03, 1.03, 1.0), pale);
+			top *= mix(dark, light, patch);
 		}
 		if (variation > 0.0) {
 			// Wavy rock layers on cliff sides.

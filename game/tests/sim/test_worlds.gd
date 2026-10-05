@@ -72,6 +72,16 @@ func test_boss_worlds_play_to_victory() -> void:
 			p.invuln_left = 9999.0
 			if p.global_position.distance_to(bw.arena_center) > bw.arena_radius:
 				p.respawn_at(bw.arena_center + Vector3(0.0, 0.05, -6.0))
+			# The Ape only opens up after sliding into a pillar: stand behind one, as a player would.
+			var ape := boss as AvalancheApe
+			if ape != null and ape.state == AvalancheApe.S.SLIDE_WINDUP and ape.state_ticks == 2:
+				var best := ape.pillars[0]
+				for pil in ape.pillars:
+					if pil.distance_to(ape.global_position) < best.distance_to(ape.global_position):
+						best = pil
+				var away := best - ape.global_position
+				away.y = 0.0
+				p.respawn_at(best + away.normalized() * 3.0 + Vector3.UP * 0.05)
 			if boss.weak_open and boss.weak_invuln <= 0:
 				hits += boss.apply_weak_hit()
 			if boss.hp <= 0:
@@ -81,8 +91,9 @@ func test_boss_worlds_play_to_victory() -> void:
 		check_eq(boss.watchdog_trips, 0, "%s: no watchdog trips" % w.id)
 		await ticks(2)
 		check(Progress.is_world_complete(w.id), "%s: victory committed" % w.id)
-		check(w.ability in learned, "%s: clearing it teaches %s" % [w.id, w.ability])
-		check(p.has_ability(w.ability), "%s: the hero can now use %s" % [w.id, w.ability])
+		if w.ability != &"":
+			check(w.ability in learned, "%s: clearing it teaches %s" % [w.id, w.ability])
+			check(p.has_ability(w.ability), "%s: the hero can now use %s" % [w.id, w.ability])
 		Events.ability_learned.disconnect(on_learn)
 		lvl.queue_free()
 		await ticks(3)

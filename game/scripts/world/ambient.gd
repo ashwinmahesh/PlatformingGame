@@ -168,6 +168,30 @@ static func sparkles(parent: Node, center: Vector3, size: Vector3, count: int = 
 	parent.add_child(p)
 
 
+## Gentle snowfall (Frostfang Peak).
+static func snow(parent: Node, center: Vector3, size: Vector3, count: int = 160) -> void:
+	var p := CPUParticles3D.new()
+	p.amount = count
+	p.lifetime = 9.0
+	p.preprocess = 9.0
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = size * 0.5
+	p.direction = Vector3.DOWN
+	p.spread = 25.0
+	p.gravity = Vector3(0.3, -0.4, 0.1)
+	p.initial_velocity_min = 0.6
+	p.initial_velocity_max = 1.4
+	var dot := SphereMesh.new()
+	dot.radius = 0.07
+	dot.height = 0.14
+	p.mesh = dot
+	p.scale_amount_min = 0.6
+	p.scale_amount_max = 1.5
+	p.material_override = Fx.fx_mat(Color(1.0, 1.0, 1.0, 0.85))
+	p.position = center
+	parent.add_child(p)
+
+
 ## Rising streams of bubbles (Bubbleton Reef).
 static func bubbles(parent: Node, center: Vector3, size: Vector3, count: int = 40) -> void:
 	var p := CPUParticles3D.new()
