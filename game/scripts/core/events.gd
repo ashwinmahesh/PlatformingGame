@@ -4,4 +4,5 @@ extends Node
 signal boss_defeated(world_id: StringName)
 signal checkpoint_reached(checkpoint_id: StringName)
 signal seed_collected(seed_id: StringName)
+signal shard_collected(shard_id: StringName)
 signal notice(text: String)

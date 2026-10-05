@@ -79,6 +79,7 @@ func _ready() -> void:
 	_build_pause(root)
 	Events.notice.connect(show_notice)
 	Events.seed_collected.connect(func(_id: StringName) -> void: _refresh_seeds())
+	Events.shard_collected.connect(func(_id: StringName) -> void: _refresh_seeds())
 	_refresh_seeds()
 
 
@@ -136,8 +137,14 @@ func bind_player(p: Player) -> void:
 
 
 func _refresh_seeds() -> void:
-	var total := Progress.all_seed_ids().size()
-	_seeds.text = "Glimmer Seeds  %d / %d" % [Progress.seed_count(), total]
+	var w := Progress.world_def(world_id)
+	if w == null:
+		_seeds.text = "Glimmer Seeds  %d / %d" % [Progress.seed_count(), Progress.all_seed_ids().size()]
+		return
+	var text := "Glimmer Seeds  %d / %d" % [Progress.world_seed_count(world_id), w.seed_ids.size()]
+	if not w.shard_ids.is_empty():
+		text += "\nStar Shards  %d / %d" % [Progress.world_shard_count(world_id), w.shards_required]
+	_seeds.text = text
 
 
 func show_notice(text: String) -> void:

@@ -22,7 +22,7 @@ const INTERACT_RANGE := 2.2
 const HERO_PATH := "res://assets/models/kaykit_adventurers/Rogue.glb"
 const SWORD_PATH := "res://assets/models/kaykit_adventurers/sword_1handed.gltf"
 const HERO_SCALE := 0.62
-const SWORD_LENGTH_SCALE := 1.45
+const SWORD_LENGTH_SCALE := 1.75
 const ATTACK_CLIPS: Dictionary[StringName, StringName] = {
 	&"slash_1": &"1H_Melee_Attack_Slice_Diagonal",
 	&"slash_2": &"1H_Melee_Attack_Slice_Horizontal",
@@ -72,6 +72,9 @@ var water_surface: float = NAN
 var _drown_left: float = 0.0
 var _bubble_left: float = 0.0
 var _swim_grace: float = 0.0
+## Set each tick by an Updraft the hero is inside (Build 4 wind columns).
+var external_lift: float = 0.0
+var on_ice: bool = false
 
 # Combat (plan §4.1)
 var attack: AttackDef
@@ -256,6 +259,21 @@ func take_damage(halves: int, source_pos: Vector3, heavy: bool = false, cause: S
 	return true
 
 
+## Bounced off a shield: a short push back with no damage.
+func recoil(from: Vector3) -> void:
+	if state in [State.DEAD, State.FROZEN, State.SWIM]:
+		return
+	attack = null
+	state = State.HURT
+	hurt_left = 10
+	var away := global_position - from
+	away.y = 0.0
+	away = away.normalized() if away.length() > 0.01 else -facing
+	_knock_left = 8
+	_knock_velocity = away * 6.0
+	_knock_guarded = is_grounded()
+
+
 func heal(halves: int) -> void:
 	hp = mini(hp + halves, max_hp)
 	hp_changed.emit(hp, max_hp)
@@ -430,6 +448,11 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 		_step_move()
 	else:
 		move_and_slide()
+	on_ice = false
+	for i in get_slide_collision_count():
+		var c := get_slide_collision(i)
+		if c.get_normal().y > 0.7 and c.get_collider() is Node and (c.get_collider() as Node).has_meta(&"slippery"):
+			on_ice = true
 	# 7. Ceiling bonk: the jump stays spent and the buffer clears.
 	if is_on_ceiling() and velocity.y > 0.0:
 		velocity.y = 0.0
@@ -729,6 +752,13 @@ func _apply_gravity(delta: float, jump_held: bool) -> void:
 			# Straight down, accelerating hard (Build 2 feedback).
 			velocity = Vector3(0.0, maxf(velocity.y - settings.plunge_accel * delta, -settings.plunge_speed), 0.0)
 		return
+	if external_lift > 0.0 and not is_grounded():
+		# Wind column: rise toward the lift speed; still counts as being launched.
+		velocity.y = move_toward(velocity.y, external_lift, 70.0 * delta)
+		air_slash_ready = true
+		external_lift = 0.0
+		return
+	external_lift = 0.0
 	if is_grounded() and velocity.y <= 0.0:
 		velocity.y = -0.5
 		return
@@ -776,6 +806,10 @@ func _apply_horizontal(delta: float, move: Vector2, grounded: bool) -> void:
 		top *= settings.attack_move_scale
 	var accel := settings.run_speed / settings.accel_time
 	var decel := settings.run_speed / settings.decel_time
+	if grounded and on_ice:
+		# Ice: slow to start, slow to stop (Frostfang Peak).
+		accel *= 0.18
+		decel *= 0.08
 	if not grounded:
 		accel *= settings.air_control
 		decel *= settings.air_control
@@ -1020,7 +1054,7 @@ func _build_visual() -> void:
 	_sword_trail = SwordTrail.new()
 	_sword_trail.blade = sword
 	_sword_trail.base_local = Vector3(0.0, 0.25, 0.0)
-	_sword_trail.tip_local = Vector3(0.0, 1.38, 0.0)
+	_sword_trail.tip_local = Vector3(0.0, 1.4, 0.0)
 	_sword_trail.color = Color(Palette.color(&"foam"), 0.85)
 	add_child(_sword_trail)
 	# Lock-on marker (top level).

@@ -23,7 +23,7 @@ func test_world_loop_victory_and_resume() -> void:
 	var boss := lvl.get("boss") as MotherGloop
 	check(boss != null, "Mother Gloop is waiting")
 	# Walk through the gate into the arena.
-	p.respawn_at(Vector3(0.0, Glimmerbrook.RIDGE_Y + 0.05, Glimmerbrook.FIGHT_TRIGGER_Z - 3.0))
+	p.respawn_at(Glimmerbrook.ARENA_CENTER + Vector3(0.0, 0.05, -6.0))
 	p.invuln_left = 9999.0
 	await ticks(3)
 	check(bool(lvl.get("fight_started")), "entering the arena starts the fight")

@@ -77,6 +77,7 @@ func fresh_data() -> Dictionary:
 		"schema_version": SCHEMA_VERSION,
 		"completed_worlds": [],
 		"seeds": [],
+		"shards": [],
 		"flags": [],
 		"best_times": {},
 		"world_progress": {},
@@ -121,6 +122,49 @@ func collect_seed(seed_id: StringName) -> void:
 	(data["seeds"] as Array).append(String(seed_id))
 	Events.seed_collected.emit(seed_id)
 	save()
+
+
+func all_shard_ids() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for w in WORLD_DEFS:
+		out.append_array(w.shard_ids)
+	return out
+
+
+func has_shard(shard_id: StringName) -> bool:
+	return String(shard_id) in (data.get("shards", []) as Array)
+
+
+func collect_shard(shard_id: StringName) -> void:
+	if has_shard(shard_id):
+		return
+	if not data.has("shards"):
+		data["shards"] = []
+	(data["shards"] as Array).append(String(shard_id))
+	Events.shard_collected.emit(shard_id)
+	save()
+
+
+func world_shard_count(world_id: StringName) -> int:
+	var w := world_def(world_id)
+	if w == null:
+		return 0
+	var n := 0
+	for s in w.shard_ids:
+		if has_shard(s):
+			n += 1
+	return n
+
+
+func world_seed_count(world_id: StringName) -> int:
+	var w := world_def(world_id)
+	if w == null:
+		return 0
+	var n := 0
+	for s in w.seed_ids:
+		if has_seed(s):
+			n += 1
+	return n
 
 
 func has_flag(flag: StringName) -> bool:
@@ -287,6 +331,10 @@ func sanitize(d: Dictionary) -> Dictionary:
 		known_flags.append(String(fl))
 	out["completed_worlds"] = _filter_known(d.get("completed_worlds", []), known_worlds, "world")
 	out["seeds"] = _filter_known(d.get("seeds", []), known_seeds, "seed")
+	var known_shards: Array[String] = []
+	for s in all_shard_ids():
+		known_shards.append(String(s))
+	out["shards"] = _filter_known(d.get("shards", []), known_shards, "shard")
 	out["flags"] = _filter_known(d.get("flags", []), known_flags, "flag")
 	if d.get("best_times") is Dictionary:
 		out["best_times"] = d["best_times"]
@@ -318,7 +366,9 @@ func _filter_known(values: Variant, known: Array[String], kind: String) -> Array
 func validate(d: Dictionary) -> bool:
 	if int(d.get("schema_version", -1)) != SCHEMA_VERSION:
 		return false
-	for key: String in ["completed_worlds", "seeds", "flags"]:
+	if not d.has("shards"):
+		d["shards"] = []
+	for key: String in ["completed_worlds", "seeds", "shards", "flags"]:
 		var arr: Variant = d.get(key)
 		if not arr is Array:
 			return false

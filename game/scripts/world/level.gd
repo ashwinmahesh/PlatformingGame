@@ -15,9 +15,23 @@ var hud: Hud
 var resolver: CombatResolver
 var sun: DirectionalLight3D
 var spawns: Dictionary[StringName, Array] = {}
+var environment: Environment
+## Per-world look (Build 4): sky, sun and haze. Subclasses set these in configure().
+var sky_top: Color = Color(0.486, 0.784, 0.949)
+var sky_horizon: Color = Color(0.98, 0.9, 0.79)
+var sky_bottom: Color = Color(0.93, 0.85, 0.74)
+var sun_color: Color = Color("#FFE2B5")
+var sun_energy: float = 0.95
+var sun_angles: Vector2 = Vector2(-48.0, -35.0)
+var ambient_color: Color = Palette.FOG
+var ambient_energy: float = 0.36
+var fog_color: Color = Palette.FOG
+var fog_begin: float = 70.0
+var fog_end: float = 220.0
 
 
 func _ready() -> void:
+	configure()
 	_build_environment()
 	build()
 	resolver = CombatResolver.new()
@@ -41,6 +55,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.bind_player(player)
 	hud.world_id = scene_id
+	hud._refresh_seeds()
 	player.died.connect(_on_player_died)
 	if DevTools.enabled:
 		add_child(HitboxDebug.new())
@@ -53,6 +68,11 @@ func _ready() -> void:
 		AudioDirector.play_music(music)
 	Telemetry.log_event("scene_enter", {"scene": String(scene_id), "spawn": String(spawn_id)})
 	after_spawn(spawn_id)
+
+
+## Override: set the world's look (sky, sun, haze) before anything is built.
+func configure() -> void:
+	pass
 
 
 ## Override: build geometry, spawns, NPCs, enemies.
@@ -89,30 +109,34 @@ func _build_environment() -> void:
 	var sky := Sky.new()
 	var sky_mat := ShaderMaterial.new()
 	sky_mat.shader = SKY_SHADER
+	sky_mat.set_shader_parameter(&"top_col", sky_top)
+	sky_mat.set_shader_parameter(&"horizon_col", sky_horizon)
+	sky_mat.set_shader_parameter(&"bottom_col", sky_bottom)
 	sky.sky_material = sky_mat
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Palette.FOG
-	env.ambient_light_energy = 0.36
+	env.ambient_light_color = ambient_color
+	env.ambient_light_energy = ambient_energy
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
 	env.fog_enabled = true
 	env.fog_mode = Environment.FOG_MODE_DEPTH
-	env.fog_light_color = Palette.FOG
-	env.fog_depth_begin = 70.0
-	env.fog_depth_end = 220.0
+	env.fog_light_color = fog_color
+	env.fog_depth_begin = fog_begin
+	env.fog_depth_end = fog_end
 	env.fog_density = 0.4
 	env.fog_sky_affect = 0.0
 	env.glow_enabled = true
 	env.glow_intensity = 0.5
 	env.glow_hdr_threshold = 1.1
+	environment = env
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
 	sun = DirectionalLight3D.new()
-	sun.light_color = Color("#FFE2B5")
-	sun.light_energy = 0.95
-	sun.rotation = Vector3(deg_to_rad(-48.0), deg_to_rad(-35.0), 0.0)
+	sun.light_color = sun_color
+	sun.light_energy = sun_energy
+	sun.rotation = Vector3(deg_to_rad(sun_angles.x), deg_to_rad(sun_angles.y), 0.0)
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	sun.directional_shadow_max_distance = 60.0

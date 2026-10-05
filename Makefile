@@ -53,3 +53,6 @@ export-mac:
 clip:
 	rm -rf captures/clips/$(NAME) && mkdir -p captures/clips/$(NAME)
 	$(G) --resolution 1280x720 --write-movie $(CURDIR)/captures/clips/$(NAME)/frame.png --fixed-fps 30 res://tools/clip/clip_runner.tscn -- --scenario=$(NAME)
+
+check-scripts: import
+	$(G) --headless res://tools/check_scripts.tscn 2>&1 | $(LOGCHK)

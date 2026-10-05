@@ -59,7 +59,11 @@ func _player_attacks() -> void:
 			if actor == null or not actor.has_method(&"receive_player_attack"):
 				continue
 			var res: Dictionary = actor.call(&"receive_player_attack", atk, area)
-			if bool(res.get("hit", false)):
+			if bool(res.get("blocked", false)):
+				# Shields push you back instead of taking the hit (Armorling).
+				hit_this_tick[actor.get_instance_id()] = true
+				player.recoil((actor as Node3D).global_position)
+			elif bool(res.get("hit", false)):
 				hit_this_tick[actor.get_instance_id()] = true
 				_impact(actor, area, int(atk["hitstop"]))
 	elif player.is_plunge_active():

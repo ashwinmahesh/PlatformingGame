@@ -3,13 +3,20 @@ extends Node3D
 ## A permanent bounce mushroom (plan §5.3). Landing gives a small bounce; a Plunge launches high.
 ## Only permanent bounce surfaces like this one may be on the required path.
 
+enum Look { MUSHROOM, CLOUD, GLOWCAP }
+
+var look: Look = Look.MUSHROOM
+## 0 = use the hero's MovementSettings values.
+var land_height: float = 0.0
+var plunge_height: float = 0.0
 var _cap: Node3D
 var _squash: float = 0.0
 
 
 func _ready() -> void:
-	var stem := Kit.pillar(self, Vector3(0.0, 0.7, 0.0), 0.35, 0.7, &"cloth_cream")
-	stem.collision_layer = Layers.WORLD
+	if look != Look.CLOUD:
+		var stem := Kit.pillar(self, Vector3(0.0, 0.7, 0.0), 0.35, 0.7, &"cloth_cream")
+		stem.collision_layer = Layers.WORLD
 	_cap = Node3D.new()
 	_cap.position.y = 0.7
 	add_child(_cap)
@@ -24,19 +31,14 @@ func _ready() -> void:
 	dome.radius = 1.15
 	dome.height = 1.0
 	dome.is_hemisphere = true
-	Kit.mesh_instance(_cap, dome, Kit.mat(&"roof_red", 0.03), Vector3(0.0, 0.0, 0.0))
-	for i in 6:
-		var spot := SphereMesh.new()
-		spot.radius = 0.16
-		spot.height = 0.12
-		var a := i * TAU / 6.0
-		var dome_y := 0.5 * sqrt(1.0 - pow(0.7 / 1.15, 2.0))
-		var sm := Kit.mesh_instance(_cap, spot, Kit.mat(&"cloth_cream"), Vector3(cos(a) * 0.7, dome_y, sin(a) * 0.7))
-		sm.rotation = Vector3(sin(a) * 0.6, 0.0, -cos(a) * 0.6)
-	var top_spot := SphereMesh.new()
-	top_spot.radius = 0.22
-	top_spot.height = 0.12
-	Kit.mesh_instance(_cap, top_spot, Kit.mat(&"cloth_cream"), Vector3(0.0, 0.53, 0.0))
+	if look == Look.CLOUD:
+		# Bouncy cloud (Cloudtop Steps): fluffy blobs instead of a cap.
+		for i in 6:
+			var a := float(i) / 6.0 * TAU
+			Kit.blob(_cap, Vector3(cos(a) * 0.8, 0.2, sin(a) * 0.8), 0.7, &"foam")
+		Kit.blob(_cap, Vector3(0.0, 0.45, 0.0), 0.9, &"cloth_cream")
+	else:
+		_build_cap(dome)
 	var area := Area3D.new()
 	area.collision_layer = Layers.BOUNCE
 	area.collision_mask = 0
@@ -49,17 +51,42 @@ func _ready() -> void:
 	_cap.add_child(area)
 
 
+func _build_cap(dome: SphereMesh) -> void:
+	Kit.mesh_instance(_cap, dome, Kit.mat(&"roof_red" if look == Look.MUSHROOM else &"portal_teal", 0.03), Vector3(0.0, 0.0, 0.0))
+	if look == Look.GLOWCAP:
+		var glow := OmniLight3D.new()
+		glow.light_color = Palette.color(&"portal_teal")
+		glow.light_energy = 1.2
+		glow.omni_range = 6.0
+		glow.position.y = 0.6
+		_cap.add_child(glow)
+	for i in 6:
+		var spot := SphereMesh.new()
+		spot.radius = 0.16
+		spot.height = 0.12
+		var a := i * TAU / 6.0
+		var dome_y := 0.5 * sqrt(1.0 - pow(0.7 / 1.15, 2.0))
+		var sm := Kit.mesh_instance(_cap, spot, Kit.mat(&"cloth_cream"), Vector3(cos(a) * 0.7, dome_y, sin(a) * 0.7))
+		sm.rotation = Vector3(sin(a) * 0.6, 0.0, -cos(a) * 0.6)
+	var top_spot := SphereMesh.new()
+	top_spot.radius = 0.22
+	top_spot.height = 0.12
+	Kit.mesh_instance(_cap, top_spot, Kit.mat(&"cloth_cream"), Vector3(0.0, 0.53, 0.0))
+
+
 func receive_player_attack(atk: Dictionary, _area: Area3D) -> Dictionary:
 	if StringName(str(atk.get("kind", ""))) != &"plunge":
 		return {}
 	_boing()
 	var p := get_tree().get_first_node_in_group(&"player") as Player
+	if plunge_height > 0.0:
+		return {"bounce": plunge_height}
 	return {"bounce": p.settings.springcap_plunge_height if p != null else 8.5}
 
 
 func on_player_land(p: Player) -> float:
 	_boing()
-	return p.settings.springcap_height
+	return land_height if land_height > 0.0 else p.settings.springcap_height
 
 
 func _boing() -> void:

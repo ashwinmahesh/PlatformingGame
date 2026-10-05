@@ -10,3 +10,9 @@ extends Resource
 @export var spawn_ids: Array[StringName] = []
 @export var seed_ids: Array[StringName] = []
 @export var first_clear_heart_containers: int = 1
+## Build 4 open worlds: Star Shards found around the world open the goal.
+@export var shard_ids: Array[StringName] = []
+@export var shards_required: int = 3
+## &"boss" or &"star": what the shards unlock.
+@export var goal: StringName = &"boss"
+@export var color: StringName = &"leaf_teal"
