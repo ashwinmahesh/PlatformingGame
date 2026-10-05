@@ -57,6 +57,8 @@ func _ready() -> void:
 	Kit.clear_cache()
 	Toon.clear_cache()
 	Props.clear_cache()
+	Whimsy.clear_cache()
+	Ambient.clear_cache()
 	AudioDirector.shutdown()
 	for i in 6:
 		OS.delay_msec(30)

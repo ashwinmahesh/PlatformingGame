@@ -120,6 +120,18 @@ const KEEP_FACETS: Array[StringName] = [&"column_broken", &"statue_block", &"ten
 
 static var _scenes: Dictionary[StringName, PackedScene] = {}
 
+## Build 5 ("vibrant, whimsical, like Dragon Quest"): every Kenney tree is drawn as a Whimsy
+## puffball tree or storybook pine instead. 0 = puffball, 1 = pine.
+const WHIMSY_TREES: Dictionary[StringName, int] = {
+	&"tree_default": 0, &"tree_oak": 0, &"tree_detailed": 0, &"tree_fat": 0, &"tree_tall": 0,
+	&"tree_simple": 0, &"tree_blocks": 0, &"tree_plateau": 0,
+	&"tree_pine": 1, &"tree_cone": 1, &"pine_tall": 1, &"pine_default": 1, &"pine_small": 1,
+}
+## Tree colours a level wants (set in its build()); picked per tree by position.
+static var tree_kinds: Array[StringName] = [&"green", &"lime", &"green", &"teal", &"blossom", &"green", &"autumn"]
+## Leaf overrides map to tree kinds.
+const LEAF_KINDS: Dictionary[StringName, StringName] = {&"leaf_dark": &"green", &"leaf_teal": &"teal", &"grass_light": &"lime", &"wood_warm": &"autumn", &"gloop_pink": &"blossom"}
+
 
 static func clear_cache() -> void:
 	_scenes.clear()
@@ -132,6 +144,11 @@ static func exists(id: StringName) -> bool:
 ## Spawn a prop with its base at `pos`. scale_mul multiplies the table scale.
 static func spawn(parent: Node, id: StringName, pos: Vector3, yaw: float = 0.0, scale_mul: float = 1.0, collide: bool = true, leaf: StringName = &"") -> Node3D:
 	assert(TABLE.has(id), "Unknown prop %s" % id)
+	if WHIMSY_TREES.has(id):
+		var kind: StringName = LEAF_KINDS.get(leaf, tree_kinds[absi(hash(Vector2i(int(pos.x), int(pos.z)))) % tree_kinds.size()])
+		if WHIMSY_TREES[id] == 1:
+			return Whimsy.pine(parent, pos, kind, scale_mul * 0.9, collide)
+		return Whimsy.tree(parent, pos, kind, scale_mul * 0.85, -1, yaw, collide)
 	var spec: Array = TABLE[id]
 	if not _scenes.has(id):
 		_scenes[id] = load(str(spec[0])) as PackedScene

@@ -17,14 +17,17 @@ var _spire_steps: Array[GhostPlatform] = []
 
 func configure() -> void:
 	world_id = WORLD
-	sky_top = Color(0.42, 0.72, 0.98)
-	sky_horizon = Color(0.95, 0.9, 0.98)
-	sky_bottom = Color(0.98, 0.96, 1.0)
-	sun_energy = 1.05
-	fog_color = Color(0.96, 0.93, 0.98)
-	fog_begin = 90.0
-	fog_end = 300.0
-	ambient_energy = 0.42
+	# Build 5: a candy-bright sky world, deep blue above, pink-lilac at the horizon.
+	sky_top = Color(0.18, 0.48, 0.98)
+	sky_horizon = Color(0.98, 0.82, 0.95)
+	sky_bottom = Color(1.0, 0.9, 0.98)
+	cloud_cover = 0.5
+	cloud_shade = Color(0.86, 0.78, 0.98)
+	sun_energy = 1.12
+	fog_color = Color(0.96, 0.88, 0.98)
+	fog_begin = 100.0
+	fog_end = 340.0
+	tree_kinds = [&"blossom", &"teal", &"blossom", &"lime", &"violet", &"blossom", &"gold"]
 
 
 func build() -> void:
@@ -59,6 +62,17 @@ func island(top_local: Vector3, radius: float, grass: int = -1) -> void:
 	Kit.mesh_instance(self, under, Kit.mat(&"stone_dark", 0.04), top + Vector3(0.0, -2.5 - radius * 0.7, 0.0))
 	if grass != 0:
 		_add_grass_disc(top, radius * 0.9, grass if grass > 0 else int(radius * radius * 0.5))
+
+
+## A small decorative floating island (world position).
+func island_at(top: Vector3, radius: float) -> void:
+	Kit.pillar(self, top, radius, 2.0, &"bark_mid", &"grass_mid")
+	var under := CylinderMesh.new()
+	under.top_radius = radius * 0.95
+	under.bottom_radius = radius * 0.15
+	under.height = radius * 1.4
+	under.radial_segments = 16
+	Kit.mesh_instance(self, under, Kit.mat(&"stone_dark", 0.04), top + Vector3(0.0, -2.0 - radius * 0.7, 0.0))
 
 
 ## A solid cloud you can stand on.
@@ -100,6 +114,16 @@ func _cloud_sea() -> void:
 		Kit.mesh_instance(self, under, Kit.mat(&"stone_dark"), top + Vector3(0.0, -3.0 - rad * 0.8, 0.0))
 		Props.spawn(self, &"tree_oak", top, a, 2.5, false)
 	birds(Vector3.ZERO, 70.0, 30.0, 8)
+	# Build 5: floating mushroom islets, rainbows and stardust between the islands.
+	var caps: Array[StringName] = [&"pink", &"teal", &"purple", &"gold", &"blue"]
+	for i in 12:
+		var a := float(i) / 12.0 * TAU + 0.13
+		var c := Vector3(cos(a) * _rng.randf_range(110.0, 160.0), _rng.randf_range(-8.0, 26.0), sin(a) * _rng.randf_range(110.0, 160.0))
+		island_at(c, _rng.randf_range(5.0, 8.0))
+		Whimsy.mushroom(self, c, _rng.randf_range(6.0, 12.0), _rng.randf_range(4.0, 7.0), caps[i % caps.size()])
+	Whimsy.rainbow(self, Vector3(-60.0, -30.0, -120.0), 110.0, 0.5)
+	Whimsy.rainbow(self, Vector3(120.0, -30.0, 40.0), 80.0, -1.2)
+	Ambient.sparkles(self, Vector3(0.0, 10.0, 0.0), Vector3(240.0, 30.0, 240.0), 160)
 
 
 # --- Sky Plaza (centre) -------------------------------------------------------------------------
@@ -143,6 +167,10 @@ func _plaza() -> void:
 	scatter(Vector3.ZERO, Vector2(18.0, 18.0), 26, [&"bush", &"flower_yellow", &"flower_purple", &"mushroom_red_group"], 10.0)
 	animals(Bunny, Vector3.ZERO, 18.0, 5)
 	butterflies(Vector3.ZERO, 16.0, 10)
+	for spec: Array in [[-14.0, -14.0, &"candy_pink"], [15.0, 12.0, &"gold"], [-16.0, 14.0, &"slime_blue"]]:
+		Whimsy.flower(self, Vector3(spec[0] as float, 0.0, spec[1] as float), 3.0, 2.0, spec[2] as StringName)
+	for spec: Array in [[9.0, -16.0, &"crystal_violet"], [-10.0, -2.0, &"portal_teal"]]:
+		Whimsy.crystal(self, Vector3(spec[0] as float, 0.0, spec[1] as float), spec[2] as StringName, 1.2)
 	add_capture_point("plaza", Vector3(26.0, 18.0, 34.0), Vector3(0.0, 8.0, -6.0))
 
 

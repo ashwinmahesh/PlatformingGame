@@ -4,7 +4,7 @@ extends OpenWorld
 ## Meadow in the middle, four regions open in any order:
 ##   North  Fernway Cliffs  - slimes, shelf mushrooms, the Springcap Plunge up to the Cliff Garden
 ##   East   River & Falls   - stepping stones, slow rafts, sinking lily pads, swimming, a waterfall
-##   West   Bonk Grove      - coconut monkeys and a treetop route
+##   West   Mushroom Grove  - coconut monkeys and a route over giant mushroom caps
 ##   South  Sunny Glade     - the Lily Gate to Gloop Lake (Mother Gloop)
 ## A Star Shard waits at the top of the Cliff Garden, the waterfall and the treetops; all three
 ## open the Lily Gate. 10 Glimmer Seeds, 4 of them hidden. Platforms are big and low (Ashwin).
@@ -31,6 +31,7 @@ var _victory_running: bool = false
 
 func configure() -> void:
 	world_id = WORLD
+	tree_kinds = [&"green", &"lime", &"green", &"blossom", &"green", &"teal", &"lime", &"autumn"]
 
 
 func build() -> void:
@@ -72,10 +73,22 @@ func _forest_floor() -> void:
 		if _near_land(p):
 			continue
 		Props.spawn(self, trees[i % trees.size()], p, _rng.randf() * TAU, _rng.randf_range(1.6, 2.6), false, &"leaf_dark" if i % 3 == 0 else &"")
-	for i in 50:
+	# Build 5: giant mushrooms rise out of the forest all around (Ashwin: "giant mushroom forests").
+	var caps: Array[StringName] = [&"red", &"purple", &"teal", &"orange", &"pink", &"red", &"blue"]
+	for i in 70:
+		var p := Vector3(_rng.randf_range(-200.0, 200.0), floor_y + 1.0, _rng.randf_range(-200.0, 200.0))
+		if _near_land(p):
+			continue
+		Whimsy.mushroom(self, p, _rng.randf_range(8.0, 22.0), _rng.randf_range(4.0, 9.0), caps[i % caps.size()])
+	# Rolling hills and big trees at the edge of the world.
+	for i in 36:
+		var a := float(i) / 36.0 * TAU + _rng.randf_range(-0.05, 0.05)
+		var r := _rng.randf_range(190.0, 230.0)
+		Whimsy.hill(self, Vector3(cos(a) * r, floor_y, sin(a) * r), _rng.randf_range(40.0, 60.0), _rng.randf_range(0.7, 1.1))
+	for i in 40:
 		var a := _rng.randf() * TAU
-		var r := _rng.randf_range(170.0, 240.0)
-		Props.spawn(self, &"forest_cluster" if i % 2 else &"forest_cluster_b", Vector3(cos(a) * r, floor_y + 1.0, sin(a) * r), _rng.randf() * TAU, _rng.randf_range(1.8, 2.6), false)
+		var r := _rng.randf_range(150.0, 190.0)
+		Whimsy.tree(self, Vector3(cos(a) * r, floor_y + 1.0, sin(a) * r), tree_kinds[i % tree_kinds.size()], _rng.randf_range(2.6, 3.6), -1, _rng.randf() * TAU, false)
 
 
 ## True near the walkable plateaus, so floor trees don't poke up through them.
@@ -103,7 +116,7 @@ func _meadow() -> void:
 	sign_post(Vector3(5.0, 0.0, 9.0), "Find 3 Star Shards to open\nthe Lily Gate to the south!")
 	sign_post(Vector3(-4.0, 0.0, -28.0), "North: Fernway Cliffs")
 	sign_post(Vector3(28.0, 0.0, -4.0), "East: River & Waterfall", -PI * 0.5)
-	sign_post(Vector3(-28.0, 0.0, 4.0), "West: Bonk Grove", PI * 0.5)
+	sign_post(Vector3(-28.0, 0.0, 4.0), "West: Mushroom Grove", PI * 0.5)
 	sign_post(Vector3(5.0, 0.0, 28.0), "South: Lily Gate", PI)
 	sign_post(Vector3(-5.0, 0.0, 18.0), "Space: jump (x3)  F: attack\nShift in the air: PLUNGE")
 	# The old stump the meadow is named for.
@@ -124,8 +137,15 @@ func _meadow() -> void:
 	gloplets(Vector3(14.0, 0.0, -14.0), 8.0, [Vector3.ZERO, Vector3(3.0, 0.0, -3.0)])
 	scatter(Vector3.ZERO, Vector2(26.0, 26.0), 40, [&"bush", &"bush_small", &"mushroom_red_group", &"mushroom_tan_group", &"rock_small", &"stump"], 9.0)
 	heart_bush(Vector3(-18.0, 0.0, -16.0))
+	# Giant flowers to bounce about on, and glowing crystals by the old stump.
+	Whimsy.flower(self, P(Vector3(16.0, 0.0, 10.0)), 2.5, 2.5, &"candy_pink")
+	Whimsy.flower(self, P(Vector3(20.0, 0.0, 16.0)), 4.5, 2.5, &"gold")
+	Whimsy.flower(self, P(Vector3(-16.0, 0.0, 14.0)), 3.0, 2.0, &"slime_blue")
+	Whimsy.crystal(self, P(Vector3(-6.0, 0.0, -10.0)), &"crystal_violet", 0.9)
+	Whimsy.crystal(self, P(Vector3(7.0, 0.0, -9.0)), &"portal_teal", 0.7)
 	animals(Bunny, Vector3.ZERO, 22.0, 8)
 	butterflies(Vector3(0.0, 0.0, 0.0), 20.0, 10)
+	sparkles(Vector3(0.0, 2.0, 0.0), Vector3(50.0, 4.0, 50.0), 60)
 	add_capture_point("meadow", Vector3(20.0, 14.0, 40.0), Vector3(0.0, 0.0, -10.0))
 
 
@@ -139,10 +159,10 @@ func _fernway() -> void:
 	gloplets(Vector3(-3.0, 0.0, -30.0), 9.0, [Vector3.ZERO, Vector3(-4.0, 0.0, -5.0), Vector3(4.0, 0.0, -6.0)])
 	ledge(Vector3(-12.0, 1.2, -30.0), Vector3(2.6, 1.2, 18.0), &"bark_light")
 	# Optional shelf mushrooms up to a seed.
-	Kit.pillar(self, P(Vector3(-10.0, 3.0, -12.0)), 2.6, 3.0, &"cloth_cream", &"roof_red")
-	Kit.pillar(self, P(Vector3(-11.0, 6.0, -19.0)), 2.6, 6.0, &"cloth_cream", &"roof_red")
-	Kit.pillar(self, P(Vector3(-9.0, 9.0, -26.0)), 2.6, 9.0, &"cloth_cream", &"roof_red")
-	seed_at(&"w1_seed_fernway", Vector3(-9.0, 9.0, -26.0))
+	mushroom_platform(Vector3(-10.0, 3.0, -12.0), 0.0, 3.0, &"orange")
+	mushroom_platform(Vector3(-11.0, 6.0, -19.0), 0.0, 3.0, &"pink")
+	var shelf_top := mushroom_platform(Vector3(-9.0, 9.0, -26.0), 0.0, 3.0, &"red")
+	Pickup.spawn_seed(self, shelf_top, &"w1_seed_fernway")
 	_fern_nook()
 	# The Springcap: Plunge onto it to reach the Cliff Garden.
 	bouncer(Vector3(0.0, 0.0, -45.0))
@@ -168,6 +188,9 @@ func _fernway() -> void:
 	heart_bush(Vector3(5.0, CLIFF, -80.0))
 	sign_post(Vector3(-4.0, CLIFF, -52.0), "Drop off the cliff to go back down.")
 	butterflies(Vector3(0.0, CLIFF, -66.0), 14.0, 6)
+	sparkles(Vector3(0.0, CLIFF + 2.0, -66.0), Vector3(36.0, 4.0, 28.0), 40)
+	Whimsy.flower(self, P(Vector3(12.0, CLIFF, -60.0)), 3.0, 2.0, &"candy_pink")
+	Whimsy.crystal(self, P(Vector3(-16.0, CLIFF, -74.0)), &"crystal_violet")
 	animals(Bunny, Vector3(0.0, CLIFF, -70.0), 12.0, 3)
 	add_capture_point("fernway", Vector3(16.0, 12.0, -10.0), Vector3(0.0, 4.0, -70.0))
 	add_capture_point("cliff_garden", Vector3(-20.0, CLIFF + 10.0, -84.0), Vector3(0.0, CLIFF, -100.0))
@@ -307,29 +330,30 @@ func _river_and_falls() -> void:
 	add_capture_point("falls", Vector3(110.0, 12.0, 14.0), Vector3(116.0, 6.0, -10.0))
 
 
-# --- West: Bonk Grove -------------------------------------------------------------------------
+# --- West: Mushroom Grove (Build 5: giant mushrooms instead of plain treetops) ------------------
 
 func _bonk_grove() -> void:
 	region(Vector3(-36.0, 0.0, 0.0), 90.0)
 	plat(Vector3(0.0, 0.0, -30.0), Vector2(52.0, 60.0))
 	checkpoint(&"w1_cp_grove", Vector3(0.0, 0.0, -6.0))
-	for spec: Array in [[-14.0, -12.0], [13.0, -18.0], [-10.0, -36.0], [15.0, -42.0], [0.0, -55.0]]:
-		prop(&"tree_oak", Vector3(spec[0] as float, 0.0, spec[1] as float), _rng.randf() * TAU, 2.4)
-	# Treetop route: wide platforms in easy steps.
-	stone(Vector3(-19.0, 2.5, -6.0), 2.4, 2.5, &"bark_light")
-	_canopy(Vector3(-13.0, 5.0, -14.0))
-	_canopy(Vector3(-5.0, 7.5, -21.0))
-	_canopy(Vector3(5.0, 8.0, -28.0))
-	_canopy(Vector3(12.0, 7.0, -36.0))
-	_canopy(Vector3(4.0, 10.5, -44.0))
-	_canopy(Vector3(-6.0, 8.0, -49.0))
-	_canopy(Vector3(-14.0, 6.0, -41.0))
-	shard_at(&"w1_shard_grove", Vector3(4.0, 10.5, -44.0))
-	seed_at(&"w1_seed_grove", Vector3(-14.0, 6.0, -41.0))
-	monkey([Vector3(-5.0, 7.5, -21.0), Vector3(12.0, 7.0, -36.0)])
-	monkey([Vector3(5.0, 8.0, -28.0), Vector3(-6.0, 8.0, -49.0)])
-	stone(Vector3(14.0, 5.0, -54.0), 2.2, 5.0, &"bark_mid")
-	monkey([Vector3(14.0, 5.0, -54.0), Vector3(-14.0, 6.0, -41.0)])
+	# Towering mushrooms over the grove (scenery you walk under).
+	for spec: Array in [[-14.0, -12.0, &"purple"], [13.0, -18.0, &"teal"], [-10.0, -36.0, &"red"], [15.0, -42.0, &"blue"], [0.0, -55.0, &"pink"]]:
+		giant_mushroom(Vector3(spec[0] as float, 0.0, spec[1] as float), _rng.randf_range(13.0, 16.0), _rng.randf_range(6.0, 7.5), spec[2] as StringName)
+	# Cap-top route: wide caps in easy steps.
+	mushroom_platform(Vector3(-19.0, 2.5, -6.0), 0.0, 2.5, &"orange")
+	mushroom_platform(Vector3(-13.0, 5.0, -14.0), 0.0, 3.5, &"red")
+	var c2 := mushroom_platform(Vector3(-5.0, 7.5, -21.0), 0.0, 3.5, &"purple")
+	var c3 := mushroom_platform(Vector3(5.0, 8.0, -28.0), 0.0, 3.5, &"teal")
+	var c4 := mushroom_platform(Vector3(12.0, 7.0, -36.0), 0.0, 3.5, &"pink")
+	var c5 := mushroom_platform(Vector3(4.0, 10.5, -44.0), 0.0, 3.5, &"gold")
+	var c6 := mushroom_platform(Vector3(-6.0, 8.0, -49.0), 0.0, 3.5, &"red")
+	var c7 := mushroom_platform(Vector3(-14.0, 6.0, -41.0), 0.0, 3.5, &"blue")
+	var c8 := mushroom_platform(Vector3(14.0, 5.0, -54.0), 0.0, 3.0, &"orange")
+	Pickup.spawn_shard(self, c5, &"w1_shard_grove")
+	Pickup.spawn_seed(self, c7, &"w1_seed_grove")
+	monkey(_locals([c2, c4]))
+	monkey(_locals([c3, c6]))
+	monkey(_locals([c8, c7]))
 	gloplets(Vector3(0.0, 0.0, -32.0), 14.0, [Vector3(-6.0, 0.0, 6.0), Vector3(7.0, 0.0, -6.0), Vector3(-3.0, 0.0, -12.0)])
 	sign_post(Vector3(-6.0, 0.0, -4.0), "Coconut monkeys! Watch for the red rings.\nSlash a coconut to send it home.", PI * 0.5)
 	for spec: Array in [[4.0, -14.0], [-6.0, -26.0], [7.0, -40.0], [-3.0, -46.0]]:
@@ -337,18 +361,24 @@ func _bonk_grove() -> void:
 	tree_line(Vector3(24.0, 0.0, -6.0), Vector3(24.0, 0.0, -58.0), 7.0, TREES, 1.1)
 	tree_line(Vector3(-24.0, 0.0, -10.0), Vector3(-24.0, 0.0, -58.0), 7.0, TREES, 1.1)
 	scatter(Vector3(0.0, 0.0, -30.0), Vector2(22.0, 27.0), 40, [&"mushroom_red_group", &"mushroom_tan_group", &"bush", &"grass_leafs", &"stump_old"], 0.0)
+	for i in 6:
+		Whimsy.crystal(self, P(Vector3(_rng.randf_range(-20.0, 20.0), 0.0, _rng.randf_range(-56.0, -8.0))), [&"crystal_violet", &"portal_teal", &"candy_pink"][i % 3] as StringName, _rng.randf_range(0.6, 1.1))
 	heart_bush(Vector3(18.0, 0.0, -10.0))
 	heart_bush(Vector3(-18.0, 0.0, -56.0))
 	fireflies(Vector3(0.0, 2.0, -32.0), 18.0, 40)
+	sparkles(Vector3(0.0, 6.0, -30.0), Vector3(44.0, 12.0, 52.0), 70)
 	birds(Vector3(0.0, 0.0, -30.0), 26.0, 24.0, 5)
 	add_capture_point("grove", Vector3(-20.0, 16.0, 28.0), Vector3(-66.0, 4.0, 0.0))
+	add_capture_point("grove_caps", Vector3(-40.0, 14.0, 6.0), Vector3(-66.0, 6.0, -6.0))
 
 
-func _canopy(top_local: Vector3) -> void:
-	ledge(top_local, Vector3(7.0, 0.8, 7.0), &"wood_plank")
-	for i in 4:
-		var a := float(i) / 4.0 * TAU + 0.4
-		prop(&"bush_small", top_local + Vector3(cos(a), 0.0, sin(a)) * 3.0, a, 0.9, false)
+## World positions -> local positions in the current region frame (for monkey perches).
+func _locals(points: Array[Vector3]) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	var inv := Transform3D(Basis(Vector3.UP, Y()), P(Vector3.ZERO)).affine_inverse()
+	for w in points:
+		out.append(inv * w)
+	return out
 
 
 # --- South: Sunny Glade, Lily Gate and Gloop Lake ---------------------------------------------
@@ -390,7 +420,8 @@ func _glade_and_lake() -> void:
 		if absf(wrapf(a + PI * 0.5, -PI, PI)) < 0.26:
 			continue
 		var p := ARENA_CENTER + Vector3(cos(a), 0.0, sin(a)) * (ARENA_RADIUS + 0.3)
-		Props.spawn(self, &"rock_tall_a" if i % 2 == 0 else &"rock_tall_b", p, a, 1.0)
+		# Build 5: a fairy ring of mushrooms round the arena.
+		Whimsy.mushroom(self, p, 1.5 + float(i % 3) * 0.5, 1.5 + float(i % 2) * 0.5, [&"red", &"orange", &"pink", &"purple"][i % 4] as StringName)
 	for i in 8:
 		var a := float(i) / 8.0 * TAU + 0.4
 		Props.spawn(self, &"waterlily", ARENA_CENTER + Vector3(cos(a) * 26.0, -0.95, sin(a) * 22.0), a, 1.6, false)
@@ -426,10 +457,12 @@ func _spawn_boss(stump_positions: Array[Vector3] = []) -> void:
 
 
 func _sky() -> void:
-	Kit.block(self, Vector3(0.0, 40.0, -250.0), Vector3(80.0, 40.0 - floor_y, 14.0), &"stone_dark")
-	for i in 12:
-		var a := float(i) / 12.0 * TAU
-		Props.spawn(self, &"mountain", Vector3(cos(a) * 300.0, floor_y, sin(a) * 300.0), _rng.randf() * TAU, _rng.randf_range(2.4, 3.2), false)
+	# Build 5: storybook blue mountains with snow caps, a rainbow over the falls.
+	for i in 16:
+		var a := float(i) / 16.0 * TAU + _rng.randf_range(-0.08, 0.08)
+		var r := _rng.randf_range(300.0, 360.0)
+		Whimsy.mountain(self, Vector3(cos(a) * r, floor_y - 20.0, sin(a) * r), _rng.randf_range(70.0, 110.0), _rng.randf_range(120.0, 200.0), i % 4 != 1)
+	Whimsy.rainbow(self, Vector3(150.0, floor_y, -40.0), 90.0, -PI * 0.5 + 0.4)
 	for i in 10:
 		Props.spawn(self, &"cloud_big" if i % 2 == 0 else &"cloud_small", Vector3(_rng.randf_range(-200.0, 200.0), _rng.randf_range(60.0, 90.0), _rng.randf_range(-200.0, 200.0)), _rng.randf() * TAU, _rng.randf_range(2.0, 3.0), false)
 	birds(Vector3.ZERO, 60.0, 40.0, 6)

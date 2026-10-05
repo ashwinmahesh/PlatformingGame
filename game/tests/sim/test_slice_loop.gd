@@ -71,6 +71,8 @@ func test_hub_loads_with_rootway() -> void:
 		if n is Portal and not (n as Portal).dormant:
 			portals += 1
 	check(portals >= 1, "the Rootway portal to World 1 exists")
-	check_eq(get_tree().get_nodes_in_group(&"interactable").size(), 3, "three villagers to talk to")
+	# Build 5 (Ashwin: "make the hub less sparse"): Fern, Pip and Bramble plus Bea, Kip and Marlo.
+	check_eq(get_tree().get_nodes_in_group(&"interactable").size(), 6, "six villagers to talk to")
+	check_eq(portals, Progress.WORLD_DEFS.size(), "one Rootway arch per world")
 	hub.queue_free()
 	await ticks(2)

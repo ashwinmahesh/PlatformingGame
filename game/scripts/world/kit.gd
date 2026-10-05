@@ -31,6 +31,7 @@ static func mat(color_name: StringName, outline_width: float = 0.0, top: StringN
 	if top != &"":
 		m.set_shader_parameter(&"top_cell", Vector2(Palette.cell(top)))
 		m.set_shader_parameter(&"top_amount", 1.0)
+		m.set_shader_parameter(&"variation", 1.0)
 	if outline_width > 0.0:
 		m.next_pass = outline(outline_width)
 	_cache[key] = m

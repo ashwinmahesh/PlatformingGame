@@ -19,7 +19,7 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 base = texture(palette_tex, (cell + vec2(0.5)) / vec2(8.0, 4.0)).rgb;
+	vec3 base = texture(palette_tex, (cell + vec2(0.5)) / vec2(8.0, 6.0)).rgb;
 	ALBEDO = base;
 	EMISSION = base * jelly_glow * 0.35 + flash_color * flash;
 	float spec = pow(clamp(dot(NORMAL, normalize(vec3(-0.3, 0.6, 0.75))), 0.0, 1.0), 40.0);

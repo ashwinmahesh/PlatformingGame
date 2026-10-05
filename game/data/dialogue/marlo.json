@@ -1,0 +1,19 @@
+{
+  "id": "marlo",
+  "name": "Marlo",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Marlo",
+          "text": "Shh. The ducks have been watching me fish for three days."
+        },
+        {
+          "speaker": "Marlo",
+          "text": "Haven't caught a thing. I think they're telling the fish."
+        }
+      ]
+    }
+  ]
+}

@@ -14,6 +14,10 @@ var _fern: Npc
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
+func configure() -> void:
+	tree_kinds = [&"green", &"blossom", &"lime", &"autumn", &"green", &"teal", &"blossom"]
+
+
 ## Build 2: rebuilt at about 1.5x scale for the faster, higher hero, with KayKit Medieval houses
 ## and Kenney Nature Kit trees and plants (CC0).
 func build() -> void:
@@ -32,6 +36,7 @@ func build() -> void:
 	_training_yard()
 	_rooftop_course()
 	_flowers()
+	_village_life()
 	_scenery()
 	add_capture_point("hub_overview", Vector3(0.0, 20.0, 46.0), Vector3(0.0, 2.0, -8.0))
 	add_capture_point("hub_oak", Vector3(12.0, 5.0, -8.0), Vector3(0.0, 4.0, -26.0))
@@ -55,8 +60,18 @@ func _great_oak() -> void:
 	cm.height = 22.0
 	cm.radial_segments = 14
 	Kit.mesh_instance(trunk, cm, Kit.mat(&"bark_mid", 0.06))
-	for spec: Array in [[0.0, 27.0, -34.0, 13.0], [-9.0, 23.0, -31.0, 8.5], [9.5, 23.5, -35.0, 9.0], [0.0, 21.0, -24.0, 7.0]]:
-		Kit.blob(self, Vector3(spec[0] as float, spec[1] as float, spec[2] as float), spec[3] as float, &"leaf_dark")
+	# Build 5: a big puffy storybook canopy with glowing lantern-fruit.
+	for spec: Array in [[0.0, 27.0, -34.0, 13.0, &"green"], [-9.0, 23.0, -31.0, 8.5, &"lime"], [9.5, 23.5, -35.0, 9.0, &"lime"], [0.0, 21.0, -24.0, 7.0, &"green"]]:
+		Whimsy.canopy(self, Vector3(spec[0] as float, spec[1] as float, spec[2] as float), spec[3] as float, spec[4] as StringName)
+	for i in 9:
+		var a := float(i) / 9.0 * TAU
+		var fruit := SphereMesh.new()
+		fruit.radius = 0.6
+		fruit.height = 1.1
+		var m := Kit.unique_mat(&"gold")
+		m.set_shader_parameter(&"flash", 0.6)
+		m.set_shader_parameter(&"flash_color", Palette.color(&"gold"))
+		Kit.mesh_instance(self, fruit, m, Vector3(cos(a) * 12.0, 17.5 + sin(i * 1.7) * 1.5, -34.0 + sin(a) * 12.0))
 	# The Rootway: one Dream Pool arch per world in a crescent around the oak (Build 4).
 	var n := Progress.WORLD_DEFS.size()
 	for i in n:
@@ -184,6 +199,57 @@ func _flowers() -> void:
 			Props.spawn(self, kinds[k % kinds.size()], c + Vector3(cos(a) * 1.1, 0.25, sin(a) * 1.1), a, 1.3, false)
 
 
+## Build 5 (Ashwin: "make the hub less sparse", "whimsical and magical"): mushroom cottages,
+## market stalls, lamps and bunting along the main path, a fishing pier with ducks, more
+## villagers, giant flowers, crystals by the Rootway, animals and sparkles.
+func _village_life() -> void:
+	Whimsy.mushroom_house(self, Vector3(-25.0, 0.0, 25.0), deg_to_rad(135.0), &"red")
+	Whimsy.mushroom_house(self, Vector3(25.0, 0.0, 26.0), deg_to_rad(-135.0), &"blue", 2.4, 3.8, 5.0)
+	Whimsy.mushroom_house(self, Vector3(34.0, 0.0, 6.0), deg_to_rad(-100.0), &"purple", 2.2, 3.6, 4.6)
+	Whimsy.stall(self, Vector3(-9.0, 0.0, 14.0), PI * 0.5, &"roof_red")
+	Whimsy.stall(self, Vector3(-9.0, 0.0, 19.5), PI * 0.5, &"sunset_orange")
+	Whimsy.stall(self, Vector3(9.0, 0.0, 16.0), -PI * 0.5, &"roof_blue")
+	_npc("bea", "Bea", Vector3(-11.0, 0.0, 14.0))
+	_npc("kip", "Kip", Vector3(4.0, 0.0, 31.0))
+	_npc("marlo", "Marlo", Vector3(14.0, 0.4, 50.0))
+	# Dirt path from the arrival green to the Rootway.
+	var path := RoundMesh.box(Vector3(4.2, 0.06, 44.0), 0.03)
+	Kit.mesh_instance(self, path, Kit.mat(&"sand_mid"), Vector3(0.0, 0.03, 1.0))
+	for z: float in [16.0, 6.0, -4.0, -14.0]:
+		Whimsy.lamp(self, Vector3(-3.6, 0.0, z), z > 0.0)
+		Whimsy.lamp(self, Vector3(3.6, 0.0, z + 0.5), z <= 0.0)
+		Whimsy.bunting(self, Vector3(-3.6, 3.0, z), Vector3(3.6, 3.0, z + 0.5), 0.5)
+	Whimsy.bunting(self, Vector3(-14.0, 6.5, -4.0), Vector3(-15.0, 5.5, 12.0), 0.8)
+	Whimsy.bunting(self, Vector3(14.0, 6.0, -6.0), Vector3(15.0, 5.5, 12.0), 0.8)
+	# Fishing pier into the lake.
+	Kit.block(self, Vector3(14.0, 0.4, 44.0), Vector3(3.6, 0.5, 18.0), &"wood_plank", Layers.WORLD | Layers.CAMERA_BLOCKER, &"")
+	for z: float in [37.0, 42.0, 47.0, 52.0]:
+		for x: float in [12.4, 15.6]:
+			Kit.pillar(self, Vector3(x, 0.4, z), 0.22, 3.0, &"bark_mid", &"", Layers.WORLD)
+	for i in 4:
+		var duck := Duck.new()
+		duck.position = Vector3(20.0 + i * 3.0, -1.0, 46.0 - i * 4.0)
+		duck.radius = 3.5
+		add_child(duck)
+	for i in 10:
+		Props.spawn(self, &"waterlily", Vector3(_rng.randf_range(4.0, 30.0), -0.95, _rng.randf_range(42.0, 58.0)), _rng.randf() * TAU, 1.4, false)
+	# Giant flowers by Kip's corner, crystals by the Rootway arches.
+	Whimsy.flower(self, Vector3(-14.0, 0.0, 31.0), 2.5, 2.0, &"candy_pink")
+	Whimsy.flower(self, Vector3(-9.0, 0.0, 34.0), 4.0, 2.0, &"gold")
+	Whimsy.flower(self, Vector3(8.0, 0.0, 35.0), 3.0, 1.5, &"slime_blue")
+	Whimsy.crystal(self, Vector3(-18.0, 0.0, -29.0), &"crystal_violet", 1.2)
+	Whimsy.crystal(self, Vector3(18.0, 0.0, -28.0), &"portal_teal", 1.1)
+	Whimsy.crystal(self, Vector3(-21.0, 0.0, -22.0), &"candy_pink", 0.8)
+	for i in 6:
+		var b := Bunny.new()
+		b.position = Vector3(_rng.randf_range(-28.0, 28.0), 0.5, _rng.randf_range(-12.0, 32.0))
+		add_child(b)
+	Ambient.butterflies(self, Vector3(0.0, 0.0, 10.0), 24.0, 12)
+	Ambient.sparkles(self, Vector3(0.0, 3.0, -4.0), Vector3(70.0, 6.0, 70.0), 80)
+	Ambient.sparkles(self, Vector3(0.0, 8.0, -30.0), Vector3(30.0, 14.0, 20.0), 50)
+	Ambient.birds(self, Vector3(0.0, 0.0, -4.0), 40.0, 30.0, 6)
+
+
 func _scenery() -> void:
 	var trees: Array[StringName] = [&"tree_default", &"tree_oak", &"tree_detailed", &"tree_fat", &"tree_pine", &"tree_cone"]
 	var i := 0
@@ -203,9 +269,22 @@ func _scenery() -> void:
 			continue
 		var kinds: Array[StringName] = [&"grass", &"grass_large", &"flower_red", &"flower_yellow", &"flower_purple", &"bush_small", &"mushroom_red_group"]
 		Props.spawn(self, kinds[k % kinds.size()], p, _rng.randf() * TAU, _rng.randf_range(0.9, 1.3), false)
-	for k in 8:
-		var a := float(k) / 8.0 * TAU + 0.3
-		Props.spawn(self, &"mountain" if k % 2 == 0 else &"hills_trees", Vector3(cos(a) * 120.0, -1.0, sin(a) * 120.0), _rng.randf() * TAU, _rng.randf_range(1.0, 1.4), false)
+	# Build 5 backdrop: mushroom islets in the lake, hills, blue mountains and a rainbow.
+	var caps: Array[StringName] = [&"red", &"purple", &"teal", &"orange", &"pink", &"blue"]
+	for k in 10:
+		var a := float(k) / 10.0 * TAU + 0.2
+		var c := Vector3(cos(a) * _rng.randf_range(75.0, 105.0), 0.0, -4.0 + sin(a) * _rng.randf_range(75.0, 105.0))
+		var r := _rng.randf_range(6.0, 11.0)
+		Kit.pillar(self, c + Vector3(0.0, 0.6, 0.0), r, 4.0, &"bark_mid", &"grass_mid")
+		Whimsy.mushroom(self, c + Vector3(0.0, 0.6, 0.0), _rng.randf_range(8.0, 16.0), _rng.randf_range(4.0, 7.0), caps[k % caps.size()])
+		Whimsy.tree(self, c + Vector3(r * 0.5, 0.6, r * 0.3), tree_kinds[k % tree_kinds.size()], 1.3)
+	for k in 24:
+		var a := float(k) / 24.0 * TAU
+		Whimsy.hill(self, Vector3(cos(a) * 170.0, -2.0, -4.0 + sin(a) * 170.0), _rng.randf_range(35.0, 55.0), _rng.randf_range(0.7, 1.0))
+	for k in 12:
+		var a := float(k) / 12.0 * TAU + 0.15
+		Whimsy.mountain(self, Vector3(cos(a) * 260.0, -10.0, sin(a) * 260.0), _rng.randf_range(60.0, 90.0), _rng.randf_range(100.0, 160.0), k % 3 != 0)
+	Whimsy.rainbow(self, Vector3(0.0, -2.0, -110.0), 80.0)
 	for k in 6:
 		Props.spawn(self, &"cloud_big" if k % 2 == 0 else &"cloud_small", Vector3(_rng.randf_range(-80.0, 80.0), _rng.randf_range(45.0, 70.0), _rng.randf_range(-90.0, 60.0)), _rng.randf() * TAU, _rng.randf_range(1.6, 2.4), false)
 

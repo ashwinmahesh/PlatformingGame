@@ -17,22 +17,30 @@ var sun: DirectionalLight3D
 var spawns: Dictionary[StringName, Array] = {}
 var environment: Environment
 ## Per-world look (Build 4): sky, sun and haze. Subclasses set these in configure().
-var sky_top: Color = Color(0.486, 0.784, 0.949)
-var sky_horizon: Color = Color(0.98, 0.9, 0.79)
-var sky_bottom: Color = Color(0.93, 0.85, 0.74)
-var sun_color: Color = Color("#FFE2B5")
-var sun_energy: float = 0.95
-var sun_angles: Vector2 = Vector2(-48.0, -35.0)
+## Build 5 ("vibrant, whimsical, like Dragon Quest"): deep blue sky, warm sun, sky-lit ambient
+## so shadows read cool and colourful, and a sky-blue distance haze instead of a beige one.
+var sky_top: Color = Color(0.16, 0.5, 0.98)
+var sky_horizon: Color = Color(0.78, 0.92, 1.0)
+var sky_bottom: Color = Color(0.86, 0.93, 1.0)
+var cloud_cover: float = 0.42
+var cloud_shade: Color = Color(0.76, 0.78, 0.98)
+var sun_color: Color = Color("#FFF0D2")
+var sun_energy: float = 1.1
+var sun_angles: Vector2 = Vector2(-50.0, -35.0)
 var ambient_color: Color = Palette.FOG
-var ambient_energy: float = 0.36
+var ambient_energy: float = 0.55
 var fog_color: Color = Palette.FOG
-var fog_begin: float = 70.0
-var fog_end: float = 220.0
+var fog_begin: float = 80.0
+var fog_end: float = 320.0
+var saturation: float = 1.06
+## Puffball-tree colours for this level (Props draws every tree as a Whimsy tree).
+var tree_kinds: Array[StringName] = [&"green", &"lime", &"green", &"teal", &"blossom", &"green", &"autumn"]
 
 
 func _ready() -> void:
 	configure()
 	_build_environment()
+	Props.tree_kinds = tree_kinds
 	build()
 	resolver = CombatResolver.new()
 	resolver.name = "CombatResolver"
@@ -112,10 +120,14 @@ func _build_environment() -> void:
 	sky_mat.set_shader_parameter(&"top_col", sky_top)
 	sky_mat.set_shader_parameter(&"horizon_col", sky_horizon)
 	sky_mat.set_shader_parameter(&"bottom_col", sky_bottom)
+	sky_mat.set_shader_parameter(&"cloud_cover", cloud_cover)
+	sky_mat.set_shader_parameter(&"cloud_shade", cloud_shade)
 	sky.sky_material = sky_mat
+	sky.radiance_size = Sky.RADIANCE_SIZE_64
 	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_color = ambient_color
+	env.ambient_light_sky_contribution = 0.75
 	env.ambient_light_energy = ambient_energy
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_DISABLED
 	env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
@@ -127,8 +139,12 @@ func _build_environment() -> void:
 	env.fog_density = 0.4
 	env.fog_sky_affect = 0.0
 	env.glow_enabled = true
-	env.glow_intensity = 0.5
-	env.glow_hdr_threshold = 1.1
+	env.glow_intensity = 0.6
+	env.glow_bloom = 0.04
+	env.glow_hdr_threshold = 1.0
+	env.adjustment_enabled = true
+	env.adjustment_saturation = saturation
+	env.adjustment_contrast = 1.04
 	environment = env
 	var we := WorldEnvironment.new()
 	we.environment = env

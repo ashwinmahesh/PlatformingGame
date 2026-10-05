@@ -135,6 +135,39 @@ static func motes(parent: Node, center: Vector3, size: Vector3, color: Color = C
 	parent.add_child(p)
 
 
+## Magic in the air (Build 5, "whimsical and magical"): tiny glowing stars in gold, pink and
+## aqua that drift up, twinkle and fade.
+static func sparkles(parent: Node, center: Vector3, size: Vector3, count: int = 40) -> void:
+	var p := CPUParticles3D.new()
+	p.amount = count
+	p.lifetime = 5.0
+	p.preprocess = 5.0
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = size * 0.5
+	p.gravity = Vector3(0.0, 0.25, 0.0)
+	p.initial_velocity_min = 0.05
+	p.initial_velocity_max = 0.35
+	p.spread = 180.0
+	p.angular_velocity_min = -90.0
+	p.angular_velocity_max = 90.0
+	p.mesh = GoalStar.star_mesh(0.13, 0.06, 0.03)
+	p.material_override = Fx.fx_mat(Color(1.7, 1.7, 1.6, 0.95))
+	var g := Gradient.new()
+	g.set_color(0, Palette.color(&"gold"))
+	g.set_color(1, Palette.color(&"candy_pink"))
+	g.add_point(0.5, Palette.color(&"water_light"))
+	p.color_initial_ramp = g
+	var curve := Curve.new()
+	curve.add_point(Vector2(0.0, 0.0))
+	curve.add_point(Vector2(0.15, 1.0))
+	curve.add_point(Vector2(0.4, 0.4))
+	curve.add_point(Vector2(0.6, 1.0))
+	curve.add_point(Vector2(1.0, 0.0))
+	p.scale_amount_curve = curve
+	p.position = center
+	parent.add_child(p)
+
+
 ## A fluttering butterfly on a wandering loop.
 class Butterfly:
 	extends Node3D

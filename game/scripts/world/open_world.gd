@@ -289,6 +289,24 @@ func finish_life(grass_color: StringName = &"grass_light") -> void:
 	Ambient.flowers(self, _flower_points)
 
 
+func sparkles(center_local: Vector3, size: Vector3, count: int = 40) -> void:
+	Ambient.sparkles(self, P(center_local), size, count)
+
+
+## A giant mushroom standing on ground at base_local; returns the top of its cap.
+func giant_mushroom(base_local: Vector3, height: float, cap_r: float, kind: StringName = &"red") -> Vector3:
+	Whimsy.mushroom(self, P(base_local), height, cap_r, kind)
+	return Whimsy.cap_top(P(base_local), height, cap_r)
+
+
+## A giant mushroom whose cap top lands at top_local (height is worked out). Returns the
+## actual (snapped) top in world space.
+func mushroom_platform(top_local: Vector3, ground_y: float, cap_r: float, kind: StringName = &"red") -> Vector3:
+	var base := Vector3(top_local.x, ground_y, top_local.z)
+	var h := top_local.y - ground_y - snappedf(cap_r, 0.5) * 0.56
+	return giant_mushroom(base, maxf(h, 1.0), cap_r, kind)
+
+
 func butterflies(center_local: Vector3, radius: float, count: int = 6) -> void:
 	Ambient.butterflies(self, P(center_local), radius, count)
 

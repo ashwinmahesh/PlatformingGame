@@ -2,7 +2,7 @@
 class_name Palette
 extends RefCounted
 
-const GRID := Vector2i(8, 4)
+const GRID := Vector2i(8, 6)
 
 ## Palette cell (column, row) for every named colour.
 const CELLS: Dictionary[StringName, Vector2i] = {
@@ -38,47 +38,79 @@ const CELLS: Dictionary[StringName, Vector2i] = {
 	&"slime_green": Vector2i(5, 3),
 	&"slime_blue": Vector2i(6, 3),
 	&"gloop_pink": Vector2i(7, 3),
+	&"mush_red": Vector2i(0, 4),
+	&"mush_spot": Vector2i(1, 4),
+	&"mush_purple": Vector2i(2, 4),
+	&"mush_teal": Vector2i(3, 4),
+	&"candy_pink": Vector2i(4, 4),
+	&"crystal_violet": Vector2i(5, 4),
+	&"lime_pop": Vector2i(6, 4),
+	&"sunset_orange": Vector2i(7, 4),
+	&"coral_pink": Vector2i(0, 5),
+	&"coral_orange": Vector2i(1, 5),
+	&"kelp": Vector2i(2, 5),
+	&"sand_light": Vector2i(3, 5),
+	&"sand_mid": Vector2i(4, 5),
+	&"sea_violet": Vector2i(5, 5),
+	&"bubble": Vector2i(6, 5),
+	&"ink_navy": Vector2i(7, 5),
 }
 
 ## The same colours as Color values, for UI, particles and lights.
 const COLORS: Dictionary[StringName, Color] = {
-	&"grass_light": Color("#A9D65A"),
-	&"grass_mid": Color("#82BD45"),
-	&"leaf_dark": Color("#4F8A35"),
-	&"leaf_teal": Color("#69A85A"),
-	&"moss": Color("#BFCB4E"),
-	&"bark_light": Color("#C98A52"),
-	&"bark_mid": Color("#9C6038"),
-	&"bark_dark": Color("#6E3F25"),
-	&"wood_plank": Color("#E6AE6E"),
-	&"wood_warm": Color("#CF8442"),
-	&"roof_red": Color("#E8664A"),
-	&"roof_blue": Color("#5B86D0"),
-	&"roof_teal": Color("#4FB8A4"),
-	&"thatch": Color("#F0CB70"),
-	&"stone_light": Color("#DCCBB2"),
-	&"stone_dark": Color("#A38F7C"),
-	&"water_light": Color("#7FE0F0"),
-	&"water_mid": Color("#39A9DB"),
-	&"water_deep": Color("#2A6FB0"),
-	&"foam": Color("#F4FBFF"),
-	&"sky_top": Color("#7CC8F2"),
-	&"portal_magenta": Color("#E05AD6"),
-	&"portal_teal": Color("#4DF0D2"),
-	&"gold": Color("#FFC83D"),
+	&"grass_light": Color("#A9D86A"),
+	&"grass_mid": Color("#74B84A"),
+	&"leaf_dark": Color("#2F8C40"),
+	&"leaf_teal": Color("#2BB58C"),
+	&"moss": Color("#9ED45A"),
+	&"bark_light": Color("#E09A5C"),
+	&"bark_mid": Color("#A8603A"),
+	&"bark_dark": Color("#6E3A2A"),
+	&"wood_plank": Color("#F5BD72"),
+	&"wood_warm": Color("#EC8A3C"),
+	&"roof_red": Color("#F04A3E"),
+	&"roof_blue": Color("#3F7EF2"),
+	&"roof_teal": Color("#1FC7B0"),
+	&"thatch": Color("#FFD65A"),
+	&"stone_light": Color("#EDE2CF"),
+	&"stone_dark": Color("#8579B4"),
+	&"water_light": Color("#7DF2FF"),
+	&"water_mid": Color("#1FB6F5"),
+	&"water_deep": Color("#1A6FE0"),
+	&"foam": Color("#F7FFFF"),
+	&"sky_top": Color("#46A8FF"),
+	&"portal_magenta": Color("#FF4FD0"),
+	&"portal_teal": Color("#2BF2D6"),
+	&"gold": Color("#FFCC1F"),
 	&"skin_light": Color("#FFD9B8"),
-	&"skin_mid": Color("#E0A37A"),
+	&"skin_mid": Color("#E8A57A"),
 	&"skin_dark": Color("#9C6644"),
-	&"tunic_blue": Color("#3D7BE0"),
-	&"cloth_cream": Color("#F5EBD3"),
-	&"slime_green": Color("#63E06B"),
-	&"slime_blue": Color("#4FB7FF"),
-	&"gloop_pink": Color("#F2709C"),
+	&"tunic_blue": Color("#3B7BFF"),
+	&"cloth_cream": Color("#FFF4DA"),
+	&"slime_green": Color("#5EE06A"),
+	&"slime_blue": Color("#3FA8FF"),
+	&"gloop_pink": Color("#FF7AC8"),
+	&"mush_red": Color("#FF4B55"),
+	&"mush_spot": Color("#FFF9EE"),
+	&"mush_purple": Color("#A762FF"),
+	&"mush_teal": Color("#2FD9CB"),
+	&"candy_pink": Color("#FF9AD8"),
+	&"crystal_violet": Color("#C08CFF"),
+	&"lime_pop": Color("#C2F53C"),
+	&"sunset_orange": Color("#FF8A3D"),
+	&"coral_pink": Color("#FF6F91"),
+	&"coral_orange": Color("#FFA040"),
+	&"kelp": Color("#3CC46E"),
+	&"sand_light": Color("#FFE6A6"),
+	&"sand_mid": Color("#F4C46A"),
+	&"sea_violet": Color("#7C6CFF"),
+	&"bubble": Color("#D2FAFF"),
+	&"ink_navy": Color("#26325E"),
 }
 
 const INK := Color("#3A2633")
-const SHADOW_TINT := Color("#8C6A8C")
-const FOG := Color("#F6E4CC")
+const SHADOW_TINT := Color("#7466C4")
+const FOG := Color("#CFE6FF")
 
 
 static func cell(color_name: StringName) -> Vector2i:

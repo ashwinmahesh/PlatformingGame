@@ -1,0 +1,28 @@
+{
+  "id": "bea",
+  "name": "Bea",
+  "conversations": [
+    {
+      "when": "world_01_complete",
+      "lines": [
+        {
+          "speaker": "Bea",
+          "text": "A Fireball? In MY village? Just keep it away from the pastries, sweetie."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Bea",
+          "text": "Fresh mushroom muffins! Glowcap jam! Starfruit tarts!"
+        },
+        {
+          "speaker": "Bea",
+          "text": "Everything's free for heroes. Well. Everything will be, once the shop opens."
+        }
+      ]
+    }
+  ]
+}
