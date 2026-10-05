@@ -1,16 +1,19 @@
 # Board
 
-## Done (2026-10-05 session)
-- P0 foundation (minus gdtoolkit and macOS export), P1 movement/camera/Feel Lab/event log/capture,
-  P2 combat core, the P3 slice route, full Mother Gloop, hub stub with NPCs and rooftop course.
-- 53 automated tests green (`make test`).
+## Done (2026-10-05)
+- Builds 1–3: movement, combat, World 1 slice, Mother Gloop, hub, swimming, camera zoom, sourced
+  CC0 art and sound (see docs/assets/LICENSES.md).
+- Build 4: five open worlds with Star Shards (Glimmerbrook, Cloudtop Steps, Sunscorch Canyon,
+  Bubbleton Reef, Frostfang Peak); Rumble Golem and Avalanche Ape on BossBase/BossWorld; Build 4
+  monsters (Batling, Hoppy, Shroomlet, Mimic, Armorling, Jellyfloat, Pricklepot, Snapper Crab).
+- Build 5: vibrant storybook look (8x6 palette, sky ambient, Whimsy set pieces), busier Mossbrook,
+  magic abilities (Fireball, Glide, Thunderclap, Air Dash) learned per world clear.
+- 70 automated tests green (`make test`, which now fails on any FAIL line).
 
 ## Needs a human
-- Gate A: play 20+ minutes, rate movement, pick jump mode (Feel Lab F1 has Mario chain toggle).
-- Approve sourcing: environment pack, hero, sound packs (none downloaded).
+- Play each world end to end and say what feels off (platform sizes, jump distances, boss pace).
 - Install gdtoolkit; install export templates for `make export-mac`.
 
 ## Backlog (next)
-- P4: sections 5–7 (Bonk Grove, Waterfall Climb, Ridge Run), Bonk monkey + coconut reflect.
-- Ledge grab and air dive Feel Lab toggles. Remapping UI. Rootway interior hall.
-- Level linter with RouteLinks; perf probe; input replay when needed.
+- Gamepad/keyboard remapping UI; a world map; music beyond the synthesised cues.
+- More ability gates in Worlds 1–2 for revisits (brambles, ice, far ledges).

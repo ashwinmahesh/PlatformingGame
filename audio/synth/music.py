@@ -170,8 +170,21 @@ def main():
     make_cue("glimmerbrook", 124, 16, chords=[(55, MAJOR), (62, MAJOR), (64, MINOR), (60, MAJOR)], key_root=67, lead=square_lead, seed=11, drums="light", lead_gain=0.32)
     # A minor, driving: i  VI  III  VII
     make_cue("boss", 140, 16, chords=[(57, MINOR), (53, MAJOR), (60, MAJOR), (55, MAJOR)], key_root=57, lead=square_lead, seed=23, drums="drive", lead_gain=0.3, scale_minor=True)
+    world_cues()
     victory()
-    print(f"music: wrote 4 cues to {OUT}")
+    print(f"music: wrote 8 cues to {OUT}")
+
+
+def world_cues():
+    # Build 4/5 worlds.
+    # Cloudtop Steps, D major, airy: I  iii  IV  V
+    make_cue("cloudtop", 108, 16, chords=[(62, MAJOR), (66, MINOR), (67, MAJOR), (69, MAJOR)], key_root=62, lead=flute, seed=31, drums="light", lead_gain=0.42)
+    # Sunscorch Canyon, E minor, twangy: i  VII  VI  VII
+    make_cue("canyon", 112, 16, chords=[(52, MINOR), (50, MAJOR), (48, MAJOR), (50, MAJOR)], key_root=64, lead=pluck, seed=37, drums="drive", lead_gain=0.55, scale_minor=True)
+    # Bubbleton Reef, F major, bouncy island: I  IV  ii  V
+    make_cue("reef", 118, 16, chords=[(53, MAJOR), (58, MAJOR), (55, MINOR), (60, MAJOR)], key_root=65, lead=pluck, seed=41, drums="light", lead_gain=0.6)
+    # Frostfang Peak, A major, gentle and sparkly: I  V  vi  IV
+    make_cue("frostfang", 96, 16, chords=[(57, MAJOR), (64, MAJOR), (66, MINOR), (62, MAJOR)], key_root=69, lead=flute, seed=43, drums="none", lead_gain=0.45)
 
 
 if __name__ == "__main__":
