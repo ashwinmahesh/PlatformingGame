@@ -9,6 +9,10 @@ var tunic: StringName = &"roof_teal"
 var hat: StringName = &"thatch"
 var skin: StringName = &"skin_mid"
 var body_scale: float = 1.0
+## Build 6 side task: once `errand_flag` is set (an ErrandItem was found), talking hands over
+## `reward_seed` (a Glimmer Seed of this world).
+var errand_flag: StringName = &""
+var reward_seed: StringName = &""
 ## Build 5 (Bubbleton Reef): a glass diving bubble round the head.
 var bubble_helmet: bool = false
 ## Villagers share one rig (KayKit Adventurers, CC0) and differ by outfit and scale (plan §11.4).
@@ -25,6 +29,7 @@ const MODELS: Dictionary[String, Array] = {
 	"bea": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.58, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 	"barnacle": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.64, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
 	"coralie": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.56, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"puffle": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 	"finn": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"kip": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.44, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
 }
@@ -90,6 +95,14 @@ func _process(delta: float) -> void:
 
 
 func interact(p: Player) -> void:
+	if errand_flag != &"" and reward_seed != &"" and Progress.has_flag(errand_flag) and not Progress.has_seed(reward_seed):
+		Progress.collect_seed(reward_seed)
+		AudioDirector.play(&"seed")
+		emote_joy()
+		var h := get_tree().get_first_node_in_group(&"hud") as Hud
+		if h != null:
+			h.open_dialogue([{"speaker": display_name, "text": "You found it! Thank you! Here, take this Glimmer Seed."}], p)
+		return
 	var data := DialogueData.load_npc(npc_id)
 	var lines := DialogueData.pick_lines(data)
 	if lines.is_empty():

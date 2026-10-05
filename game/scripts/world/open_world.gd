@@ -213,6 +213,62 @@ func alcove(base_local: Vector3, yaw: float, color: StringName, door: StringName
 	return w
 
 
+## Build 6 (Ashwin: "make the secret areas more expansive... each with some platforming"): a big
+## walled room (size: width, height, depth) with one doorway on its local +Z side, closed by
+## &"break", &"bramble", &"gate" or &"open". The current frame moves inside the room, with its
+## origin at the floor centre, so the caller lays out the platforming with ledge()/stone()/
+## seed_at() in room coordinates; restore it with `_frame = saved` (the return value's [0]).
+## Returns [saved_frame, door].
+func secret_cave(center_local: Vector3, yaw: float, size: Vector3, color: StringName, door: StringName = &"break") -> Array:
+	var saved := _frame
+	var origin := P(center_local)
+	var basis := Basis(Vector3.UP, Y(yaw))
+	_frame = Transform3D(basis, origin)
+	var t := top_of(color)
+	var layers := Layers.WORLD | Layers.CAMERA_BLOCKER
+	var hx := size.x * 0.5
+	var hz := size.z * 0.5
+	var walls: Array[Array] = [[Vector3(0.0, size.y, -hz), Vector3(size.x + 2.0, size.y, 1.0)], [Vector3(-hx, size.y, 0.0), Vector3(1.0, size.y, size.z)], [Vector3(hx, size.y, 0.0), Vector3(1.0, size.y, size.z)],
+		[Vector3(-hx * 0.5 - 1.25, size.y, hz), Vector3(hx - 2.5 + 1.0, size.y, 1.0)], [Vector3(hx * 0.5 + 1.25, size.y, hz), Vector3(hx - 2.5 + 1.0, size.y, 1.0)], [Vector3(0.0, size.y, hz), Vector3(5.0, size.y - 4.2, 1.0)]]
+	for w in walls:
+		var b := Kit.block(self, P(w[0] as Vector3), S(w[1] as Vector3), color, layers, t)
+		b.name = "CaveWall"
+	Kit.block(self, P(Vector3(0.0, size.y + 1.0, 0.0)), S(Vector3(size.x + 2.0, 1.0, size.z + 2.0)), color, layers, t)
+	Kit.block(self, P(Vector3(0.0, 0.15, 0.0)), S(Vector3(size.x, 0.3, size.z)), color, layers, t)
+	var light := OmniLight3D.new()
+	light.light_color = Palette.color(&"gold")
+	light.light_energy = 1.3
+	light.omni_range = maxf(size.x, size.z)
+	light.position = P(Vector3(0.0, size.y * 0.7, 0.0))
+	add_child(light)
+	var d: Node3D = null
+	match door:
+		&"bramble":
+			var br := Bramble.new()
+			br.size = Vector3(5.0, 4.2, 1.0)
+			br.position = P(Vector3(0.0, 0.0, hz))
+			br.rotation.y = Y()
+			add_child(br)
+			d = br
+		&"gate":
+			var g := VineGate.new()
+			g.width = 5.2
+			g.position = P(Vector3(0.0, 0.0, hz + 0.1))
+			g.rotation.y = Y()
+			add_child(g)
+			g.set_closed.call_deferred(true)
+			d = g
+		&"break":
+			var w := BreakableWall.new()
+			w.size = Vector3(5.0, 4.2, 1.0)
+			w.color_name = color
+			w.position = P(Vector3(0.0, 0.0, hz))
+			w.rotation.y = Y()
+			add_child(w)
+			d = w
+	return [saved, d]
+
+
 func water(center_local: Vector3, size: Vector2, depth: float = 5.0) -> Area3D:
 	var s := S(Vector3(size.x, 0.0, size.y))
 	return Kit.water(self, P(center_local), Vector2(s.x, s.z), depth)

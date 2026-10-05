@@ -1,0 +1,28 @@
+{
+  "id": "puffle",
+  "name": "Mrs. Puffle",
+  "conversations": [
+    {
+      "when": "w4_found_hat",
+      "lines": [
+        {
+          "speaker": "Mrs. Puffle",
+          "text": "My spotted hat! I feel like a proper lady again. Thank you, dear."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Mrs. Puffle",
+          "text": "Oh, a current snatched my spotted hat right off my head! It drifted all the way up the Jellyfish Fields."
+        },
+        {
+          "speaker": "Mrs. Puffle",
+          "text": "If you find it, do bring it back. I have a Glimmer Seed I've been saving for someone kind."
+        }
+      ]
+    }
+  ]
+}
