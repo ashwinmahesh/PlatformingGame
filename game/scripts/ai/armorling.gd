@@ -58,7 +58,8 @@ func state_name() -> String:
 
 ## The shield blocks slashes from the front unless it's recovering from a swing.
 func on_hit(atk: Dictionary) -> Dictionary:
-	var plunge := StringName(str(atk.get("kind", ""))) == &"plunge"
+	var kind := StringName(str(atk.get("kind", "")))
+	var plunge := kind == &"plunge" or kind == &"thunder"
 	var from := atk.get("from", global_position) as Vector3
 	var to_attacker := flat_to(from)
 	var in_front := to_attacker.length() > 0.01 and rad_to_deg(facing.angle_to(to_attacker.normalized())) < 70.0

@@ -73,6 +73,7 @@ func _physics_process(delta: float) -> void:
 		boss.start_fight()
 		AudioDirector.play_music(&"boss")
 	if hud != null:
+		hud.set_boss_name(boss.boss_name)
 		hud.set_boss(boss.hp, boss.max_hp, fight_started and not boss.gone)
 
 

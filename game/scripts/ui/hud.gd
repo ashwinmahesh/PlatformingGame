@@ -26,6 +26,13 @@ var _dlg_ignore_frames: int = 0
 var _pause: Control
 var _notice_tween: Tween
 var _theme: Theme
+var _boss_name: Label
+## Build 5 magic: the ability bar (bottom right) and the "new magic" card.
+var _ability_bar: HBoxContainer
+var _ability_slots: Dictionary[StringName, Control] = {}
+var _learn_card: PanelContainer
+var _learn_title: Label
+var _learn_body: Label
 
 
 func _ready() -> void:
@@ -75,6 +82,7 @@ func _ready() -> void:
 	_timer_label.offset_right = 300
 	_timer_label.offset_top = 40
 	_build_boss_bar(root)
+	_build_abilities(root)
 	_build_dialogue(root)
 	_build_pause(root)
 	Events.notice.connect(show_notice)
@@ -182,6 +190,7 @@ func _build_boss_bar(root: Control) -> void:
 	_boss_box.visible = false
 	root.add_child(_boss_box)
 	var name_label := _label(_boss_box, "Mother Gloop", 30, HORIZONTAL_ALIGNMENT_CENTER)
+	_boss_name = name_label
 	name_label.position = Vector2(0, -44)
 	name_label.size = Vector2(1000, 40)
 	_boss_bar = ColorRect.new()
@@ -195,9 +204,101 @@ func _build_boss_bar(root: Control) -> void:
 	_boss_box.add_child(_boss_fill)
 
 
+func set_boss_name(text: String) -> void:
+	_boss_name.text = text
+
+
 func set_boss(hp: int, max_hp: int, shown: bool) -> void:
 	_boss_box.visible = shown
 	_boss_fill.size.x = 990.0 * float(hp) / float(max_hp)
+
+
+# --- Magic (Build 5) ---------------------------------------------------------------------------
+
+func _build_abilities(root: Control) -> void:
+	_ability_bar = HBoxContainer.new()
+	_ability_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	_ability_bar.offset_left = -560
+	_ability_bar.offset_top = -150
+	_ability_bar.offset_right = -40
+	_ability_bar.offset_bottom = -40
+	_ability_bar.alignment = BoxContainer.ALIGNMENT_END
+	_ability_bar.add_theme_constant_override(&"separation", 14)
+	root.add_child(_ability_bar)
+	for id in Abilities.ORDER:
+		var info: Array = Abilities.INFO[id]
+		var slot := VBoxContainer.new()
+		slot.custom_minimum_size = Vector2(110, 110)
+		var orb := PanelContainer.new()
+		orb.custom_minimum_size = Vector2(76, 76)
+		orb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Palette.color(info[4] as StringName)
+		sb.set_corner_radius_all(38)
+		sb.border_color = Palette.INK
+		sb.set_border_width_all(4)
+		orb.add_theme_stylebox_override(&"panel", sb)
+		var initial := _label(orb, str(info[0]).substr(0, 1), 40, HORIZONTAL_ALIGNMENT_CENTER)
+		initial.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		slot.add_child(orb)
+		var key := _label(slot, str(info[1]), 22, HORIZONTAL_ALIGNMENT_CENTER)
+		key.name = "Key"
+		slot.visible = false
+		_ability_bar.add_child(slot)
+		_ability_slots[id] = slot
+	_learn_card = PanelContainer.new()
+	_learn_card.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_learn_card.offset_left = -520
+	_learn_card.offset_right = 520
+	_learn_card.offset_top = -170
+	_learn_card.offset_bottom = 120
+	_learn_card.modulate.a = 0.0
+	_learn_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_learn_card)
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	_learn_card.add_child(box)
+	_label(box, "New magic!", 30, HORIZONTAL_ALIGNMENT_CENTER)
+	_learn_title = _label(box, "", 64, HORIZONTAL_ALIGNMENT_CENTER)
+	_learn_body = _label(box, "", 30, HORIZONTAL_ALIGNMENT_CENTER)
+	_learn_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	Events.ability_learned.connect(show_ability_learned)
+
+
+func show_ability_learned(id: StringName) -> void:
+	var info: Array = Abilities.INFO.get(id, [])
+	if info.is_empty():
+		return
+	_learn_title.text = str(info[0])
+	_learn_title.add_theme_color_override(&"font_color", Palette.color(info[4] as StringName))
+	_learn_body.text = "%s\n%s" % [info[2], info[3]]
+	AudioDirector.play(&"ability")
+	var t := create_tween()
+	t.tween_interval(1.2)
+	t.tween_property(_learn_card, "modulate:a", 1.0, 0.35)
+	t.tween_interval(5.0)
+	t.tween_property(_learn_card, "modulate:a", 0.0, 0.6)
+
+
+func _update_abilities() -> void:
+	if player == null:
+		return
+	for id in _ability_slots:
+		var slot := _ability_slots[id]
+		slot.visible = player.has_ability(id)
+		if not slot.visible:
+			continue
+		var ready := true
+		match id:
+			&"fireball":
+				ready = player.fireball_cooldown <= 0
+			&"thunderclap":
+				ready = player.clap_cooldown <= 0
+			&"dash":
+				ready = player.dash_cooldown <= 0 and (player.is_grounded() or not player.air_dash_used)
+			&"glide":
+				ready = not player.gliding
+		slot.modulate = Color(1.0, 1.0, 1.0, 1.0 if ready else 0.4)
 
 
 # --- Dialogue (plan §8.7) ---------------------------------------------------------------------
@@ -291,6 +392,7 @@ func _process(delta: float) -> void:
 	_update_prompt()
 	if player != null and is_instance_valid(player):
 		_breath.set_breath(player.breath / Player.BREATH_MAX, player.head_underwater() or player.breath < Player.BREATH_MAX - 0.05)
+		_update_abilities()
 
 
 func _update_prompt() -> void:

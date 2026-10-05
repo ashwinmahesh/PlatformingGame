@@ -38,8 +38,11 @@ func receive_player_attack(atk: Dictionary, _area: Area3D) -> Dictionary:
 	if id == _last_id:
 		return {}
 	_last_id = id
-	var plunge := StringName(str(atk.get("kind", ""))) == &"plunge"
-	hp -= 3 if plunge else 1
+	var kind := StringName(str(atk.get("kind", "")))
+	var plunge := kind == &"plunge"
+	# Build 5 magic: Fireball melts ice blocks at once; the Thunderclap shatters anything.
+	var melts := kind == &"fireball" and color_name == &"water_light"
+	hp -= 3 if plunge or melts or kind == &"thunder" else 1
 	_mat.set_shader_parameter(&"flash", 0.8)
 	create_tween().tween_method(func(v: float) -> void: _mat.set_shader_parameter(&"flash", v), 0.8, 0.0, 0.2)
 	if hp <= 0:

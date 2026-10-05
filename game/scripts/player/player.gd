@@ -37,6 +37,16 @@ const SWIM_VERTICAL := 4.0
 const SWIM_HOP_HEIGHT := 2.6
 const DROWN_INTERVAL := 1.5
 const STEP_HOLD_TICKS := 8
+## Build 5 magic (Ashwin: "unlock magic abilities... some combat, some movement").
+const FIREBALL_COOLDOWN := 22
+const CLAP_COOLDOWN := 120
+const CLAP_ACTIVE := 8
+const CLAP_RADIUS := 5.5
+const DASH_TICKS := 11
+const DASH_SPEED := 24.0
+const DASH_COOLDOWN := 30
+const GLIDE_FALL := 2.6
+const GLIDE_HOLD_TICKS := 10
 
 @export var settings: MovementSettings = preload("res://data/movement/hero_movement.tres")
 
@@ -75,6 +85,24 @@ var _swim_grace: float = 0.0
 ## Set each tick by an Updraft the hero is inside (Build 4 wind columns).
 var external_lift: float = 0.0
 var on_ice: bool = false
+# Magic state (Build 5).
+## Abilities granted directly (tests); otherwise they come from Progress.
+var abilities_override: Array[StringName] = []
+var gliding: bool = false
+var dash_left: int = 0
+var dash_dir: Vector3 = Vector3.FORWARD
+var clap_tick: int = -1
+var clap_id: int = 0
+var clap_cooldown: int = 0
+var fireball_cooldown: int = 0
+var dash_cooldown: int = 0
+var air_dash_used: bool = false
+var _jump_hold_ticks: int = 0
+var _fireball_pending: bool = false
+var _clap_pending: bool = false
+var _dash_pending: bool = false
+var _cast_anim_left: float = 0.0
+var _glider: Node3D
 
 # Combat (plan §4.1)
 var attack: AttackDef
@@ -148,12 +176,38 @@ func _ready() -> void:
 	_build_shadow()
 	_build_landing_marker()
 	_build_plunge_streaks()
+	_build_glider()
 	max_hp = Progress.max_halves()
 	hp = max_hp
 	safe_position = global_position
 
 
 # --- Public API -------------------------------------------------------------------------------
+
+## The Glide flower: a big pink blossom held overhead like a parasol (Build 5).
+func _build_glider() -> void:
+	_glider = Node3D.new()
+	_glider.position = Vector3(0.0, 0.35, 0.0)
+	_glider.visible = false
+	body_pivot.add_child(_glider)
+	var mi := MeshInstance3D.new()
+	mi.mesh = Whimsy.flower_mesh(&"candy_pink", 1.0, 1.0)
+	mi.material_override = Whimsy.material()
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_glider.add_child(mi)
+
+
+func has_ability(ability: StringName) -> bool:
+	return ability in abilities_override or Progress.has_ability(ability)
+
+
+func clap_active() -> bool:
+	return clap_tick >= 0 and clap_tick < CLAP_ACTIVE
+
+
+func clap_attack_dict() -> Dictionary:
+	return {"id": clap_id, "damage": 1, "kind": &"thunder", "from": global_position, "hitstop": 4, "knockback": 2.0}
+
 
 func has_buffered_jump() -> bool:
 	return buffer_age >= 0 and buffer_age <= int(settings.jump_buffer * 60.0 + 0.001)
@@ -324,6 +378,10 @@ func respawn_at(pos: Vector3, look: Vector3 = Vector3.FORWARD) -> void:
 	_ignore_floor_ticks = 0
 	_left_ground_by_launch = false
 	_slow_left = 0.0
+	gliding = false
+	dash_left = 0
+	clap_tick = -1
+	air_dash_used = false
 	look.y = 0.0
 	if look.length() > 0.01:
 		facing = look.normalized()
@@ -384,6 +442,12 @@ func _physics_process(delta: float) -> void:
 			stored_attack_tick = tick
 	if inp.plunge_pressed and state in [State.NORMAL, State.ATTACK]:
 		_plunge_press_pending = true
+	if inp.fireball_pressed and state in [State.NORMAL, State.ATTACK]:
+		_fireball_pending = true
+	if inp.clap_pressed and state in [State.NORMAL, State.ATTACK]:
+		_clap_pending = true
+	if inp.dash_pressed and state in [State.NORMAL, State.ATTACK]:
+		_dash_pending = true
 	if inp.interact_pressed and state == State.NORMAL and is_grounded():
 		_try_interact()
 	# Local hit-stop: position, animation and timers pause; buffers pause rather than drain.
@@ -441,6 +505,14 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 	if inp.jump_released and _short_hop_ok and velocity.y > 0.0:
 		velocity.y *= settings.short_hop_factor
 		_short_hop_ok = false
+	# Glide (Build 5): hold jump while falling; hold through the apex, or after the third jump.
+	_jump_hold_ticks = _jump_hold_ticks + 1 if inp.jump_held else 0
+	var was_gliding := gliding
+	gliding = has_ability(&"glide") and state == State.NORMAL and not is_grounded() and dash_left <= 0 \
+		and velocity.y < 0.0 and inp.jump_held and (jumps_used >= 3 or _jump_hold_ticks > GLIDE_HOLD_TICKS)
+	if gliding and not was_gliding:
+		AudioDirector.play(&"glide", -6.0)
+		_air_speed_cap = maxf(_air_speed_cap, settings.run_speed)
 	# 6. Gravity and horizontal movement, then move.
 	_apply_gravity(delta, inp.jump_held)
 	_apply_horizontal(delta, inp.move, is_grounded() or _step_hold > 0)
@@ -583,6 +655,8 @@ func _allows_jump_now() -> bool:
 
 func _on_landed() -> void:
 	jumps_used = 0
+	air_dash_used = false
+	gliding = false
 	air_slash_ready = false
 	_left_ground_by_launch = false
 	_landed_at_tick = tick
@@ -624,6 +698,7 @@ func _tick_actions(grounded: bool) -> void:
 		_plunge_press_pending = false
 		if not grounded and state in [State.NORMAL, State.ATTACK]:
 			_start_plunge()
+	_tick_magic(grounded)
 	if _attack_press_pending:
 		_attack_press_pending = false
 		if state == State.NORMAL:
@@ -632,6 +707,90 @@ func _tick_actions(grounded: bool) -> void:
 			elif air_slash_ready:
 				air_slash_ready = false
 				_start_attack(ATTACK_AIR)
+
+
+## Build 5 magic: Fireball (R), Thunderclap (C) and Air Dash (V). Each needs its ability.
+func _tick_magic(grounded: bool) -> void:
+	if state != State.NORMAL:
+		dash_left = 0
+	if fireball_cooldown > 0:
+		fireball_cooldown -= 1
+	if clap_cooldown > 0:
+		clap_cooldown -= 1
+	if dash_cooldown > 0:
+		dash_cooldown -= 1
+	if clap_tick >= 0:
+		clap_tick += 1
+		if clap_tick >= CLAP_ACTIVE:
+			clap_tick = -1
+	if _fireball_pending:
+		_fireball_pending = false
+		if state == State.NORMAL and has_ability(&"fireball") and fireball_cooldown <= 0:
+			_cast_fireball()
+	if _clap_pending:
+		_clap_pending = false
+		if state == State.NORMAL and has_ability(&"thunderclap") and clap_cooldown <= 0:
+			_thunderclap(grounded)
+	if _dash_pending:
+		_dash_pending = false
+		if state == State.NORMAL and has_ability(&"dash") and dash_cooldown <= 0 and (grounded or not air_dash_used):
+			_start_dash(grounded)
+
+
+func _cast_fireball() -> void:
+	fireball_cooldown = FIREBALL_COOLDOWN
+	attack_id += 1
+	var origin := global_position + Vector3.UP * 1.0 + facing * 0.7
+	var aim := facing
+	if lock_target != null and is_instance_valid(lock_target):
+		var to := lock_target.global_position + Vector3.UP * 0.6 - origin
+		if to.length() > 0.5:
+			aim = to.normalized()
+			var flat := Vector3(to.x, 0.0, to.z)
+			if flat.length() > 0.1:
+				facing = flat.normalized()
+	var fb := Fireball.new()
+	fb.dir = aim
+	fb.attack_id = attack_id
+	get_parent().add_child(fb)
+	fb.global_position = origin
+	_cast_anim_left = 0.3
+	AudioDirector.play(&"fireball", -3.0)
+	Telemetry.log_event("fireball", {"pos": global_position})
+
+
+func _thunderclap(grounded: bool) -> void:
+	clap_cooldown = CLAP_COOLDOWN
+	attack_id += 1
+	clap_id = attack_id
+	clap_tick = 0
+	if not grounded:
+		velocity.y = maxf(velocity.y, 4.0)
+	_cast_anim_left = 0.45
+	_squash = Vector3(1.25, 0.8, 1.25)
+	Fx.ring(get_parent(), global_position + Vector3.UP * 0.2, Palette.color(&"gold"), CLAP_RADIUS)
+	Fx.ring(get_parent(), global_position + Vector3.UP * 0.6, Palette.color(&"water_light"), CLAP_RADIUS * 0.8)
+	Fx.burst(get_parent(), global_position + Vector3.UP * 1.0, Palette.color(&"gold"), 30, 9.0, 0.1, 0.0, 0.35)
+	AudioDirector.play(&"thunder", -1.0)
+	if camera_rig != null and camera_rig.has_method(&"add_trauma"):
+		camera_rig.call(&"add_trauma", 0.35)
+	Telemetry.log_event("thunderclap", {"pos": global_position})
+
+
+func _start_dash(grounded: bool) -> void:
+	var b := _move_basis()
+	var dir := b * Vector3(last_input.move.x, 0.0, -last_input.move.y)
+	dash_dir = dir.normalized() if dir.length() > 0.2 else facing
+	facing = dash_dir
+	dash_left = DASH_TICKS
+	dash_cooldown = DASH_COOLDOWN
+	if not grounded:
+		air_dash_used = true
+	gliding = false
+	_squash = Vector3(0.8, 0.8, 1.3)
+	Fx.burst(get_parent(), global_position + Vector3.UP * 0.6, Palette.color(&"water_light"), 12, 3.0, 0.1, 0.0, 0.3)
+	AudioDirector.play(&"dash", -3.0)
+	Telemetry.log_event("dash", {"pos": global_position})
 
 
 func _tick_attack(grounded: bool) -> void:
@@ -668,6 +827,8 @@ func _start_attack(def: AttackDef) -> void:
 
 
 func _start_plunge() -> void:
+	dash_left = 0
+	gliding = false
 	attack = null
 	state = State.PLUNGE
 	plunge_tick = 0
@@ -752,15 +913,22 @@ func _apply_gravity(delta: float, jump_held: bool) -> void:
 			# Straight down, accelerating hard (Build 2 feedback).
 			velocity = Vector3(0.0, maxf(velocity.y - settings.plunge_accel * delta, -settings.plunge_speed), 0.0)
 		return
+	if dash_left > 0:
+		velocity.y = 0.0
+		return
 	if external_lift > 0.0 and not is_grounded():
-		# Wind column: rise toward the lift speed; still counts as being launched.
-		velocity.y = move_toward(velocity.y, external_lift, 70.0 * delta)
+		# Wind column: rise toward the lift speed; still counts as being launched. Gliding
+		# opens the flower like a sail and rides it higher.
+		velocity.y = move_toward(velocity.y, external_lift * (1.4 if gliding or (has_ability(&"glide") and last_input.jump_held) else 1.0), 70.0 * delta)
 		air_slash_ready = true
 		external_lift = 0.0
 		return
 	external_lift = 0.0
 	if is_grounded() and velocity.y <= 0.0:
 		velocity.y = -0.5
+		return
+	if gliding:
+		velocity.y = maxf(velocity.y - settings.gravity_down * delta, -GLIDE_FALL)
 		return
 	var g := settings.gravity_up if velocity.y > 0.0 else settings.gravity_down
 	if absf(velocity.y) < settings.apex_threshold and jump_held:
@@ -794,6 +962,15 @@ func _apply_horizontal(delta: float, move: Vector2, grounded: bool) -> void:
 	if state == State.PLUNGE_LAND:
 		velocity.x = 0.0
 		velocity.z = 0.0
+		return
+	if dash_left > 0:
+		dash_left -= 1
+		velocity.x = dash_dir.x * DASH_SPEED
+		velocity.z = dash_dir.z * DASH_SPEED
+		if dash_left == 0:
+			velocity.x = dash_dir.x * settings.run_speed
+			velocity.z = dash_dir.z * settings.run_speed
+			_air_speed_cap = settings.run_speed
 		return
 	var b := _move_basis()
 	var dir := (b * Vector3(move.x, 0.0, -move.y))
@@ -1224,6 +1401,13 @@ func _update_visual(delta: float) -> void:
 	hurt_shape.height = 0.8 if _flip_speed > 0.0 else 1.2
 	_land_anim_left = maxf(_land_anim_left - delta, 0.0)
 	_cheer_left = maxf(_cheer_left - delta, 0.0)
+	_cast_anim_left = maxf(_cast_anim_left - delta, 0.0)
+	if _glider != null:
+		if gliding and not _glider.visible:
+			_glider.scale = Vector3.ONE * 0.2
+		_glider.visible = gliding
+		_glider.scale = _glider.scale.lerp(Vector3.ONE, 1.0 - exp(-14.0 * delta))
+		_glider.rotation.y += delta * 2.0
 	_sword_trail.emitting = state == State.ATTACK and attack != null and attack.phase_at(attack_tick) != AttackDef.Phase.STARTUP and attack.phase_at(attack_tick) != AttackDef.Phase.DONE and attack_tick < attack.startup + attack.active + 3
 	if sword != null and state != State.PLUNGE:
 		sword.transform = _sword_rest
@@ -1284,6 +1468,16 @@ func _animate(grounded: bool, h_speed: float) -> void:
 				var dur := attack.total() / 60.0
 				hero.play(clip, 0.06, hero.clip_length(clip) / dur, attack_tick <= 1)
 			return
+	if dash_left > 0:
+		hero.play(&"Dodge_Forward", 0.04, 1.8)
+		return
+	if _cast_anim_left > 0.0:
+		hero.play(&"Spellcast_Raise" if clap_tick >= 0 else &"Spellcast_Shoot", 0.05, 1.6)
+		return
+	if gliding:
+		hero.play(&"Jump_Idle", 0.15, 0.5)
+		body_pivot.rotation.x = 0.25
+		return
 	if _cheer_left > 0.0 and grounded and h_speed < 0.5:
 		hero.play(&"Cheer", 0.2)
 	elif not grounded:

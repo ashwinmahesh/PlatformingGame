@@ -16,3 +16,4 @@ shard_ids = Array[StringName]([&"w1_shard_cliff", &"w1_shard_waterfall", &"w1_sh
 shards_required = 3
 goal = &"boss"
 color = &"leaf_teal"
+ability = &"fireball"

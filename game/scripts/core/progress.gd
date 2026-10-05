@@ -97,6 +97,20 @@ func is_world_complete(world_id: StringName) -> bool:
 	return String(world_id) in (data["completed_worlds"] as Array)
 
 
+## Build 5 magic abilities: learned by clearing the world that teaches them (derived from
+## completion, never stored). Dev builds can grant them all with F3 for playtesting.
+var dev_all_abilities: bool = false
+
+
+func has_ability(ability: StringName) -> bool:
+	if dev_all_abilities:
+		return true
+	for w in WORLD_DEFS:
+		if w.ability == ability and is_world_complete(w.id):
+			return true
+	return false
+
+
 func completed_count() -> int:
 	return (data["completed_worlds"] as Array).size()
 
@@ -239,6 +253,8 @@ func commit_victory(world_id: StringName) -> bool:
 	data = next
 	save()
 	_debug_kill(3)
+	if first_clear and w != null and w.ability != &"":
+		Events.ability_learned.emit(w.ability)
 	return first_clear
 
 

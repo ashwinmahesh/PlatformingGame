@@ -53,6 +53,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 	elif event.is_action_pressed(&"dev_ai_debug"):
 		ai_debug = not ai_debug
+	elif event.is_action_pressed(&"dev_all_abilities"):
+		Progress.dev_all_abilities = not Progress.dev_all_abilities
+		Events.notice.emit("Dev: all abilities %s" % ("ON" if Progress.dev_all_abilities else "off"))
 
 
 func _process(_delta: float) -> void:

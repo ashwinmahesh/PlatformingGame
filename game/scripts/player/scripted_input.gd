@@ -37,6 +37,9 @@ func sample() -> PlayerInput:
 	i.lock_held = _held.get(&"lock_on", false)
 	i.lock_released = &"lock_on" in _released
 	i.switch_target_pressed = &"switch_target" in _pressed
+	i.fireball_pressed = &"fireball" in _pressed
+	i.clap_pressed = &"thunderclap" in _pressed
+	i.dash_pressed = &"dash" in _pressed
 	_pressed.clear()
 	_released.clear()
 	return i

@@ -16,3 +16,5 @@ extends Resource
 ## &"boss" or &"star": what the shards unlock.
 @export var goal: StringName = &"boss"
 @export var color: StringName = &"leaf_teal"
+## Build 5: the magic ability learned the first time this world is cleared (&"" for none).
+@export var ability: StringName = &""

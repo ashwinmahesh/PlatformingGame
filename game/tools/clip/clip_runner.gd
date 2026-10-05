@@ -26,6 +26,8 @@ func _ready() -> void:
 	_level.player.input_source = _inp
 	if _scenario == "plunge_springcap":
 		_level.player.respawn_at(Vector3(0.0, 5.05, -62.0))
+	if _scenario == "magic":
+		_level.player.abilities_override = [&"fireball", &"glide", &"thunderclap", &"dash"]
 
 
 func _physics_process(_delta: float) -> void:
@@ -47,5 +49,24 @@ func _physics_process(_delta: float) -> void:
 		"slash_combo":
 			if _t in [20, 32, 46]:
 				_inp.tap(&"attack")
-	if _t > (360 if _scenario == "hub_portal" else 200):
+		"magic":
+			# Fireball, Thunderclap, then a jump held into a Glide and an Air Dash.
+			if _t in [20, 48]:
+				_inp.tap(&"fireball")
+			if _t == 80:
+				_inp.tap(&"thunderclap")
+			_inp.move = Vector2(0.0, 1.0) if _t > 120 else Vector2.ZERO
+			if _t == 130:
+				_inp.press(&"jump")
+			if _t == 150:
+				_inp.release(&"jump")
+			if _t == 156:
+				_inp.press(&"jump")
+			if _t == 176:
+				_inp.release(&"jump")
+			if _t == 182:
+				_inp.press(&"jump")
+			if _t == 260:
+				_inp.tap(&"dash")
+	if _t > (360 if _scenario in ["hub_portal", "magic"] else 200):
 		AudioDirector.quit_game()

@@ -78,7 +78,9 @@ func is_lockable() -> bool:
 func on_hit(atk: Dictionary) -> Dictionary:
 	if state == S.HIDDEN:
 		return {}
-	if state in [S.POP, S.SPIN]:
+	if state in [S.POP, S.SPIN] and StringName(str(atk.get("kind", ""))) == &"thunder":
+		set_state(S.DIZZY)
+	elif state in [S.POP, S.SPIN]:
 		AudioDirector.play(&"hit", 0.0, 1.9)
 		Fx.burst(get_parent(), global_position + Vector3.UP * 1.0, Palette.color(&"cloth_cream"), 6, 3.0, 0.07)
 		return {"hit": true, "blocked": true}

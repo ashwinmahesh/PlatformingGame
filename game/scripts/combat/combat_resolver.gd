@@ -9,6 +9,9 @@ var player: Player
 var feet_shape: SphereShape3D
 ## Enemies the player hit this tick (instance ids). Exposed for tests.
 var hit_this_tick: Dictionary[int, bool] = {}
+## Actors the current Thunderclap already hit (one hit per clap, whatever the actor).
+var _clap_seen: int = -1
+var _clap_hit: Dictionary[int, bool] = {}
 
 
 func _ready() -> void:
@@ -24,6 +27,7 @@ func _physics_process(_delta: float) -> void:
 	if player.state in [Player.State.DEAD, Player.State.FROZEN]:
 		return
 	_player_attacks()
+	_magic_attacks()
 	_land_bounces()
 	_enemy_attacks()
 
@@ -81,6 +85,41 @@ func _player_attacks() -> void:
 				_impact(actor, area, int(atk["hitstop"]))
 		if best_bounce > 0.0:
 			player.bounce(best_bounce, true)
+
+
+## Build 5 magic: Fireballs (one hit, then they pop) and the Thunderclap ring.
+func _magic_attacks() -> void:
+	for n in get_tree().get_nodes_in_group(&"player_projectile"):
+		var fb := n as Fireball
+		if fb == null or fb.done:
+			continue
+		var atk := fb.attack_dict()
+		for area in _query(fb.shape, Transform3D(Basis(), fb.global_position), Layers.ENEMY_HURTBOX | Layers.REFLECTABLE):
+			var actor := actor_of(area)
+			if actor == null or not actor.has_method(&"receive_player_attack"):
+				continue
+			var res: Dictionary = actor.call(&"receive_player_attack", atk, area)
+			if bool(res.get("hit", false)) or bool(res.get("blocked", false)):
+				hit_this_tick[actor.get_instance_id()] = true
+				if bool(res.get("hit", false)) and not bool(res.get("blocked", false)):
+					AudioDirector.play(&"hit", -4.0)
+				fb.pop()
+				break
+	if player.clap_active():
+		if player.clap_id != _clap_seen:
+			_clap_seen = player.clap_id
+			_clap_hit.clear()
+		var atk := player.clap_attack_dict()
+		var s := SphereShape3D.new()
+		s.radius = Player.CLAP_RADIUS
+		for area in _query(s, Transform3D(Basis(), player.global_position + Vector3.UP * 0.6), Layers.ENEMY_HURTBOX | Layers.REFLECTABLE):
+			var actor := actor_of(area)
+			if actor == null or not actor.has_method(&"receive_player_attack") or _clap_hit.has(actor.get_instance_id()):
+				continue
+			_clap_hit[actor.get_instance_id()] = true
+			var res: Dictionary = actor.call(&"receive_player_attack", atk, area)
+			if bool(res.get("hit", false)):
+				hit_this_tick[actor.get_instance_id()] = true
 
 
 func _impact(actor: Node, area: Area3D, hitstop: int) -> void:

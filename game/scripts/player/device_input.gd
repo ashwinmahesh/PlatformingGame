@@ -21,4 +21,7 @@ func sample() -> PlayerInput:
 	i.lock_held = Input.is_action_pressed(&"lock_on")
 	i.lock_released = Input.is_action_just_released(&"lock_on")
 	i.switch_target_pressed = Input.is_action_just_pressed(&"switch_target")
+	i.fireball_pressed = Input.is_action_just_pressed(&"fireball")
+	i.clap_pressed = Input.is_action_just_pressed(&"thunderclap")
+	i.dash_pressed = Input.is_action_just_pressed(&"dash")
 	return i

@@ -14,3 +14,7 @@ var lock_pressed: bool = false
 var lock_held: bool = false
 var lock_released: bool = false
 var switch_target_pressed: bool = false
+## Build 5 magic.
+var fireball_pressed: bool = false
+var clap_pressed: bool = false
+var dash_pressed: bool = false

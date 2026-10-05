@@ -222,6 +222,50 @@ def ui_blip():
     return chime([84], 0.0, 0.07, "square")
 
 
+# --- Build 5 magic ----------------------------------------------------------------------------
+
+@sound
+def fireball():
+    n = noise(0.32, 51)
+    whoosh = mul(bandpass_sweep(n, 600, 3200), env_adsr(len(n), 0.01, 0.05, 0.7, 0.15))
+    body = mul(sweep(0.32, 180, 420, "saw", curve=0.7), env_exp(int(0.32 * SR), 0.12))
+    return mix(whoosh, gain(lowpass(body, 900), 0.6))
+
+
+@sound
+def fire_pop():
+    crack = mul(highpass(noise(0.18, 53), 1500), env_exp(int(0.18 * SR), 0.03))
+    return mix(thump(0.25, 700, 55), gain(crack, 0.7))
+
+
+@sound
+def thunder():
+    crack = mul(highpass(noise(0.12, 57), 2000), env_exp(int(0.12 * SR), 0.02))
+    rumble = mul(lowpass(noise(1.1, 59), 220), env_adsr(int(1.1 * SR), 0.02, 0.2, 0.6, 0.6))
+    zap = mul(sweep(0.35, 1800, 120, "square", curve=0.4), env_exp(int(0.35 * SR), 0.08))
+    return mix(gain(crack, 0.9), gain(rumble, 1.2), gain(zap, 0.35))
+
+
+@sound
+def dash():
+    n = noise(0.22, 61)
+    return mix(mul(bandpass_sweep(n, 4000, 900), env_adsr(len(n), 0.005, 0.03, 0.6, 0.1)), gain(boing(500, 900, 0.12), 0.3))
+
+
+@sound
+def glide():
+    n = noise(0.5, 63)
+    air = mul(lowpass(n, 1800), env_adsr(len(n), 0.08, 0.1, 0.5, 0.25))
+    return mix(gain(air, 0.5), gain(chime([79, 84, 88], 0.06, 0.3), 0.5))
+
+
+@sound
+def ability():
+    fanfare = chime([67, 72, 76, 79, 84, 88, 91, 96], 0.075, 0.7)
+    shimmer = gain(chime([96, 100, 103, 108], 0.05, 0.5), 0.35)
+    return reverb(mix(fanfare, shimmer), wet=0.25)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, fn in SOUNDS.items():

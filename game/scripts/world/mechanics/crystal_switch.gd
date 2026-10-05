@@ -9,6 +9,8 @@ enum Look { CRYSTAL, LANTERN }
 
 var look: Look = Look.CRYSTAL
 var hold: float = 0.0
+## Build 5: only this attack kind lights it (&"fireball" for lanterns, &"thunder"), or any.
+var needs: StringName = &""
 var lit: bool = false
 var _left: float = 0.0
 var _last_id: int = -1
@@ -58,6 +60,9 @@ func receive_player_attack(atk: Dictionary, _area: Area3D) -> Dictionary:
 	if id == _last_id:
 		return {}
 	_last_id = id
+	if needs != &"" and StringName(str(atk.get("kind", ""))) != needs:
+		AudioDirector.play(&"ui_blip", -6.0, 0.7)
+		return {"hit": true}
 	set_lit(true)
 	return {"hit": true}
 
