@@ -59,6 +59,31 @@ const TABLE: Dictionary[StringName, Array] = {
 	&"obelisk": [K + "statue_obelisk.glb", 3.0, Col.BOX],
 	&"column": [K + "statue_column.glb", 3.0, Col.BOX],
 	&"hanging_moss": [K + "hanging_moss.glb", 3.0, Col.NONE],
+	&"cactus_short": [K + "cactus_short.glb", 4.0, Col.TRUNK],
+	&"cactus_tall": [K + "cactus_tall.glb", 4.0, Col.TRUNK],
+	&"palm": [K + "tree_palm.glb", 4.5, Col.TRUNK],
+	&"palm_tall": [K + "tree_palmTall.glb", 4.5, Col.TRUNK],
+	&"palm_bend": [K + "tree_palmBend.glb", 4.5, Col.TRUNK],
+	&"palm_detailed": [K + "tree_palmDetailedTall.glb", 4.5, Col.TRUNK],
+	&"rock_tall_c": [K + "rock_tallC.glb", 3.0, Col.CONVEX],
+	&"rock_tall_d": [K + "rock_tallD.glb", 3.0, Col.CONVEX],
+	&"rock_tall_e": [K + "rock_tallE.glb", 3.0, Col.CONVEX],
+	&"rock_large_d": [K + "rock_largeD.glb", 4.0, Col.CONVEX],
+	&"column_broken": [K + "statue_columnDamaged.glb", 3.0, Col.BOX],
+	&"statue_block": [K + "statue_block.glb", 3.0, Col.BOX],
+	&"statue_head": [K + "statue_head.glb", 3.0, Col.CONVEX],
+	&"statue_ring": [K + "statue_ring.glb", 3.0, Col.NONE],
+	&"stone_tall_b": [K + "stone_tallB.glb", 3.0, Col.CONVEX],
+	&"stone_tall_c": [K + "stone_tallC.glb", 3.0, Col.CONVEX],
+	&"stone_large_b": [K + "stone_largeB.glb", 4.0, Col.CONVEX],
+	&"tent_big": [K + "tent_detailedOpen.glb", 4.0, Col.BOX],
+	&"campfire_stones": [K + "campfire_stones.glb", 4.0, Col.NONE],
+	&"pumpkin": [K + "crop_pumpkin.glb", 4.0, Col.NONE],
+	&"pine_tall": [K + "tree_pineTallA.glb", 5.0, Col.TRUNK],
+	&"pine_default": [K + "tree_pineDefaultA.glb", 5.0, Col.TRUNK],
+	&"pine_small": [K + "tree_pineSmallA.glb", 4.0, Col.TRUNK],
+	&"tree_blocks": [K + "tree_blocks.glb", 5.0, Col.TRUNK],
+	&"tree_plateau": [K + "tree_plateau.glb", 5.0, Col.TRUNK],
 	&"home_a_blue": [M + "building_home_A_blue.gltf", 6.0, Col.BOX],
 	&"home_a_green": [M + "building_home_A_green.gltf", 6.0, Col.BOX],
 	&"home_b_red": [M + "building_home_B_red.gltf", 6.0, Col.BOX],
@@ -91,7 +116,7 @@ const TABLE: Dictionary[StringName, Array] = {
 const NO_SHADOW: Array[StringName] = [&"mountain", &"hills_trees", &"forest_cluster", &"forest_cluster_b", &"forest_medium", &"cloud_big", &"cloud_small"]
 
 ## Built shapes keep their crisp edges; everything natural gets smooth normals (Build 3: rounder).
-const KEEP_FACETS: Array[StringName] = [&"home_a_blue", &"home_a_green", &"home_b_red", &"market", &"windmill", &"well", &"tower", &"village_fence", &"barrel", &"crate", &"crate_small", &"flag", &"tent", &"target", &"sack", &"wheelbarrow", &"lumber", &"fence", &"fence_high", &"sign", &"obelisk", &"column", &"tent_small"]
+const KEEP_FACETS: Array[StringName] = [&"column_broken", &"statue_block", &"tent_big", &"home_a_blue", &"home_a_green", &"home_b_red", &"market", &"windmill", &"well", &"tower", &"village_fence", &"barrel", &"crate", &"crate_small", &"flag", &"tent", &"target", &"sack", &"wheelbarrow", &"lumber", &"fence", &"fence_high", &"sign", &"obelisk", &"column", &"tent_small"]
 
 static var _scenes: Dictionary[StringName, PackedScene] = {}
 

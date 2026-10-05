@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="WorldDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_02"
+display_name = "Cloudtop Steps"
+scene_path = "res://scenes/levels/w2/cloudtop.tscn"
+entrance_spawn = &"w2_entrance"
+arena_exit_spawn = &"w2_entrance"
+spawn_ids = Array[StringName]([&"w2_entrance", &"w2_cp_plaza", &"w2_cp_heights", &"w2_cp_puffball", &"w2_cp_windmill"])
+seed_ids = Array[StringName]([&"w2_seed_lee", &"w2_seed_updraft", &"w2_seed_under", &"w2_seed_puff", &"w2_seed_chest", &"w2_seed_sails", &"w2_seed_garden", &"w2_seed_bounce"])
+first_clear_heart_containers = 1
+shard_ids = Array[StringName]([&"w2_shard_heights", &"w2_shard_puffball", &"w2_shard_windmill"])
+shards_required = 3
+goal = &"star"
+color = &"sky_top"

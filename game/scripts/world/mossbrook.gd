@@ -25,7 +25,7 @@ func build() -> void:
 	Kit.water(self, Vector3(0.0, -1.0, 0.0), Vector2(320.0, 320.0))
 	Kit.pillar(self, Vector3(0.0, 0.0, -4.0), 42.0, 5.0, &"bark_mid", &"grass_mid")
 	add_spawn(&"hub_arrival", Vector3(0.0, 0.0, 22.0))
-	add_spawn(&"hub_rootway_exit", Vector3(0.0, 0.0, -17.0), Vector3.BACK)
+	add_spawn(&"hub_rootway_exit", Vector3(0.0, 0.0, -11.0), Vector3.BACK)
 	_great_oak()
 	_huts()
 	_npcs()
@@ -57,20 +57,19 @@ func _great_oak() -> void:
 	Kit.mesh_instance(trunk, cm, Kit.mat(&"bark_mid", 0.06))
 	for spec: Array in [[0.0, 27.0, -34.0, 13.0], [-9.0, 23.0, -31.0, 8.5], [9.5, 23.5, -35.0, 9.0], [0.0, 21.0, -24.0, 7.0]]:
 		Kit.blob(self, Vector3(spec[0] as float, spec[1] as float, spec[2] as float), spec[3] as float, &"leaf_dark")
-	# The Rootway: World 1's Dream Pool at the oak's door, and a dormant arch for later worlds.
-	var arch := Portal.new()
-	arch.target_scene = &"world_01"
-	arch.target_spawn = &"w1_entrance"
-	arch.cleared = Progress.is_world_complete(&"world_01")
-	arch.label_text = "Glimmerbrook Wilds"
-	arch.position = Vector3(0.0, 0.0, -25.0)
-	add_child(arch)
-	var dormant := Portal.new()
-	dormant.dormant = true
-	dormant.label_text = "Not yet..."
-	dormant.position = Vector3(-10.5, 0.0, -23.5)
-	dormant.rotation.y = 0.5
-	add_child(dormant)
+	# The Rootway: one Dream Pool arch per world in a crescent around the oak (Build 4).
+	var n := Progress.WORLD_DEFS.size()
+	for i in n:
+		var w := Progress.WORLD_DEFS[i]
+		var a := lerpf(-0.95, 0.95, float(i) / maxf(n - 1, 1)) if n > 1 else 0.0
+		var arch := Portal.new()
+		arch.target_scene = w.id
+		arch.target_spawn = w.entrance_spawn
+		arch.cleared = Progress.is_world_complete(w.id)
+		arch.label_text = "%d. %s%s" % [i + 1, w.display_name, "  (Star)" if w.goal == &"star" else ""]
+		arch.position = Vector3(sin(a) * 15.0, 0.0, -34.0 + cos(a) * 15.0)
+		arch.rotation.y = a
+		add_child(arch)
 	if Progress.is_world_complete(&"world_01"):
 		# Trophy pedestal: the Glimmer Crest beside the cleared arch.
 		Kit.pillar(self, Vector3(-4.0, 1.0, -22.0), 0.45, 1.0, &"stone_light")
@@ -98,7 +97,7 @@ func _huts() -> void:
 func _npcs() -> void:
 	_fern = _npc("elder_fern", "Elder Fern", Vector3(-12.0, 0.0, -2.0))
 	_npc("pip", "Pip", Vector3(11.0, 0.0, -3.0))
-	_npc("old_bramble", "Old Bramble", Vector3(5.0, 0.0, -21.0))
+	_npc("old_bramble", "Old Bramble", Vector3(8.0, 0.0, -11.0))
 
 
 func _npc(id: String, display: String, pos: Vector3) -> Npc:

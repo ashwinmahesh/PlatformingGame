@@ -8,7 +8,10 @@ const HUB_SCENE := &"hub"
 const HUB_SPAWNS: Array[StringName] = [&"hub_arrival", &"hub_rootway_exit"]
 const HUB_PATH := "res://scenes/hub/mossbrook.tscn"
 const KNOWN_FLAGS: Array[StringName] = [&"seeds_quest_started", &"met_fern", &"met_pip", &"met_bramble"]
-const WORLD_DEFS: Array[WorldDef] = [preload("res://data/worlds/world_01.tres")]
+const WORLD_DEFS: Array[WorldDef] = [
+	preload("res://data/worlds/world_01.tres"),
+	preload("res://data/worlds/world_02.tres"),
+]
 const RETRY_SECONDS := 30.0
 
 var save_dir: String = "user://"

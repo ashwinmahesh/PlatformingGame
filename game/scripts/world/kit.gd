@@ -88,13 +88,13 @@ static func add_shape(body: CollisionObject3D, shape: Shape3D, offset: Vector3 =
 
 ## Solid box with softly rounded edges (Build 3). pos is the centre of the top face, which is
 ## how level layouts are written. Dirt and stone blocks get a grassy or mossy top.
-static func block(parent: Node, top_center: Vector3, size: Vector3, color_name: StringName, layers: int = Layers.WORLD | Layers.CAMERA_BLOCKER) -> StaticBody3D:
+static func block(parent: Node, top_center: Vector3, size: Vector3, color_name: StringName, layers: int = Layers.WORLD | Layers.CAMERA_BLOCKER, top_color: StringName = &"auto") -> StaticBody3D:
 	var body := static_body(parent, top_center - Vector3(0.0, size.y * 0.5, 0.0), layers)
 	var shape := BoxShape3D.new()
 	shape.size = size
 	add_shape(body, shape)
 	var radius := clampf(minf(size.x, minf(size.y, size.z)) * 0.3, 0.12, 1.1)
-	var top: StringName = TOPS.get(color_name, &"") if size.x > 1.5 and size.z > 1.5 else &""
+	var top: StringName = (TOPS.get(color_name, &"") if top_color == &"auto" else top_color) if size.x > 1.5 and size.z > 1.5 else &""
 	mesh_instance(body, RoundMesh.box(size, radius), mat(color_name, 0.0, top))
 	return body
 

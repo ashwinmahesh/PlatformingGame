@@ -14,6 +14,14 @@ const MODELS: Dictionary[String, Array] = {
 	"elder_fern": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand"]],
 	"pip": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.48, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
 	"old_bramble": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.62, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	# Build 4: travellers in the new worlds and more villagers in Mossbrook.
+	"sandy": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.58, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"cobble": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.6, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"lumen": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.55, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"tundra": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.66, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	"marlo": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.6, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"bea": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.58, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"kip": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.44, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
 }
 
 ## Room for future services (plan §8.8); empty in Release 1.

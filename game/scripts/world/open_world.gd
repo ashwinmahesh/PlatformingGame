@@ -8,6 +8,12 @@ extends Level
 var world_id: StringName
 var floor_y: float = -14.0
 var lock: ShardLock
+## Per-world top colours for blocks (a desert has no grassy tops) and grass density per m².
+var tops: Dictionary[StringName, StringName] = {}
+var grass_density: float = 1.0 / 7.0
+## Region name -> centre, for "section_entered" telemetry.
+var regions: Dictionary[String, Vector3] = {}
+var _region_now: String = ""
 var _frame: Transform3D = Transform3D.IDENTITY
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var _grass_points: Array[Transform3D] = []
@@ -33,6 +39,10 @@ func S(size: Vector3) -> Vector3:
 	return Vector3(absf(x.x) + absf(z.x), size.y, absf(x.z) + absf(z.z))
 
 
+func top_of(color: StringName) -> StringName:
+	return tops.get(color, Kit.TOPS.get(color, &""))
+
+
 func make_lock() -> void:
 	var w := Progress.world_def(world_id)
 	lock = ShardLock.new()
@@ -43,13 +53,55 @@ func make_lock() -> void:
 
 # --- Terrain ----------------------------------------------------------------------------------
 
+## Flat ground with rectangular holes (ponds, gorges), built from a few sharp-edged boxes so the
+## top reads as one surface with no seams. Rects are world XZ (x, z, width, depth).
+func ground(outer: Rect2, holes: Array[Rect2], top_y: float, depth: float, color: StringName, top_color: StringName, grass: float = 0.0) -> void:
+	var xs: Array[float] = [outer.position.x, outer.end.x]
+	for h in holes:
+		xs.append(clampf(h.position.x, outer.position.x, outer.end.x))
+		xs.append(clampf(h.end.x, outer.position.x, outer.end.x))
+	xs.sort()
+	var m := Kit.mat(color, 0.0, top_color)
+	for i in xs.size() - 1:
+		var x0 := xs[i]
+		var x1 := xs[i + 1]
+		if x1 - x0 < 0.01:
+			continue
+		var cx := (x0 + x1) * 0.5
+		var cuts: Array[Vector2] = []
+		for h in holes:
+			if h.position.x < cx and h.end.x > cx:
+				cuts.append(Vector2(h.position.y, h.end.y))
+		cuts.sort_custom(func(a: Vector2, b: Vector2) -> bool: return a.x < b.x)
+		var z := outer.position.y
+		for c in cuts:
+			if c.x > z:
+				_ground_box(Rect2(x0, z, x1 - x0, c.x - z), top_y, depth, m, grass)
+			z = maxf(z, c.y)
+		if z < outer.end.y:
+			_ground_box(Rect2(x0, z, x1 - x0, outer.end.y - z), top_y, depth, m, grass)
+
+
+func _ground_box(r: Rect2, top_y: float, depth: float, m: Material, grass: float) -> void:
+	var c := Vector3(r.get_center().x, top_y - depth * 0.5, r.get_center().y)
+	var body := Kit.static_body(self, c)
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(r.size.x, depth, r.size.y)
+	Kit.add_shape(body, shape)
+	var bm := BoxMesh.new()
+	bm.size = shape.size
+	Kit.mesh_instance(body, bm, m)
+	if grass > 0.0:
+		_add_grass_area(Vector3(c.x, top_y, c.z), r.size, int(r.size.x * r.size.y * grass))
+
+
 ## A plateau whose sides run down to the floor. Returns the body.
 func plat(top_local: Vector3, size_xz: Vector2, color: StringName = &"bark_mid", grass: int = -1) -> StaticBody3D:
 	var top := P(top_local)
 	var size := S(Vector3(size_xz.x, top.y - floor_y, size_xz.y))
-	var body := Kit.block(self, top, size, color)
+	var body := Kit.block(self, top, size, color, Layers.WORLD | Layers.CAMERA_BLOCKER, top_of(color))
 	if grass != 0:
-		_add_grass_area(top, Vector2(size.x, size.z), grass if grass > 0 else int(size.x * size.z / 7.0))
+		_add_grass_area(top, Vector2(size.x, size.z), grass if grass > 0 else int(size.x * size.z * grass_density))
 	return body
 
 
@@ -58,13 +110,13 @@ func disc(top_local: Vector3, radius: float, color: StringName = &"bark_mid", to
 	var top := P(top_local)
 	var body := Kit.pillar(self, top, radius, top.y - floor_y, color, top_color)
 	if grass != 0:
-		_add_grass_disc(top, radius * 0.92, grass if grass > 0 else int(radius * radius * 0.45))
+		_add_grass_disc(top, radius * 0.92, grass if grass > 0 else int(radius * radius * PI * grass_density))
 	return body
 
 
 ## A floating ledge of `size` (y = thickness) with its top at top_local.
 func ledge(top_local: Vector3, size: Vector3, color: StringName = &"stone_light", yaw: float = 0.0) -> StaticBody3D:
-	var b := Kit.block(self, P(top_local), S(size) if yaw == 0.0 else size, color)
+	var b := Kit.block(self, P(top_local), S(size) if yaw == 0.0 else size, color, Layers.WORLD | Layers.CAMERA_BLOCKER, top_of(color))
 	if yaw != 0.0:
 		b.rotation.y = Y(yaw)
 	return b
@@ -187,13 +239,13 @@ func critter(script: GDScript, base_local: Vector3) -> Critter:
 	return c
 
 
-func gloplets(center_local: Vector3, radius: float, spots: Array[Vector3], bouncer_spots: Array[Vector3] = []) -> EncounterZone:
+func gloplets(center_local: Vector3, radius: float, spots: Array[Vector3], bouncer_spots: Array[Vector3] = [], def: EnemyDef = null) -> EncounterZone:
 	var zone := EncounterZone.new()
 	zone.zone_id = StringName("%s_zone_%d" % [world_id, get_child_count()])
 	zone.radius = radius
 	zone.position = P(center_local)
 	for s in spots:
-		zone.add_spawn(_frame.basis * s, preload("res://data/enemies/gloplet.tres"))
+		zone.add_spawn(_frame.basis * s, def if def != null else preload("res://data/enemies/gloplet.tres"))
 	for s in bouncer_spots:
 		zone.add_spawn(_frame.basis * s, preload("res://data/enemies/bouncer.tres"))
 	add_child(zone)
@@ -278,3 +330,22 @@ func tree_line(a_local: Vector3, b_local: Vector3, step: float, ids: Array[Strin
 	for i in n + 1:
 		var p := a_local.lerp(b_local, float(i) / n) + Vector3(_rng.randf_range(-1.0, 1.0), 0.0, _rng.randf_range(-1.0, 1.0))
 		prop(ids[_rng.randi() % ids.size()], p, _rng.randf() * TAU, scale_mul * _rng.randf_range(0.85, 1.2), true, leaf)
+
+
+func _physics_process(delta: float) -> void:
+	super._physics_process(delta)
+	if player == null or regions.is_empty():
+		return
+	var pos := player.global_position
+	var current := ""
+	var best := INF
+	for key: String in regions:
+		var d := Vector2(pos.x - regions[key].x, pos.z - regions[key].z).length()
+		if d < best:
+			best = d
+			current = key
+	if current != _region_now:
+		if _region_now != "":
+			Telemetry.log_event("section_left", {"section": _region_now})
+		_region_now = current
+		Telemetry.log_event("section_entered", {"section": current})
