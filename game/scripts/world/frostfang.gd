@@ -494,6 +494,11 @@ func _rimwalk() -> void:
 	bridge(Vector3(-85.0, 18.0, -124.0), Vector3(-85.0, 18.0, -138.0), 3.6, &"wood_plank", true, &"roof_red")
 	sign_post(Vector3(-76.0, 0.0, -108.0), "The Ice Stair: up to\nthe Rimwalk!", PI * 0.25)
 	lift(Vector3(25.0, 0.0, -131.7), 22.0, 8.0)
+	# Build 6 accessibility: a ladder up the front of every ledge.
+	ladder(Vector3(-70.0, 0.0, -138.0), 18.0)
+	ladder(Vector3(-20.0, 0.0, -138.0), 20.0)
+	ladder(Vector3(34.0, 0.0, -134.0), 22.0)
+	ladder(Vector3(70.0, 0.0, -130.0), 26.0)
 	sign_post(Vector3(31.0, 0.0, -126.0), "Mine lift to the Rimwalk", PI * 0.75)
 	for i in 8:
 		var top := Vector3(92.0 - i * 2.0, 3.0 + i * 3.0, -106.0 - i * 4.0)

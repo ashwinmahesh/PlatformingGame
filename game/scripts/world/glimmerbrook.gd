@@ -182,6 +182,8 @@ func _fernway() -> void:
 	animals(Bunny, Vector3(0.0, 0.0, -20.0), 10.0, 3)
 	# Cliff Garden on top.
 	plat(Vector3(0.0, CLIFF, -66.0), Vector2(42.0, 32.0))
+	# Build 6 accessibility: a ladder up the cliff's east end, besides the Springcap.
+	ladder(P(Vector3(12.0, 0.0, -50.0)), CLIFF, Y())
 	checkpoint(&"w1_cp_clearing", Vector3(0.0, CLIFF, -54.0))
 	gloplets(Vector3(-8.0, CLIFF, -68.0), 10.0, [Vector3.ZERO, Vector3(-4.0, 0.0, 4.0), Vector3(3.0, 0.0, -4.0)])
 	gloplets(Vector3(11.0, CLIFF, -70.0), 6.0, [], [Vector3.ZERO])

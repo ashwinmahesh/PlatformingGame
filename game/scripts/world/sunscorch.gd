@@ -80,6 +80,7 @@ func build() -> void:
 	_side_canyons()
 	_golem_gate()
 	_mesa_town()
+	_gorge_ladders()
 	_gorge_life()
 	finish_boss_world()
 	finish_life(&"moss")
@@ -699,3 +700,75 @@ func _mesa_town() -> void:
 	sign_post(Vector3(10.0, 0.0, 52.0), "Bounce up to Mesa Town!", PI * 0.75)
 	sparkles(sq + Vector3(0.0, 2.0, 0.0), Vector3(40.0, 4.0, 40.0), 30)
 	add_capture_point("town", Vector3(10.0, g + 22.0, 64.0), Vector3(42.0, g + 6.0, 20.0))
+
+
+# --- Build 6: vertical accessibility (Ashwin: "apply the general principle of vertical
+# accessibility throughout the game") ----------------------------------------------------------
+# Ladders up both gorge walls every 30 m or so, so the plateau is never far from wherever you are
+# down in the canyon. The wall face is found from the same 8 m cell rule that built the plateau.
+
+func _plateau_cell(p: Vector2) -> Vector2i:
+	return Vector2i(int(floor((p.x + 150.0) / 8.0)), int(floor((p.y + 160.0) / 8.0)))
+
+
+func _cell_solid(c: Vector2i) -> bool:
+	if c.x < 0 or c.x >= 38 or c.y < 0 or c.y >= 40:
+		return false
+	var centre := Vector2(-150.0 + (c.x + 0.5) * 8.0, -160.0 + (c.y + 0.5) * 8.0)
+	return gorge_distance(centre) > 4.0 and not CHASM.grow(2.0).has_point(centre) and centre.distance_to(Vector2(ARENA.x, ARENA.z)) >= 40.0
+
+
+func _in_hole(p: Vector2) -> bool:
+	for r: Rect2 in [Rect2(-24.0, 60.0, 14.0, 12.0), CHASM.grow(2.0), Rect2(-116.0, 34.0, 16.0, 16.0)]:
+		if r.has_point(p):
+			return true
+	return false
+
+
+func _gorge_ladders() -> void:
+	region(Vector3.ZERO)
+	var placed: Array[Vector2] = []
+	for seg in GORGE:
+		var a: Vector2 = seg[0]
+		var b: Vector2 = seg[1]
+		var d := (b - a).normalized()
+		var nrm := Vector2(-d.y, d.x)
+		var length := a.distance_to(b)
+		var t := 12.0
+		while t < length - 6.0:
+			for sgn: float in [-1.0, 1.0]:
+				var start := a + d * t
+				var prev := start
+				var prev_cell := _plateau_cell(prev)
+				for k in 120:
+					var q := start + nrm * sgn * (k * 0.25)
+					var c := _plateau_cell(q)
+					if c != prev_cell and _cell_solid(c):
+						# Crossed into a solid cell: the face is on whichever axis changed.
+						var foot: Vector2
+						var out: Vector2
+						if c.x != prev_cell.x:
+							var fx := -150.0 + (c.x if c.x > prev_cell.x else c.x + 1) * 8.0
+							foot = Vector2(fx, clampf(q.y, -160.0 + c.y * 8.0 + 1.2, -160.0 + (c.y + 1) * 8.0 - 1.2))
+							out = Vector2(-1.0 if c.x > prev_cell.x else 1.0, 0.0)
+						else:
+							var fz := -160.0 + (c.y if c.y > prev_cell.y else c.y + 1) * 8.0
+							foot = Vector2(clampf(q.x, -150.0 + c.x * 8.0 + 1.2, -150.0 + (c.x + 1) * 8.0 - 1.2), fz)
+							out = Vector2(0.0, -1.0 if c.y > prev_cell.y else 1.0)
+						var near := false
+						for o in placed:
+							if o.distance_to(foot) < 14.0:
+								near = true
+						if not near and not _in_hole(foot + out * 1.0) and not _cell_solid(_plateau_cell(foot + out * 1.0)):
+							ladder(Vector3(foot.x, 0.0, foot.y), PLATEAU, atan2(out.x, out.y))
+							placed.append(foot)
+						break
+					prev_cell = c
+			t += 22.0
+	# Mesa Town: a ladder up the side of each house to its roof.
+	var g := PLATEAU
+	ladder(Vector3(19.0, g, 14.0), 8.0, -PI * 0.5)
+	ladder(Vector3(19.0, g, 44.0), 6.0, -PI * 0.5)
+	ladder(Vector3(61.0, g, 14.0), 12.0, PI * 0.5)
+	ladder(Vector3(62.0, g, 44.0), 10.0, PI * 0.5)
+

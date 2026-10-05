@@ -178,3 +178,39 @@ func test_every_world_loads_from_a_played_save() -> void:
 			check(lvl.player != null and lvl.player.state != Player.State.DEAD, "%d cleared: %s loads and the hero stands" % [cleared.size(), w.id])
 			lvl.queue_free()
 			await ticks(3)
+
+
+## Build 6 accessibility: every ladder in every world (and the hub) stands on ground and leads
+## onto something solid at the top.
+func test_every_ladder_leads_somewhere() -> void:
+	var paths: Array[String] = ["res://scenes/hub/mossbrook.tscn"]
+	for w in Progress.WORLD_DEFS:
+		paths.append(w.scene_path)
+	for path in paths:
+		Router.pending_spawn = &""
+		var lvl := (load(path) as PackedScene).instantiate() as Level
+		add_child(lvl)
+		await ticks(3)
+		var space := get_world_3d().direct_space_state
+		var bad: Array[String] = []
+		var count := 0
+		for n in lvl.find_children("*", "Ladder", true, false):
+			var l := n as Ladder
+			count += 1
+			var out := l.out_dir()
+			var foot := l.global_position + out * 0.8
+			var top := l.global_position + Vector3.UP * l.height - out * 1.4
+			var q1 := PhysicsRayQueryParameters3D.create(foot + Vector3.UP * 1.0, foot + Vector3.DOWN * 1.5, Layers.WORLD)
+			var q2 := PhysicsRayQueryParameters3D.create(top + Vector3.UP * 1.2, top + Vector3.DOWN * 1.2, Layers.WORLD)
+			var h1 := space.intersect_ray(q1)
+			var h2 := space.intersect_ray(q2)
+			if h1.is_empty() or h2.is_empty():
+				bad.append("%s%s" % ["foot " if h1.is_empty() else "top ", str(l.global_position.snapped(Vector3.ONE * 0.1))])
+		check(bad.is_empty(), "%s: %d ladders all lead somewhere %s" % [path.get_file(), count, str(bad.slice(0, 6))])
+		print("    ladders: %s %d" % [path.get_file(), count])
+		if path.ends_with("sunscorch.tscn"):
+			check(count >= 15, "Sunscorch: ladders all along the gorge walls (%d)" % count)
+		if path.ends_with("lanternwick.tscn"):
+			check(count >= 20, "Lanternwick: a ladder in every alley (%d)" % count)
+		lvl.queue_free()
+		await ticks(3)

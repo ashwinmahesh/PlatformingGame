@@ -814,6 +814,10 @@ func _coral_heights() -> void:
 	var bell := lift(Vector3(44.0, 0.0, 124.5), 22.0, 8.0, &"gold")
 	Kit.blob(bell, Vector3(0.0, 3.2, 0.0), 1.6, &"gold")
 	updraft(Vector3(-26.0, 0.0, 96.0), Vector3(4.0, 26.0, 4.0), 10.0, &"bubbles")
+	# Build 6 accessibility: ladders up the plaza, the Lantern Walk and the terrace.
+	ladder(Vector3(10.0, 0.0, 118.0), 18.0)
+	ladder(Vector3(-33.0, 0.0, 120.0), 20.0, PI * 0.5)
+	ladder(Vector3(34.0, 0.0, 104.0), 22.0, -PI * 0.5)
 	for i in 3:
 		var top := Vector3(-90.0 + i * 6.0, 6.0 + i * 6.0, 136.0 - i * 7.0)
 		Kit.pillar(self, top, 2.6, top.y, &"coral_pink", &"sand_light")
