@@ -1,0 +1,19 @@
+{
+  "id": "mags",
+  "name": "mags",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Mags",
+          "text": "Mind the washing, love! Every alley in Lanternwick has a way up if you look. Ladders on one wall, ledges on the other."
+        },
+        {
+          "speaker": "Mags",
+          "text": "And if you're nimble, you can kick off the walls themselves."
+        }
+      ]
+    }
+  ]
+}

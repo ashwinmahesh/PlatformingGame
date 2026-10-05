@@ -1,0 +1,19 @@
+{
+  "id": "tom",
+  "name": "tom",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Old Tom",
+          "text": "I've played this alley forty years. Folk throw coins, the cats throw shade."
+        },
+        {
+          "speaker": "Old Tom",
+          "text": "There's a crystal down the next alley. Give it a whack and see what lights up."
+        }
+      ]
+    }
+  ]
+}

@@ -21,6 +21,8 @@ const WALL_H := 14.0
 const TERRACE := TownHouse.FLOOR * 3.0 + 0.4
 
 var _batch: ModuleBatch
+## Every townhouse built: {pos, yaw, side, eave, ridge, flat} (Build 6 alleys use the side ones).
+var _houses: Array[Dictionary] = []
 var _spire_steps: Array[GhostPlatform] = []
 
 
@@ -65,6 +67,7 @@ func build() -> void:
 	_mill()
 	_courtyards()
 	_streets()
+	_alleys()
 	_batch.build(self)
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -134,15 +137,22 @@ func house_block(r: Rect2, floors_min: int, floors_max: int, flat: bool, gap_sid
 			if cursor > along + 0.01:
 				break
 			var floors := _rng.randi_range(floors_min, floors_max)
+			var pos: Vector3
+			var yaw := 0.0
 			match side:
 				0:
-					house(Vector3(r.position.x + mid, 0.0, r.end.y - hd), 0.0, w, dep, floors, roof, jetty_ns)
+					pos = Vector3(r.position.x + mid, 0.0, r.end.y - hd)
 				1:
-					house(Vector3(r.end.x - mid, 0.0, r.position.y + hd), PI, w, dep, floors, roof, jetty_ns)
+					pos = Vector3(r.end.x - mid, 0.0, r.position.y + hd)
+					yaw = PI
 				2:
-					house(Vector3(r.end.x - hd, 0.0, r.end.y - hd * 2.0 - mid), PI * 0.5, w, dep, floors, roof, false)
+					pos = Vector3(r.end.x - hd, 0.0, r.end.y - hd * 2.0 - mid)
+					yaw = PI * 0.5
 				3:
-					house(Vector3(r.position.x + hd, 0.0, r.position.y + hd * 2.0 + mid), -PI * 0.5, w, dep, floors, roof, false)
+					pos = Vector3(r.position.x + hd, 0.0, r.position.y + hd * 2.0 + mid)
+					yaw = -PI * 0.5
+			var info := house(pos, yaw, w, dep, floors, roof, jetty_ns if side < 2 else false)
+			_houses.append({"pos": pos, "yaw": yaw, "side": side, "w": w, "eave": info["eave"], "ridge": info["ridge"], "flat": flat})
 	return r.grow(-hd * 2.0)
 
 
@@ -468,3 +478,116 @@ func _streets() -> void:
 	birds(Vector3.ZERO, 70.0, 40.0, 8)
 	add_capture_point("streets", Vector3(-19.0, 3.0, 76.0), Vector3(-19.0, 6.0, 40.0))
 	add_capture_point("overview", Vector3(110.0, 70.0, 110.0), Vector3(0.0, 0.0, 0.0))
+
+
+# --- Build 6: the alleys (Ashwin: "ways to get to the tops of the buildings from the alleys...
+# the alleys are really boring") ---------------------------------------------------------------
+# Every alley gets a ladder up one wall and a crate-and-ledge climb up the other (or a wall-jump
+# between them), so nobody is ever stuck below; and something to find or do in each one.
+
+func _alley_houses(side: int, x: float, z0: float, z1: float) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for h in _houses:
+		var p := h["pos"] as Vector3
+		if int(h["side"]) == side and absf(p.x - x) < 0.2 and p.z > z0 and p.z < z1:
+			out.append(h)
+	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return (a["pos"] as Vector3).z < (b["pos"] as Vector3).z)
+	return out
+
+
+## Crates, then ledges every 3 m up the wall at x (facing dir), to the roof at `eave`.
+## Returns the top ledge's top.
+func _ledge_climb(x: float, dir: float, z: float, eave: float) -> Vector3:
+	Kit.block(self, Vector3(x + dir * 0.8, 1.2, z - 1.6), Vector3(1.6, 1.2, 1.6), &"wood_warm", Layers.WORLD | Layers.CAMERA_BLOCKER, &"wood_plank")
+	Kit.block(self, Vector3(x + dir * 0.8, 2.4, z), Vector3(1.6, 2.4, 1.6), &"wood_warm", Layers.WORLD | Layers.CAMERA_BLOCKER, &"wood_plank")
+	var top := Vector3(x + dir * 0.8, 2.4, z)
+	var h := 5.2
+	var k := 0
+	while h < eave - 0.4:
+		top = Vector3(x + dir * 1.0, h, z + (1.6 if k % 2 == 0 else -1.6))
+		Kit.block(self, top, Vector3(2.0, 0.4, 2.4), &"bark_mid", Layers.WORLD | Layers.CAMERA_BLOCKER, &"wood_plank")
+		# A little bracket under each ledge so it reads as part of the wall.
+		Kit.block(self, top + Vector3(-dir * 0.4, -0.4, 0.0), Vector3(1.0, 0.8, 0.3), &"bark_dark", 0, &"")
+		h += 3.0
+		k += 1
+	return top
+
+
+func _alleys() -> void:
+	region(Vector3.ZERO)
+	var hd := TownHouse.MOD
+	var rows: Array[Vector2] = []
+	rows.append_array(SOUTH)
+	rows.append_array(NORTH)
+	var n := 0
+	var seeds := 0
+	var folk: Array[Array] = [["mags", "Mags"], ["tom", "Old Tom"]]
+	for ci in COLS.size() - 1:
+		var x0 := COLS[ci].y
+		var x1 := COLS[ci + 1].x
+		var xm := (x0 + x1) * 0.5
+		for row in rows:
+			var left := _alley_houses(2, x0 - hd, row.x, row.y)
+			var right := _alley_houses(3, x1 + hd, row.x, row.y)
+			if left.is_empty() and right.is_empty():
+				continue
+			var zm := (row.x + row.y) * 0.5
+			# A ladder up the west wall to the roof.
+			if not left.is_empty():
+				var lh := left[left.size() / 2]
+				ladder(Vector3(x0, 0.0, (lh["pos"] as Vector3).z), float(lh["eave"]), PI * 0.5)
+			# Crates and ledges up the east wall.
+			var top := Vector3(xm, 0.0, zm)
+			if not right.is_empty():
+				var rh := right[0] if right.size() == 1 else right[right.size() - 1]
+				top = _ledge_climb(x1, -1.0, (rh["pos"] as Vector3).z, float(rh["eave"]))
+			# Something to find or do in every alley.
+			match n % 4:
+				0:
+					if seeds < 8 and top.y > 3.0:
+						seeds += 1
+						seed_at(StringName("w6_seed_alley_%d" % seeds), top)
+					place(Puffcap.new(), Vector3(xm, 0.5, zm + 4.0))
+				1:
+					if seeds < 8:
+						seeds += 1
+						# Hit the crystal and a stair of light climbs to a lantern-lit seed.
+						var sw := CrystalSwitch.new()
+						sw.position = Vector3(xm, 0.0, zm - 5.0)
+						add_child(sw)
+						var steps: Array[GhostPlatform] = []
+						for i in 4:
+							var gp := GhostPlatform.new()
+							gp.size = Vector3(2.4, 0.4, 2.4)
+							gp.color_name = &"gold"
+							gp.position = Vector3(xm, 2.6 + i * 2.6, zm - 2.0 + i * 2.2)
+							add_child(gp)
+							steps.append(gp)
+						seed_at(StringName("w6_seed_alley_%d" % seeds), Vector3(xm, 11.0, zm + 6.8))
+						Whimsy.lamp(self, Vector3(xm, 0.0, zm - 7.0), true)
+						sw.lit_changed.connect(func(on: bool) -> void:
+							for st in steps:
+								st.set_solid(on))
+				2:
+					if not folk.is_empty():
+						var f: Array = folk.pop_front()
+						villager(str(f[0]), str(f[1]), Vector3(xm, 0.0, zm))
+					else:
+						critter(Mimic, Vector3(xm, 0.5, zm + 3.0))
+					heart_at(Vector3(xm + 1.5, 0.0, zm - 3.0))
+				3:
+					batling(Vector3(xm, 7.5, zm), true)
+					heart_bush(Vector3(xm, 0.0, zm + 6.0))
+			# Barrels, crates, flower pots and a wall lamp.
+			for i in 3:
+				var zz := zm - 9.0 + i * 9.0
+				if absf(zz - zm) < 1.0:
+					continue
+				prop(&"barrel", Vector3(x0 + 0.8, 0.0, zz), _rng.randf() * TAU, 1.2)
+				_batch.place(TownHouse.V + "Prop_Crate.gltf", Vector3(x1 - 0.9, 0.0, zz + 2.5), _rng.randf() * TAU, Vector3.ONE * 1.3)
+			Whimsy.flower(self, Vector3(x0 + 0.7, 0.0, zm + 7.5), 0.7, 0.6, [&"candy_pink", &"gold", &"slime_blue"][n % 3] as StringName, false)
+			n += 1
+	# Ladders up the inside of the town wall to the wall-walk, from the west and east streets.
+	for z: float in [-40.0, 20.0, 60.0]:
+		ladder(Vector3(-96.0, 0.0, z), WALL_H, PI * 0.5)
+		ladder(Vector3(96.0, 0.0, z), WALL_H, -PI * 0.5)
