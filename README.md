@@ -37,7 +37,7 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 
 ### Moves and magic
 
-You have a triple jump, a downward Plunge (bounce off enemies and Springcaps), a sword combo that swings toward where the camera faces, wall slides and **wall jumps** (each kick-off gives you your jumps back), climbable **ladders**, gliding and swimming. Pickups have a generous reach and drift to you when you're close.
+You have a triple jump, a downward Plunge (bounce off enemies and Springcaps), a sword combo that swings toward where the camera faces, wall slides and **wall jumps** (kick off a wall and keep whatever air jumps you had left; the same wall won't kick you twice in a row), climbable **ladders**, gliding and swimming. Pickups have a generous reach and drift to you when you're close.
 
 Clearing a world for the first time teaches a magic ability:
 

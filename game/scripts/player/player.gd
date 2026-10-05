@@ -605,14 +605,14 @@ func _update_wall(delta: float, inp: PlayerInput) -> void:
 		break
 
 
-## Kick off the wall: up and away, and the jump count resets so two more air jumps follow.
+## Kick off the wall: up and away. Air jumps are left as they were.
 func _wall_jump() -> void:
 	var n := _wall_normal
 	velocity = n * settings.wall_jump_push
 	velocity.y = settings.launch_velocity(settings.wall_jump_height)
 	facing = n
-	jumps_used = 1
-	last_jump_index = 1
+	# Ashwin: the kick neither spends nor refills air jumps; you keep whatever you had left.
+	jumps_used = maxi(jumps_used, 1)
 	buffer_age = -1
 	coyote_left = 0.0
 	air_slash_ready = true

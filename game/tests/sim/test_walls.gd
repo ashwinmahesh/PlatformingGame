@@ -1,6 +1,6 @@
 extends TestCase
-## Build 6 (Ashwin): wall jumps ("jump off a wall into a different direction... reset the jump
-## count so you can jump onto a wall, jump off and then do 2 more jumps") and climbable ladders.
+## Build 6 (Ashwin): wall jumps ("jump off a wall into a different direction"; later: "remove the
+## jump reset... you should just get however many jumps you have left") and climbable ladders.
 
 var p: Player
 var inp: ScriptedInput
@@ -10,13 +10,15 @@ func before_each() -> void:
 	floor_block(Vector3(0.0, 0.0, 0.0), Vector3(60.0, 2.0, 60.0))
 
 
-func test_wall_slide_then_kick_off_and_two_more_jumps() -> void:
+func test_wall_slide_then_kick_off_keeps_the_jumps_left() -> void:
 	# A tall wall north of the hero.
 	floor_block(Vector3(0.0, 12.0, -4.0), Vector3(10.0, 12.0, 1.0))
 	p = spawn_player(Vector3(0.0, 0.05, 0.0))
 	inp = input_of(p)
 	await ticks(6)
 	inp.move = Vector2(0.0, 1.0)
+	inp.tap(&"jump")
+	await ticks(12)
 	inp.tap(&"jump")
 	var slid := false
 	for i in 90:
@@ -26,22 +28,22 @@ func test_wall_slide_then_kick_off_and_two_more_jumps() -> void:
 			break
 	check(slid, "pressing into the wall while falling slides down it")
 	check(p.velocity.y >= -p.settings.wall_slide_speed - 0.01, "slowly")
+	check_eq(p.jumps_used, 2, "two jumps spent on the way in")
 	inp.tap(&"jump")
 	await ticks(2)
 	check(p.velocity.z > 4.0, "a jump kicks off the wall, away from it (vz %.1f)" % p.velocity.z)
 	check(p.velocity.y > 0.0, "and upward")
-	check_eq(p.jumps_used, 1, "the jump count resets")
+	check_eq(p.jumps_used, 2, "the kick leaves the jump count as it was")
 	inp.move = Vector2.ZERO
 	await ticks(14)
-	var y0 := p.global_position.y
 	inp.tap(&"jump")
 	await ticks(2)
-	check(p.velocity.y > 0.0 and p.jumps_used == 2, "a second jump in the air")
+	check(p.velocity.y > 0.0 and p.jumps_used == 3, "the one jump left still works")
 	await ticks(14)
+	var vy := p.velocity.y
 	inp.tap(&"jump")
 	await ticks(2)
-	check(p.velocity.y > 0.0 and p.jumps_used == 3, "and a third")
-	check(p.global_position.y > y0, "climbing higher than the kick")
+	check(p.velocity.y <= vy, "and then there are none")
 
 
 func test_ladder_climb_and_step_off_at_the_top() -> void:
@@ -113,7 +115,7 @@ func test_same_wall_gives_no_second_kick() -> void:
 	await ticks(30)
 	inp.tap(&"jump")
 	await ticks(2)
-	check(p.velocity.z > 4.0 and p.jumps_used == 1, "first kick off the wall")
+	check(p.velocity.z > 4.0, "first kick off the wall")
 	# Air jump straight back into the same wall, higher up, and try again.
 	await ticks(12)
 	inp.tap(&"jump")
@@ -127,7 +129,7 @@ func test_same_wall_gives_no_second_kick() -> void:
 	inp.tap(&"jump")
 	await ticks(2)
 	check(p.velocity.z < 2.0, "the same wall gives no second kick (vz %.1f)" % p.velocity.z)
-	check(p.jumps_used >= used, "and no jump reset (%d)" % p.jumps_used)
+	check(p.jumps_used >= used, "and no jumps given back (%d)" % p.jumps_used)
 
 
 ## Zigzagging between two facing walls (a Lanternwick alley) still works.
@@ -151,4 +153,4 @@ func test_zigzag_between_two_walls() -> void:
 	await ticks(2)
 	inp.tap(&"jump")
 	await ticks(2)
-	check(p.velocity.z < -4.0 and p.jumps_used == 1, "then off the south wall (vz %.1f)" % p.velocity.z)
+	check(p.velocity.z < -4.0, "then off the south wall (vz %.1f)" % p.velocity.z)
