@@ -257,7 +257,7 @@ func _river_and_falls() -> void:
 	# The river: wide stones, slow rafts, sinking lily pads. You can swim, too.
 	# Build 6 (Ashwin: "all the swimmable water should be deeper"): 9 m to the riverbed.
 	water(Vector3(0.0, -1.0, -34.0), Vector2(44.0, 40.0), 9.0)
-	plat(Vector3(0.0, -10.0, -34.0), Vector2(44.0, 40.0), &"stone_dark", 0)
+	plat(Vector3(0.0, -10.0, -34.0), Vector2(44.0, 40.0), &"sand_light", 0)
 	plat(Vector3(-23.5, 0.0, -34.0), Vector2(3.0, 40.0), &"stone_dark", 0)
 	plat(Vector3(23.5, 0.0, -34.0), Vector2(3.0, 40.0), &"stone_dark", 0)
 	for spec: Array in [[0.0, -19.0], [6.0, -25.0], [-2.0, -31.0]]:
@@ -419,7 +419,7 @@ func _glade_and_lake() -> void:
 	sign_post(Vector3(-6.0, 0.0, -44.0), "The Lily Gate opens\nfor 3 Star Shards.")
 	# Gloop Lake.
 	water(Vector3(0.0, -1.0, -76.0), Vector2(80.0, 56.0), 11.0)
-	plat(Vector3(0.0, -12.0, -76.0), Vector2(80.0, 56.0), &"stone_dark", 0)
+	plat(Vector3(0.0, -12.0, -76.0), Vector2(80.0, 56.0), &"sand_light", 0)
 	disc(Vector3(0.0, 0.0, -76.0), ARENA_RADIUS + 0.5, &"bark_mid", &"grass_mid", 60)
 	var stump_positions: Array[Vector3] = []
 	for i in 4:

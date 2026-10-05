@@ -21,6 +21,24 @@ func _ready() -> void:
 	var points := get_tree().get_nodes_in_group(&"capture_point")
 	if str(args.get("player_cam", "0")) == "1":
 		points = [null]
+	if args.has("view"):
+		# --view=x,y,z:tx,ty,tz  one extra shot from a chosen spot, saved as view.png
+		var parts := str(args["view"]).split(":")
+		var a := parts[0].split_floats(",")
+		var b := parts[1].split_floats(",")
+		var marker := Marker3D.new()
+		marker.name = str(args.get("name", "view"))
+		add_child(marker)
+		marker.look_at_from_position(Vector3(a[0], a[1], a[2]), Vector3(b[0], b[1], b[2]))
+		points = [marker]
+		if str(args.get("tint", "0")) == "1":
+			# Same see-through blue as CameraRig shows with the camera under water.
+			var layer := CanvasLayer.new()
+			add_child(layer)
+			var tint := ColorRect.new()
+			tint.color = Color(Palette.color(&"water_mid"), 0.35)
+			tint.set_anchors_preset(Control.PRESET_FULL_RECT)
+			layer.add_child(tint)
 	for point: Node in points:
 		if point != null:
 			cam.make_current()

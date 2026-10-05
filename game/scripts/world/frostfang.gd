@@ -322,6 +322,7 @@ func _pine_heights() -> void:
 	slippery(ledge(Vector3(0.0, 0.08, -19.0), Vector3(44.0, 0.3, 22.0), &"bubble"))
 	Kit.block(self, Vector3(-85.0, -11.0, 0.0), Vector3(30.0, 7.0, 44.0), &"stone_dark", Layers.WORLD | Layers.CAMERA_BLOCKER, &"water_light")
 	Kit.water(self, Vector3(-85.0, -0.6, 0.0), Vector2(30.0, 44.0), 10.4)
+	basin_at(Vector3(-85.0, -0.6, 0.0), Vector2(30.0, 44.0), 10.4)
 	seed_at(&"w5_seed_lake_bottom", Vector3(8.0, -11.0, -45.0))
 	# An ice-crusted grotto on the lake bed: slash it open while swimming.
 	var saved := _frame
@@ -375,6 +376,7 @@ func _side_spots() -> void:
 	critter(Hoppy, Vector3(58.0, 3.5, 74.0))
 	# The ice-fishing hole: dive for a seed; penguins keep watch.
 	Kit.water(self, Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 10.0)
+	basin_at(Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 10.0)
 	Kit.block(self, Vector3(-60.0, -10.4, 60.0), Vector3(8.0, 7.6, 8.0), &"stone_dark", Layers.WORLD, &"water_light")
 	seed_at(&"w5_seed_fishing", Vector3(-60.0, -10.4, 60.0))
 	for i in 4:
