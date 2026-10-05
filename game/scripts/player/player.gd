@@ -133,7 +133,7 @@ var _dead_left: float = 0.0
 var visual: Node3D
 var body_pivot: Node3D
 var hurtbox: Area3D
-var sword_shape: SphereShape3D
+var sword_shape: CapsuleShape3D
 var plunge_shape: SphereShape3D
 var hurt_shape: CapsuleShape3D
 var shadow: Decal
@@ -234,7 +234,10 @@ func attack_phase() -> AttackDef.Phase:
 ## Hitbox transforms for the resolver (queried directly, never through animation).
 func sword_transform() -> Transform3D:
 	var reach := attack.reach if attack != null else 0.9
-	return Transform3D(Basis(), global_position + Vector3.UP * 0.65 + facing * reach)
+	# The capsule's axis (local Y) lies along the hero's right, so the slash sweeps wide.
+	var right := facing.cross(Vector3.UP).normalized()
+	var b := Basis(facing.cross(right).normalized(), right, facing)
+	return Transform3D(b.orthonormalized(), global_position + Vector3.UP * 0.65 + facing * reach)
 
 
 func plunge_transform() -> Transform3D:
@@ -815,6 +818,11 @@ func _start_attack(def: AttackDef) -> void:
 	attack_id += 1
 	stored_attack_tick = -1
 	state = State.ATTACK
+	# Ashwin: swing toward where the camera faces. Locked on, slashes still turn toward the target.
+	var cam_fwd := _move_basis() * Vector3.FORWARD
+	cam_fwd.y = 0.0
+	if cam_fwd.length() > 0.01 and (lock_target == null or not is_instance_valid(lock_target)):
+		facing = cam_fwd.normalized()
 	# Slashes auto-turn up to 60° toward the lock target.
 	if lock_target != null and is_instance_valid(lock_target):
 		var to := lock_target.global_position - global_position
@@ -1188,8 +1196,9 @@ func _build_hurtbox() -> void:
 	cs.position.y = 0.6
 	hurtbox.add_child(cs)
 	add_child(hurtbox)
-	sword_shape = SphereShape3D.new()
+	sword_shape = CapsuleShape3D.new()
 	sword_shape.radius = 0.95
+	sword_shape.height = 4.5
 	plunge_shape = SphereShape3D.new()
 	plunge_shape.radius = ATTACK_PLUNGE.radius
 

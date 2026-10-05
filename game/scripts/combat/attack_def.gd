@@ -15,6 +15,9 @@ extends Resource
 @export var knockback: float = 1.0
 @export var radius: float = 0.9
 @export var reach: float = 0.9
+## Extra side-to-side span of the slash (Ashwin: "expand the horizontal space the sword slash
+## can hit"). The hitbox is a capsule lying across the hero's facing: total width = width + 2r.
+@export var width: float = 2.6
 @export var is_air: bool = false
 @export var sfx: StringName = &"slash"
 

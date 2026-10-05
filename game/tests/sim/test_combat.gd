@@ -226,3 +226,18 @@ func test_25_knockback_stops_at_edge() -> void:
 	await ticks(30)
 	check(p.is_on_floor() and p.global_position.y > 2.9, "still on the ledge")
 	check(p.global_position.x <= 11.05, "stopped at the edge (x %.2f)" % p.global_position.x)
+
+
+## Ashwin: swing toward the camera's facing, and the slash covers a wide arc side to side.
+func test_slash_faces_camera_and_hits_wide() -> void:
+	p.camera_yaw = PI * 0.5
+	p.facing = Vector3.FORWARD
+	var cam_fwd := Basis(Vector3.UP, PI * 0.5) * Vector3.FORWARD
+	var right := cam_fwd.cross(Vector3.UP).normalized()
+	var side := _target(p.global_position + Vector3.UP * 0.65 + cam_fwd * 2.1 + right * 2.4, 0.4)
+	var behind := _target(p.global_position + Vector3.UP * 0.65 - cam_fwd * 2.5, 0.4)
+	inp.tap(&"attack")
+	await ticks(14)
+	check(p.facing.distance_to(cam_fwd) < 0.05, "the hero turned to face where the camera looks")
+	check(side.hits >= 1, "a target 2.4 m off to the side of the swing is hit")
+	check_eq(behind.hits, 0, "nothing behind the hero is hit")
