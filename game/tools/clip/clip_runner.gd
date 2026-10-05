@@ -21,8 +21,7 @@ func _ready() -> void:
 	add_child(_level)
 	# Scene changes (portals) free this node, so the safety quit lives on the tree.
 	get_tree().create_timer(14.0).timeout.connect(func() -> void:
-		AudioDirector.shutdown()
-		get_tree().quit(0))
+		AudioDirector.quit_game())
 	_inp = ScriptedInput.new()
 	_level.player.input_source = _inp
 	if _scenario == "plunge_springcap":
@@ -49,5 +48,4 @@ func _physics_process(_delta: float) -> void:
 			if _t in [20, 32, 46]:
 				_inp.tap(&"attack")
 	if _t > (360 if _scenario == "hub_portal" else 200):
-		AudioDirector.shutdown()
-		get_tree().quit(0)
+		AudioDirector.quit_game()

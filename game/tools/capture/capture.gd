@@ -32,8 +32,7 @@ func _ready() -> void:
 		var file_name := "player_view" if point == null else String(point.name)
 		img.save_png("%s/%s.png" % [args["out"], file_name])
 		print("capture: ", file_name)
-	AudioDirector.shutdown()
-	get_tree().quit(0)
+	AudioDirector.quit_game()
 
 
 func _parse_args(raw: PackedStringArray) -> Dictionary:

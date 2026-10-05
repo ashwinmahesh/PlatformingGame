@@ -12,10 +12,13 @@ var _music_a: AudioStreamPlayer
 var _music_b: AudioStreamPlayer
 var _current_music: StringName = &""
 var _duck: float = 0.0
+var _quitting: bool = false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Quit through quit_game() so playing streams are released before the engine shuts down.
+	get_tree().auto_accept_quit = false
 	for bus_name: String in ["Music", "SFX", "UI", "Ambience"]:
 		if AudioServer.get_bus_index(bus_name) == -1:
 			AudioServer.add_bus()
@@ -114,3 +117,21 @@ func shutdown() -> void:
 
 func _exit_tree() -> void:
 	shutdown()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST:
+		quit_game()
+
+
+## Stop audio, give the mixer a moment to drop its playbacks, then quit.
+func quit_game(code: int = 0) -> void:
+	if _quitting:
+		return
+	_quitting = true
+	Progress.flush()
+	shutdown()
+	for i in 4:
+		OS.delay_msec(20)
+		await get_tree().process_frame
+	get_tree().quit(code)

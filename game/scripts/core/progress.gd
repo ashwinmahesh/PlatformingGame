@@ -34,8 +34,9 @@ func _process(delta: float) -> void:
 			save()
 
 
-func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_CLOSE_REQUEST and _pending_retry:
+## Called on quit: one more try for a save that failed earlier (plan §9.8).
+func flush() -> void:
+	if _pending_retry:
 		save()
 
 

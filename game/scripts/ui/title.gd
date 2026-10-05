@@ -58,7 +58,7 @@ void fragment() {
 	_continue = _button(vb, "Continue", _on_continue)
 	_continue.visible = loaded or had_save
 	_button(vb, "New Game", _on_new_game)
-	_button(vb, "Quit", func() -> void: get_tree().quit())
+	_button(vb, "Quit", func() -> void: AudioDirector.quit_game())
 	(_continue if _continue.visible else vb.get_child(4) as Button).grab_focus()
 	var help := Label.new()
 	help.text = "WASD move  ·  Mouse camera  ·  Space jump (x3)  ·  Left mouse / J attack\nShift / K Plunge  ·  E talk  ·  Q / Right mouse lock-on  ·  Esc pause  ·  F1 Feel Lab"
