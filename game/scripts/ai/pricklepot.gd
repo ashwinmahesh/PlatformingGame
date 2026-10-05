@@ -2,7 +2,8 @@ class_name Pricklepot
 extends Critter
 ## A round cactus in a clay pot (inspired by Dragon Quest's cactus monsters, our own design). It
 ## hides in the sand with only its flower showing, pops up when you come close and spins at you
-## with its spikes out: sword hits bounce off. When the spin ends it's dizzy, and open to hits.
+## with its spikes out: sword hits bounce off. Build 6: as it pops it fires a fan of needles
+## (slash them, or glide over). When the spin ends it's dizzy, and open to hits.
 
 enum S { HIDDEN, POP, SPIN, DIZZY, SINK }
 
@@ -103,8 +104,12 @@ func think(_delta: float) -> void:
 				AudioDirector.play(&"notice", -6.0, 1.6)
 				set_state(S.POP)
 		S.POP:
+			# Build 6 roster: spikes bristle (the tell), then a fan of five needles, then the spin.
 			face(to)
-			if state_ticks >= 22:
+			flash(Color(1.0, 0.55, 0.1), 0.3 * absf(sin(state_ticks * 0.5)))
+			if state_ticks >= 30:
+				flash(Color.WHITE, 0.0)
+				_needle_fan()
 				set_state(S.SPIN)
 		S.SPIN:
 			var dir := to.normalized() if to.length() > 0.3 else facing
@@ -122,6 +127,16 @@ func think(_delta: float) -> void:
 			velocity = Vector3(0.0, velocity.y, 0.0)
 			if state_ticks >= 30:
 				set_state(S.HIDDEN)
+
+
+func _needle_fan() -> void:
+	AudioDirector.play(&"slash", -6.0, 1.7)
+	for i in 5:
+		var shot := EnemyShot.new()
+		shot.kind = EnemyShot.Kind.NEEDLE
+		shot.color_name = &"cloth_cream"
+		get_parent().add_child(shot)
+		shot.shoot(global_position + Vector3.UP * 1.0, facing.rotated(Vector3.UP, deg_to_rad(-40.0 + i * 20.0)), 11.0)
 
 
 func animate(delta: float) -> void:

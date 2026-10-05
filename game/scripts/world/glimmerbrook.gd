@@ -164,6 +164,7 @@ func _fernway() -> void:
 	prop(&"log_large", Vector3(-4.0, 0.0, -10.0), PI * 0.5, 1.7)
 	prop(&"log_large", Vector3(5.0, 0.0, -15.0), PI * 0.5 + 0.2, 1.4)
 	gloplets(Vector3(-3.0, 0.0, -30.0), 9.0, [Vector3.ZERO, Vector3(-4.0, 0.0, -5.0), Vector3(4.0, 0.0, -6.0)])
+	big_gloplet(Vector3(0.0, 0.5, -37.0))
 	ledge(Vector3(-12.0, 1.2, -30.0), Vector3(2.6, 1.2, 18.0), &"bark_light")
 	# Optional shelf mushrooms up to a seed.
 	mushroom_platform(Vector3(-10.0, 3.0, -12.0), 0.0, 3.0, &"orange")
@@ -367,6 +368,7 @@ func _bonk_grove() -> void:
 	monkey(_locals([c3, c6]))
 	monkey(_locals([c8, c7]))
 	gloplets(Vector3(0.0, 0.0, -32.0), 14.0, [Vector3(-6.0, 0.0, 6.0), Vector3(7.0, 0.0, -6.0), Vector3(-3.0, 0.0, -12.0)])
+	place(Puffcap.new(), Vector3(6.0, 0.5, -40.0))
 	sign_post(Vector3(-6.0, 0.0, -4.0), "Coconut monkeys! Watch for the red rings.\nSlash a coconut to send it home.", PI * 0.5)
 	for spec: Array in [[4.0, -14.0], [-6.0, -26.0], [7.0, -40.0], [-3.0, -46.0]]:
 		prop(&"rock_large_a", Vector3(spec[0] as float, 0.0, spec[1] as float), _rng.randf() * TAU, 1.2)
@@ -486,6 +488,7 @@ func _links() -> void:
 	seed_at(&"w1_seed_link_nw", Vector3(4.0, 6.6, 1.0))
 	_frame = burrow[0]
 	gloplets(Vector3(-44.0, 0.0, -36.0), 7.0, [Vector3(-2.0, 0.0, 2.0), Vector3(3.0, 0.0, -2.0)])
+	place(Puffcap.new(), Vector3(-41.0, 0.5, -39.0))
 	heart_bush(Vector3(-20.0, 0.0, -44.0))
 	giant_mushroom(Vector3(-48.0, 0.0, -40.0), 10.0, 5.5, &"purple")
 	butterflies(Vector3(-36.0, 0.0, -44.0), 10.0, 6)
@@ -493,6 +496,7 @@ func _links() -> void:
 	plat(Vector3(-34.0, 0.0, 38.0), Vector2(28.0, 20.0))
 	chest(Vector3(-38.0, 0.0, 42.0), PI * 0.75, &"w1_seed_link_sw")
 	gloplets(Vector3(-30.0, 0.0, 36.0), 8.0, [Vector3.ZERO, Vector3(-3.0, 0.0, 3.0)], [Vector3(3.0, 0.0, -2.0)])
+	batling(Vector3(-30.0, 6.0, 36.0))
 	prop(&"log", Vector3(-32.0, 0.0, 44.0), 0.3, 1.4)
 	prop(&"stump", Vector3(-29.0, 0.0, 44.0), 0.0, 1.2)
 	for i in 6:
@@ -514,6 +518,7 @@ func _links() -> void:
 	# North-east: River <-> Fernway, and a stair of giant mushrooms up to the Cliff Garden.
 	plat(Vector3(28.5, 0.0, -30.0), Vector2(27.0, 30.0))
 	gloplets(Vector3(30.0, 0.0, -30.0), 8.0, [Vector3(-3.0, 0.0, 0.0), Vector3(3.0, 0.0, 3.0)])
+	big_gloplet(Vector3(27.0, 0.5, -27.0))
 	sign_post(Vector3(30.0, 0.0, -40.0), "A mushroom stair to the Cliff Garden!")
 	mushroom_platform(Vector3(34.0, 3.0, -52.0), floor_y, 3.5, &"orange")
 	mushroom_platform(Vector3(36.0, 6.0, -62.0), floor_y, 3.5, &"pink")

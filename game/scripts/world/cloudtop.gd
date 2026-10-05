@@ -241,14 +241,14 @@ func _windmill_isles() -> void:
 	region(Vector3(-26.0, 0.0, 0.0), 90.0)
 	cloud(Vector3(0.0, 0.0, -6.0), Vector2(8.0, 10.0))
 	island(Vector3(0.0, 0.0, -24.0), 10.0)
-	critter(Hoppy, Vector3(3.0, 0.5, -24.0))
+	place(Puffcap.new(), Vector3(3.0, 0.5, -24.0))
 	prop(&"windmill", Vector3(-5.0, 0.0, -27.0), 0.0, 1.0)
 	# Spinning sails: ride the turning bars across.
 	mover(Vector3(0.0, 0.5, -44.0), Vector3(16.0, 1.0, 3.0), Vector3.ZERO, 6.0, &"wood_plank", 0.0, 0.5)
 	island(Vector3(0.0, 1.0, -62.0), 9.0)
 	checkpoint(&"w2_cp_windmill", Vector3(0.0, 1.0, -58.0))
-	critter(Hoppy, Vector3(-3.0, 1.5, -64.0))
-	critter(Hoppy, Vector3(4.0, 1.5, -66.0))
+	place(Puffcap.new(), Vector3(-3.0, 1.5, -64.0))
+	big_gloplet(Vector3(4.0, 1.5, -66.0), preload("res://data/enemies/pink_gloplet.tres"))
 	mover(Vector3(0.0, 2.0, -80.0), Vector3(6.0, 1.0, 6.0), Vector3(14.0, 0.0, 0.0), 6.0, &"wood_plank")
 	mover(Vector3(0.0, 4.0, -92.0), Vector3(6.0, 1.0, 6.0), Vector3(0.0, 4.0, 0.0), 5.0, &"wood_plank")
 	mover(Vector3(0.0, 6.0, -104.0), Vector3(16.0, 1.0, 3.0), Vector3.ZERO, 6.0, &"wood_plank", 0.0, -0.45)
@@ -354,9 +354,9 @@ func _ring_secret(q: int, pts: Array[Vector4]) -> void:
 			seed_at(&"w2_seed_ring_se", p2 + out * 8.0 + Vector3(0.0, 10.0, 0.0))
 			critter(Jellyfloat, p3 + Vector3(0.0, 4.0, 0.0))
 		2:
-			# A chest, with a Hoppy and a Mimic about.
+			# A chest, with a Puffcap and a Mimic about.
 			chest(p2 + out * 2.0, atan2(out.x, out.z), &"w2_seed_ring_sw")
-			critter(Hoppy, p1 + Vector3(0.0, 0.5, 0.0))
+			place(Puffcap.new(), p1 + Vector3(0.0, 0.5, 0.0))
 			critter(Mimic, p3 + out * 2.0)
 		3:
 			# Vanishing clouds up to a seed.

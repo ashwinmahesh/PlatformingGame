@@ -1,6 +1,6 @@
 class_name Critter
 extends CharacterBody3D
-## Shared base for the Build 4 monsters (Batling, Hoppy, Shroomlet, Mimic, Armorling, Jellyfloat):
+## Shared base for the monsters (Build 6 roster: Puffcap, Batling, Shieldknight, Mimic, Boulderkin, Big Gloplet; plus Jellyfloat, Pricklepot, Snapper Crab):
 ## HP, hit de-duplication, flash, defeat, contact damage against a drawn ellipsoid, and a sleep
 ## radius so far-away brains don't run. Each monster is a small tick-timed state machine.
 

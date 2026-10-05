@@ -445,6 +445,36 @@ func critter(script: GDScript, base_local: Vector3) -> Critter:
 	return c
 
 
+## Build 6 roster helpers: configured monsters (a Snowbat, a perched Batling, a coloured Big
+## Gloplet, a Boulderkin in this world's stone).
+func place(c: Critter, base_local: Vector3) -> Critter:
+	c.position = P(base_local)
+	add_child(c)
+	return c
+
+
+func batling(base_local: Vector3, perched: bool = false, snow: bool = false) -> Batling:
+	var b := Batling.new()
+	b.perched = perched
+	b.snow = snow
+	return place(b, base_local) as Batling
+
+
+func big_gloplet(base_local: Vector3, def: EnemyDef = null) -> BigGloplet:
+	var g := BigGloplet.new()
+	if def != null:
+		g.split_def = def
+	return place(g, base_local) as BigGloplet
+
+
+func boulderkin(base_local: Vector3, stone: StringName = &"stone_dark", moss: StringName = &"moss", gem: StringName = &"portal_teal") -> Boulderkin:
+	var b := Boulderkin.new()
+	b.stone = stone
+	b.moss = moss
+	b.gem = gem
+	return place(b, base_local) as Boulderkin
+
+
 func gloplets(center_local: Vector3, radius: float, spots: Array[Vector3], bouncer_spots: Array[Vector3] = [], def: EnemyDef = null) -> EncounterZone:
 	var zone := EncounterZone.new()
 	zone.zone_id = StringName("%s_zone_%d" % [world_id, get_child_count()])

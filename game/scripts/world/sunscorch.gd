@@ -332,7 +332,7 @@ func _camp() -> void:
 	mesa(c + Vector3(-14.0, 3.0, 18.0), Vector2(9.0, 9.0))
 	mesa(c + Vector3(-22.0, 6.0, 8.0), Vector2(8.0, 8.0))
 	mesa(c + Vector3(-25.0, 9.0, 20.0), Vector2(7.0, 8.0))
-	critter(Hoppy, c + Vector3(-14.0, 3.5, 18.0))
+	critter(Pricklepot, c + Vector3(-14.0, 3.0, 18.0))
 	sign_post(c + Vector3(-8.0, 0.0, 22.0), "Climb the mesa stair to the high plateau.", PI * 0.25)
 	balloon_lift(c + Vector3(26.0, 0.5, -16.0), Vector3(0.0, 11.5, 0.0), 8.0, [&"candy_pink", &"gold"])
 	heart_bush(c + Vector3(-6.0, 0.0, -20.0))
@@ -355,8 +355,8 @@ func _high_plateau() -> void:
 	stone(Vector3(-38.0, 25.5, 136.0), 3.0, 1.5, &"stone_light", &"gold")
 	shard_at(&"w3_shard_mesa", Vector3(-38.0, 25.5, 136.0))
 	prop(&"statue_head", Vector3(-46.0, 21.0, 140.0), -0.6, 1.3)
-	critter(Hoppy, Vector3(-56.0, 15.5, 98.0))
-	critter(Hoppy, Vector3(-70.0, 18.5, 112.0))
+	boulderkin(Vector3(-56.0, 15.5, 98.0), &"sunset_orange", &"sand_light", &"portal_teal")
+	critter(Pricklepot, Vector3(-70.0, 18.0, 112.0))
 	critter(Batling, Vector3(-60.0, 24.0, 128.0))
 	# Glider's Perch: a lone pillar far off the summit (Glide).
 	Kit.pillar(self, Vector3(-38.0, 16.0, 108.0), 3.0, 4.0, &"roof_red", &"sand_light")
@@ -587,8 +587,11 @@ func _gorge_life() -> void:
 					ledge(sp + Vector3(0.0, 4.6, 0.0) + Vector3(side.x, 0.0, side.y) * 1.5, Vector3(3.0, 0.5, 3.0), &"wood_plank")
 		if hw >= 10.0:
 			tumbleweed(Vector3(a.x, 0.0, a.y), Vector3(b.x - a.x, 0.0, b.y - a.y), a.distance_to(b), float(n))
-	for spec: Array in [[-40.0, 40.0], [-30.0, -60.0], [70.0, -80.0], [100.0, -10.0], [80.0, 50.0]]:
-		critter(Hoppy, Vector3(spec[0] as float, 0.5, spec[1] as float))
+	boulderkin(Vector3(-40.0, 0.5, 40.0), &"sunset_orange", &"sand_light", &"portal_teal")
+	boulderkin(Vector3(80.0, 0.5, 50.0), &"sunset_orange", &"sand_light", &"portal_teal")
+	big_gloplet(Vector3(70.0, 0.5, -80.0), preload("res://data/enemies/ember_gloplet.tres"))
+	for spec: Array in [[-30.0, -60.0], [100.0, -10.0]]:
+		critter(Mimic, Vector3(spec[0] as float, 0.5, spec[1] as float))
 	for spec: Array in [[-50.0, 10.0], [20.0, -85.0], [98.0, 0.0]]:
 		critter(Pricklepot, Vector3(spec[0] as float, 0.0, spec[1] as float))
 	# The plateau top is busy too: cacti, rock stacks, little mesas and palms.

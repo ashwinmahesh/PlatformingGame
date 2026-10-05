@@ -382,6 +382,7 @@ func _jellyfish_fields() -> void:
 	for spec: Array in [[16.0, 21.0, -46.0], [-6.0, 9.0, -32.0], [4.0, 15.0, -46.0], [-14.0, 4.0, -14.0]]:
 		critter(Jellyfloat, Vector3(spec[0] as float, spec[1] as float, spec[2] as float))
 	gloplets(Vector3(10.0, 0.0, -14.0), 10.0, [Vector3.ZERO, Vector3(3.0, 0.0, -3.0), Vector3(-3.0, 0.0, 2.0)], [Vector3(0.0, 0.0, 4.0)])
+	big_gloplet(Vector3(14.0, 0.5, -20.0), preload("res://data/enemies/pink_gloplet.tres"))
 	for i in 18:
 		var p := Vector3(_rng.randf_range(-28.0, 28.0), 0.0, _rng.randf_range(-70.0, -4.0))
 		Whimsy.flower(self, P(p), _rng.randf_range(0.8, 1.6), _rng.randf_range(0.6, 1.0), [&"candy_pink", &"gold", &"slime_blue", &"mush_purple"][i % 4] as StringName, false)
@@ -542,6 +543,9 @@ func _coral_gardens() -> void:
 	for i in 24:
 		Whimsy.coral(self, P(Vector3(_rng.randf_range(-28.0, 28.0), 0.0, _rng.randf_range(-60.0, -6.0))), [&"coral_pink", &"coral_orange", &"mush_purple", &"gold", &"slime_blue"][i % 5] as StringName, _rng.randf_range(0.8, 2.2))
 	gloplets(Vector3(0.0, 0.0, -20.0), 10.0, [Vector3(-3.0, 0.0, 0.0), Vector3(3.0, 0.0, 2.0)])
+	# A coral Boulderkin: a reef heap with a pearl-blue crystal.
+	boulderkin(Vector3(0.0, 0.5, -28.0), &"coral_pink", &"leaf_teal", &"slime_blue")
+	place(Puffcap.new(), Vector3(-6.0, 0.5, -16.0))
 	critter(SnapperCrab, Vector3(-10.0, 0.5, -28.0))
 	Ambient.fish(self, P(Vector3(0.0, 8.0, -30.0)), 10.0, 10, &"candy_pink")
 	add_capture_point("coral", Vector3(-30.0, 16.0, 30.0), Vector3(0.0, 4.0, 80.0))

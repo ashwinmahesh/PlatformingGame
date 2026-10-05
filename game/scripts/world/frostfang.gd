@@ -213,7 +213,7 @@ func _ice_slide() -> void:
 		ice.position = P(Vector3(x, 15.0, -62.0))
 		add_child(ice)
 	seed_at(&"w5_seed_icicle", Vector3(0.0, 10.0, -62.0))
-	critter(Hoppy, Vector3(6.0, 10.5, -56.0))
+	batling(Vector3(6.0, 14.0, -56.0), false, true)
 	mover(Vector3(0.0, 10.6, -72.5), Vector3(5.0, 1.0, 5.0), Vector3(0.0, 0.0, -6.0), 5.0, &"bubble")
 	plat(Vector3(0.0, 12.0, -90.0), Vector2(22.0, 18.0), &"stone_dark")
 	stone(Vector3(0.0, 13.5, -94.0), 3.0, 1.5, &"stone_light", &"gold")
@@ -286,6 +286,8 @@ func _crystal_caverns() -> void:
 	critter(Batling, Vector3(8.0, 5.0, -44.0))
 	critter(Armorling, Vector3(10.0, 0.5, -14.0))
 	critter(Armorling, Vector3(-10.0, 0.5, -54.0))
+	# An ice Boulderkin in the gorge.
+	boulderkin(Vector3(0.0, 0.5, -48.0), &"water_light", &"foam", &"portal_magenta")
 	gloplets(Vector3(0.0, 0.0, -40.0), 8.0, [Vector3(-3.0, 0.0, 0.0), Vector3(3.0, 0.0, 2.0)], [], preload("res://data/enemies/frost_gloplet.tres"))
 	for i in 18:
 		var p := Vector3(_rng.randf_range(-17.0, 17.0), 0.0, _rng.randf_range(-61.0, -8.0))
@@ -343,8 +345,8 @@ func _pine_heights() -> void:
 	plat(Vector3(8.0, 9.0, -98.0), Vector2(14.0, 12.0), &"stone_dark")
 	stone(Vector3(8.0, 10.5, -100.0), 3.0, 1.5, &"stone_light", &"gold")
 	shard_at(&"w5_shard_pines", Vector3(8.0, 10.5, -100.0))
-	critter(Hoppy, Vector3(4.0, 3.5, -68.0))
-	critter(Hoppy, Vector3(-8.0, 6.5, -84.0))
+	batling(Vector3(4.0, 7.5, -68.0), false, true)
+	place(Puffcap.new(), Vector3(-8.0, 6.5, -84.0))
 	bouncer(Vector3(3.0, 9.0, -95.0), Springcap.Look.MUSHROOM, 6.0, 11.0)
 	ledge(Vector3(-4.0, 15.0, -96.0), Vector3(3.0, 0.6, 3.0), &"water_light")
 	seed_at(&"w5_seed_pine_top", Vector3(-4.0, 15.0, -96.0))
@@ -373,7 +375,7 @@ func _side_spots() -> void:
 	for i in 5:
 		var a := float(i) / 5.0 * TAU + 0.4
 		Whimsy.snowman(self, Vector3(62.0 + cos(a) * 6.5, 3.0, 72.0 + sin(a) * 5.0), _rng.randf_range(0.7, 1.1), [&"slime_blue", &"candy_pink", &"gold", &"lime_pop", &"roof_red"][i] as StringName)
-	critter(Hoppy, Vector3(58.0, 3.5, 74.0))
+	big_gloplet(Vector3(58.0, 3.5, 74.0), preload("res://data/enemies/frost_gloplet.tres"))
 	# The ice-fishing hole: dive for a seed; penguins keep watch.
 	Kit.water(self, Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 10.0)
 	basin_at(Vector3(-60.0, -0.4, 60.0), Vector2(8.0, 8.0), 10.0)
@@ -437,7 +439,7 @@ func _summit_gate() -> void:
 	roller.speed = 7.0
 	add_child(roller)
 	critter(Armorling, Vector3(0.0, 0.5, -34.0))
-	critter(Hoppy, Vector3(4.0, 0.5, -14.0))
+	batling(Vector3(4.0, 5.0, -14.0), false, true)
 	ledge(Vector3(-11.0, 2.5, -14.0), Vector3(4.0, 1.0, 4.0), &"water_light")
 	ledge(Vector3(-11.0, 5.0, -20.0), Vector3(4.0, 1.0, 4.0), &"crystal_violet")
 	ledge(Vector3(-11.0, 7.5, -30.0), Vector3(4.0, 1.0, 4.0), &"water_light")

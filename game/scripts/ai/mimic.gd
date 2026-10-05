@@ -2,8 +2,13 @@ class_name Mimic
 extends Critter
 ## A treasure chest that bites (inspired by Dragon Quest's Mimic, our own design). It looks
 ## exactly like a real chest until you come close or try to open it.
+## Build 6 roster: while it chases and bites, its lid clamps shut on your sword. After each bite
+## (or a long chase) it sits panting with its tongue out, and only then is it open to hits.
+## Fireball or Thunderclap knocks the wind out of it straight away; Air Dash slips the bite.
 
 enum S { DORMANT, REVEAL, CHASE, WINDUP, BITE, RECOVER }
+
+const PANT_TICKS := 100
 
 var _lid: Node3D
 var _teeth: Node3D
@@ -66,10 +71,30 @@ func interact(_p: Player) -> void:
 
 
 func on_hit(atk: Dictionary) -> Dictionary:
+	var kind := StringName(str(atk.get("kind", "")))
+	var from := atk.get("from", global_position) as Vector3
 	if state == S.DORMANT:
 		_reveal()
-	take(int(atk.get("damage", 1)), atk.get("from", global_position) as Vector3)
-	return {"hit": true}
+		take(int(atk.get("damage", 1)), from)
+		return {"hit": true}
+	if state == S.RECOVER or kind == &"plunge":
+		take(int(atk.get("damage", 1)), from)
+		return {"hit": true}
+	if kind == &"fireball" or kind == &"thunder":
+		take(int(atk.get("damage", 1)), from)
+		set_state(S.RECOVER)
+		return {"hit": true}
+	# Lid clamps shut: the sword glances off.
+	AudioDirector.play(&"hit", 0.0, 1.5)
+	Fx.burst(get_parent(), global_position + Vector3.UP * 1.0, Palette.color(&"gold"), 6, 3.0, 0.07)
+	_lid.rotation.x = 0.0
+	return {"hit": true, "blocked": true}
+
+
+func damage_to_player(p: Player) -> Dictionary:
+	if state == S.BITE and p.dash_left > 0:
+		return {}
+	return super.damage_to_player(p)
 
 
 func _reveal() -> void:
@@ -96,6 +121,8 @@ func think(_delta: float) -> void:
 				velocity = to.normalized() * minf(5.0, to.length() * 2.0) + Vector3.UP * 4.5
 			if to.length() < 2.4 and is_on_floor():
 				set_state(S.WINDUP)
+			elif state_ticks >= 360:
+				set_state(S.RECOVER)
 		S.WINDUP:
 			velocity.x = 0.0
 			velocity.z = 0.0
@@ -109,9 +136,12 @@ func think(_delta: float) -> void:
 			if state_ticks > 4 and is_on_floor():
 				set_state(S.RECOVER)
 		S.RECOVER:
+			# Panting: tongue out, open to hits.
 			velocity.x = 0.0
 			velocity.z = 0.0
-			if state_ticks >= 50:
+			if state_ticks % 25 == 0:
+				AudioDirector.play(&"slime_hop", -12.0, 1.6)
+			if state_ticks >= PANT_TICKS:
 				set_state(S.CHASE)
 
 
@@ -121,4 +151,7 @@ func animate(_delta: float) -> void:
 	var target := -0.9 if state in [S.CHASE, S.RECOVER] else (-1.5 if state in [S.REVEAL, S.WINDUP] else (-0.2 if state == S.BITE else 0.0))
 	if state == S.CHASE:
 		target = -0.5 - absf(sin(state_ticks * 0.25)) * 0.6
+	if state == S.RECOVER:
+		target = -1.1 - absf(sin(state_ticks * 0.12)) * 0.3
+	_teeth.position.y = sin(state_ticks * 0.25) * 0.04 if state == S.RECOVER else 0.0
 	_lid.rotation.x = lerpf(_lid.rotation.x, target, 0.3)

@@ -8,6 +8,10 @@ const BAND := 0.45
 
 var ground_y: float = 0.0
 var max_radius: float = 17.0
+## Build 6: the Boulderkin's dust ring reuses this in stone colours.
+var color_name: StringName = &"gloop_pink"
+## Air Dash slips through a ring (Boulderkin counter).
+var dash_dodges: bool = false
 var radius: float = 0.5
 var _mi: MeshInstance3D
 var _mat: ShaderMaterial
@@ -23,7 +27,7 @@ func _ready() -> void:
 	wall.cap_top = false
 	wall.cap_bottom = false
 	wall.radial_segments = 48
-	_mat = Fx.fx_mat(Color(Palette.color(&"gloop_pink"), 0.8))
+	_mat = Fx.fx_mat(Color(Palette.color(color_name), 0.8))
 	_mi = Kit.mesh_instance(self, wall, _mat, Vector3(0.0, HEIGHT * 0.5, 0.0))
 	var tm := TorusMesh.new()
 	tm.inner_radius = 1.0 - BAND * 0.25
@@ -44,6 +48,8 @@ func _physics_process(delta: float) -> void:
 
 func damage_to_player(p: Player) -> Dictionary:
 	var flat := Vector2(p.global_position.x - global_position.x, p.global_position.z - global_position.z).length()
+	if dash_dodges and p.dash_left > 0:
+		return {}
 	if absf(flat - radius) > BAND or p.global_position.y - ground_y > HEIGHT:
 		return {}
 	return {"halves": 2, "from": global_position, "cause": "shockwave"}
