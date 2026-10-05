@@ -9,6 +9,8 @@ var tunic: StringName = &"roof_teal"
 var hat: StringName = &"thatch"
 var skin: StringName = &"skin_mid"
 var body_scale: float = 1.0
+## Build 5 (Bubbleton Reef): a glass diving bubble round the head.
+var bubble_helmet: bool = false
 ## Villagers share one rig (KayKit Adventurers, CC0) and differ by outfit and scale (plan §11.4).
 const MODELS: Dictionary[String, Array] = {
 	"elder_fern": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand"]],
@@ -21,6 +23,9 @@ const MODELS: Dictionary[String, Array] = {
 	"tundra": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.66, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
 	"marlo": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.6, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"bea": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.58, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"barnacle": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.64, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	"coralie": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.56, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"finn": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"kip": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.44, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
 }
 
@@ -43,6 +48,15 @@ func _ready() -> void:
 	_model = CharacterModel.create(str(spec[0]), float(spec[1]) * body_scale, hidden, 0.035)
 	_visual.add_child(_model)
 	_model.play(&"Idle")
+	if bubble_helmet:
+		var glass := SphereMesh.new()
+		glass.radius = 0.62 * body_scale
+		glass.height = 1.24 * body_scale
+		Kit.mesh_instance(_visual, glass, Fx.fx_mat(Color(Palette.color(&"bubble"), 0.28)), Vector3(0.0, 1.55 * body_scale, 0.0))
+		var rim := TorusMesh.new()
+		rim.inner_radius = 0.45 * body_scale
+		rim.outer_radius = 0.58 * body_scale
+		Kit.mesh_instance(_visual, rim, Kit.mat(&"gold"), Vector3(0.0, 1.05 * body_scale, 0.0))
 	_bubble = Kit.label(self, Vector3(0.0, 2.3 * body_scale, 0.0), "...", 64)
 	_bubble.visible = false
 	Kit.label(self, Vector3(0.0, 2.75 * body_scale, 0.0), display_name, 28)

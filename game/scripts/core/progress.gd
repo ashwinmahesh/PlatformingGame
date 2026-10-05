@@ -12,6 +12,7 @@ const WORLD_DEFS: Array[WorldDef] = [
 	preload("res://data/worlds/world_01.tres"),
 	preload("res://data/worlds/world_02.tres"),
 	preload("res://data/worlds/world_03.tres"),
+	preload("res://data/worlds/world_04.tres"),
 ]
 const RETRY_SECONDS := 30.0
 

@@ -1,0 +1,19 @@
+{
+  "id": "coralie",
+  "name": "Coralie",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Coralie",
+          "text": "Welcome to the Kelp Shake Diner! Today's special is the Kelp Shake. Yesterday's special was also the Kelp Shake."
+        },
+        {
+          "speaker": "Coralie",
+          "text": "Somebody left a Glimmer Seed on our roof. You can have it if you can get up there."
+        }
+      ]
+    }
+  ]
+}

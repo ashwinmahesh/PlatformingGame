@@ -1,0 +1,19 @@
+{
+  "id": "finn",
+  "name": "Finn",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Finn",
+          "text": "Did you know jellyfish don't mind being jumped on? I asked one. It just bobbed."
+        },
+        {
+          "speaker": "Finn",
+          "text": "Plunge onto them and you'll go WAY higher. That's science."
+        }
+      ]
+    }
+  ]
+}

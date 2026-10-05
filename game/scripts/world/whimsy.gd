@@ -705,3 +705,170 @@ static func balloon(parent: Node3D, top: Vector3, colors: Array[StringName]) -> 
 		rope.height = 3.0
 		var r := Kit.mesh_instance(parent, rope, Kit.mat(&"bark_dark"), top + Vector3(cos(a) * 1.75, 1.45, sin(a) * 1.75))
 		r.rotation = Vector3(sin(a) * 0.2, 0.0, -cos(a) * 0.2)
+
+
+# --- Undersea pieces (Build 5, Bubbleton Reef) ----------------------------------------------------
+
+## Branching coral: a cluster of rounded fingers. About 3 m tall at s = 1.
+static func coral_mesh(color: StringName, variant: int) -> ArrayMesh:
+	var key := "coral|%s|%d" % [color, variant]
+	if _meshes.has(key):
+		return _meshes[key]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(key)
+	var st := _begin()
+	var lo := vcol(color, 0.8)
+	var hi := vcol(color).lerp(Color.WHITE, 0.2)
+	for i in rng.randi_range(5, 8):
+		var tilt := Basis(Vector3(rng.randf_range(-1.0, 1.0), 0.0, rng.randf_range(-1.0, 1.0)).normalized(), rng.randf_range(0.0, 0.6))
+		var h := rng.randf_range(1.4, 3.0)
+		var r := rng.randf_range(0.18, 0.3)
+		var prof: Array[Vector2] = [Vector2(r * 1.2, 0.0), Vector2(r, h * 0.6), Vector2(r * 0.9, h)]
+		var pc: Array[Color] = [lo, lo.lerp(hi, 0.5), hi]
+		_lathe(st, Transform3D(tilt, Vector3(rng.randf_range(-0.4, 0.4), 0.0, rng.randf_range(-0.4, 0.4))), prof, pc, 8)
+		_sphere(st, Transform3D(tilt, Vector3.ZERO).translated_local(Vector3(0.0, h, 0.0)), r * 1.3, hi, hi, 1.0, 5, 8)
+	var mesh := st.commit()
+	_meshes[key] = mesh
+	return mesh
+
+
+static func coral(parent: Node, pos: Vector3, color: StringName = &"coral_pink", s: float = 1.0) -> Node3D:
+	var mi := _place(parent, coral_mesh(color, absi(hash(pos)) % VARIANTS), pos, fposmod(pos.x * 2.1, TAU), s)
+	return mi
+
+
+## A wavy kelp stalk with leaves, h metres tall (no collision).
+static func kelp_mesh(h: float, variant: int) -> ArrayMesh:
+	var key := "kelp|%.0f|%d" % [h, variant]
+	if _meshes.has(key):
+		return _meshes[key]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash(key)
+	var st := _begin()
+	var segs := int(h / 1.5)
+	var pos := Vector3.ZERO
+	for i in segs:
+		var bend := Basis(Vector3.FORWARD, sin(i * 0.9 + variant) * 0.18)
+		var prof: Array[Vector2] = [Vector2(0.3, 0.0), Vector2(0.26, 1.6)]
+		var pc: Array[Color] = [vcol(&"kelp", 0.85), vcol(&"kelp")]
+		_lathe(st, Transform3D(bend, pos), prof, pc, 8)
+		pos += bend * Vector3(0.0, 1.5, 0.0)
+		if i % 2 == 1:
+			var side := 1.0 if i % 4 == 1 else -1.0
+			var leaf := Transform3D(Basis(Vector3.UP, rng.randf() * TAU) * Basis(Vector3.FORWARD, side * 1.0), pos)
+			_sphere(st, leaf.scaled_local(Vector3(0.5, 1.0, 0.16)), 1.3, vcol(&"kelp", 0.9), vcol(&"lime_pop"), 1.0, 5, 8)
+	var mesh := st.commit()
+	_meshes[key] = mesh
+	return mesh
+
+
+static func kelp(parent: Node, pos: Vector3, h: float = 10.0) -> Node3D:
+	var mi := _place(parent, kelp_mesh(snappedf(h, 3.0), absi(hash(pos)) % VARIANTS), pos, fposmod(pos.z, TAU), 1.0)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
+
+
+## A sea anemone: a squat base with a crown of fat tentacles.
+static func anemone(parent: Node, pos: Vector3, color: StringName = &"mush_purple", s: float = 1.0) -> Node3D:
+	var key := "anemone|%s" % color
+	if not _meshes.has(key):
+		var st := _begin()
+		var base: Array[Vector2] = [Vector2(0.6, 0.0), Vector2(0.55, 0.5), Vector2(0.7, 0.7)]
+		var bc: Array[Color] = [vcol(&"coral_orange", 0.9), vcol(&"coral_orange"), vcol(&"coral_orange")]
+		_lathe(st, Transform3D.IDENTITY, base, bc, 12)
+		for i in 12:
+			var a := float(i) / 12.0 * TAU
+			var r := 0.5 if i % 2 == 0 else 0.3
+			var b := Basis(Vector3(-sin(a), 0.0, cos(a)), 0.45 if i % 2 == 0 else 0.2)
+			var t: Array[Vector2] = [Vector2(0.09, 0.0), Vector2(0.08, 0.7), Vector2(0.0, 0.85)]
+			var tc: Array[Color] = [vcol(color, 0.8), vcol(color), vcol(color).lerp(Color.WHITE, 0.4)]
+			_lathe(st, Transform3D(b, Vector3(cos(a) * r, 0.65, sin(a) * r)), t, tc, 6)
+		_meshes[key] = st.commit()
+	return _place(parent, _meshes[key], pos, fposmod(pos.x, TAU), s)
+
+
+## A flat storybook "sky flower": the shapes drifting at the sea surface overhead.
+static func sky_flower(parent: Node, pos: Vector3, r: float, color: StringName) -> Node3D:
+	var key := "skyflower|%s" % color
+	if not _meshes.has(key):
+		var st := _begin()
+		for i in 5:
+			var a := float(i) / 5.0 * TAU
+			_sphere(st, Transform3D(Basis(Vector3.UP, -a), Vector3(cos(a) * 0.62, 0.0, sin(a) * 0.62)).scaled_local(Vector3(1.0, 1.0, 0.75)), 0.55, vcol(color, 0.95), vcol(color), 0.12, 4, 10)
+		_sphere(st, Transform3D.IDENTITY, 0.45, vcol(&"mush_spot"), vcol(&"mush_spot"), 0.14, 4, 10)
+		_meshes[key] = st.commit()
+	var mi := _place(parent, _meshes[key], pos, fposmod(pos.x * 0.37, TAU), r)
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return mi
+
+
+## A spiral seashell cottage (conch-like) with a round door and porthole windows.
+static func shell_house(parent: Node, pos: Vector3, yaw: float, color: StringName = &"coral_pink", s: float = 1.0) -> Node3D:
+	var root := Node3D.new()
+	root.position = pos
+	root.rotation.y = yaw
+	root.scale = Vector3.ONE * s
+	parent.add_child(root)
+	var key := "shellhouse|%s" % color
+	if not _meshes.has(key):
+		var st := _begin()
+		var lo := vcol(color, 0.85)
+		var hi := vcol(&"mush_spot")
+		var prof: Array[Vector2] = []
+		var pc: Array[Color] = []
+		for i in 13:
+			var t := float(i) / 12.0
+			prof.append(Vector2(4.0 * (1.0 - t) + 0.6 * sin(t * PI * 5.0) * (1.0 - t), t * 9.0))
+			pc.append(lo.lerp(hi, 0.18 + 0.18 * sin(t * PI * 5.0)))
+		prof[12] = Vector2(0.0, 9.3)
+		_lathe(st, Transform3D.IDENTITY, prof, pc, 20)
+		_meshes[key] = st.commit()
+	_place(root, _meshes[key], Vector3.ZERO, 0.0, 1.0)
+	var body := Kit.static_body(root, Vector3.ZERO)
+	var c := CylinderShape3D.new()
+	c.radius = 3.6
+	c.height = 6.0
+	Kit.add_shape(body, c, Vector3(0.0, 3.0, 0.0))
+	var door := CylinderMesh.new()
+	door.top_radius = 0.9
+	door.bottom_radius = 0.9
+	door.height = 0.2
+	var d := Kit.mesh_instance(root, door, Kit.mat(&"bark_mid"), Vector3(0.0, 1.0, 3.75))
+	d.rotation.x = PI * 0.5
+	for side: float in [-1.0, 1.0]:
+		var win := CylinderMesh.new()
+		win.top_radius = 0.45
+		win.bottom_radius = 0.45
+		win.height = 0.15
+		var a := side * 0.7
+		var w := Kit.mesh_instance(root, win, Kit.mat(&"gold"), Vector3(sin(a) * 3.15, 3.6, cos(a) * 3.15))
+		w.rotation = Vector3(PI * 0.5, a, 0.0)
+		var m := Kit.unique_mat(&"gold")
+		m.set_shader_parameter(&"flash", 0.4)
+		m.set_shader_parameter(&"flash_color", Palette.color(&"gold"))
+		w.material_override = m
+	return root
+
+
+## A friendly sea turtle shell to ride: decoration for a moving platform (child of it).
+static func turtle_on(platform: Node3D, size: Vector3) -> void:
+	var shell := SphereMesh.new()
+	shell.radius = size.x * 0.55
+	shell.height = size.x * 0.5
+	shell.is_hemisphere = true
+	Kit.mesh_instance(platform, shell, Kit.mat(&"kelp", 0.03), Vector3(0.0, -size.y * 0.5 - 0.05, 0.0)).scale = Vector3(1.0, 0.35, 1.0)
+	var head := SphereMesh.new()
+	head.radius = 0.6
+	head.height = 1.1
+	Kit.mesh_instance(platform, head, Kit.mat(&"lime_pop", 0.03), Vector3(0.0, -size.y * 0.5, -size.z * 0.6))
+	for side: float in [-1.0, 1.0]:
+		var eye := SphereMesh.new()
+		eye.radius = 0.1
+		eye.height = 0.2
+		Kit.mesh_instance(platform, eye, Kit.mat(&"ink_navy"), Vector3(0.25 * side, -size.y * 0.5 + 0.2, -size.z * 0.6 - 0.5))
+		for fz: float in [-0.3, 0.3]:
+			var flip := SphereMesh.new()
+			flip.radius = 0.6
+			flip.height = 0.3
+			var f := Kit.mesh_instance(platform, flip, Kit.mat(&"lime_pop", 0.02), Vector3(size.x * 0.5 * side, -size.y * 0.6, fz * size.z))
+			f.scale = Vector3(1.6, 1.0, 0.8)

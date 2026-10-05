@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WorldDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_04"
+display_name = "Bubbleton Reef"
+scene_path = "res://scenes/levels/w4/bubbleton.tscn"
+entrance_spawn = &"w4_entrance"
+arena_exit_spawn = &"w4_entrance"
+spawn_ids = Array[StringName]([&"w4_entrance", &"w4_cp_town", &"w4_cp_jelly", &"w4_cp_kelp", &"w4_cp_ship", &"w4_cp_coral"])
+seed_ids = Array[StringName]([&"w4_seed_diner", &"w4_seed_jellytop", &"w4_seed_kelp_low", &"w4_seed_bubble", &"w4_seed_chest", &"w4_seed_hold", &"w4_seed_barrel", &"w4_seed_switch", &"w4_seed_lagoon", &"w4_seed_lanterns"])
+first_clear_heart_containers = 1
+shard_ids = Array[StringName]([&"w4_shard_jelly", &"w4_shard_kelp", &"w4_shard_ship"])
+shards_required = 3
+goal = &"star"
+color = &"coral_pink"
+ability = &"dash"

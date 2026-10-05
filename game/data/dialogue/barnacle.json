@@ -1,0 +1,32 @@
+{
+  "id": "barnacle",
+  "name": "Captain Barnacle",
+  "conversations": [
+    {
+      "when": "world_04_complete",
+      "lines": [
+        {
+          "speaker": "Captain Barnacle",
+          "text": "Ha HA! The Grand Star! Haven't seen it sparkle like that since I was a wee tadpole. Er, sailor."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Captain Barnacle",
+          "text": "Ahoy! Welcome to Bubbleton, finest town on the whole seafloor. Mind your step, everything's a bit bouncy."
+        },
+        {
+          "speaker": "Captain Barnacle",
+          "text": "Three Star Shards are scattered about: up the Jellyfish Fields, high in the Kelp Forest, and on my old ship past the trench."
+        },
+        {
+          "speaker": "Captain Barnacle",
+          "text": "Bring 'em home and the Great Bubble in the square will carry you all the way up to the Grand Star!"
+        }
+      ]
+    }
+  ]
+}

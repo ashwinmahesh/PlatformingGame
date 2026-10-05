@@ -86,3 +86,37 @@ func test_boss_worlds_play_to_victory() -> void:
 		Events.ability_learned.disconnect(on_learn)
 		lvl.queue_free()
 		await ticks(3)
+
+
+## Bubbleton Reef (Build 5): the shards wake the Great Bubble, which really carries the hero up
+## to the Grand Star; touching it clears the world and teaches the Air Dash.
+func test_bubbleton_great_bubble_reaches_the_star() -> void:
+	var w := Progress.world_def(&"world_04")
+	var lvl := await _load(w, w.entrance_spawn)
+	var p := lvl.player
+	var inp := ScriptedInput.new()
+	p.input_source = inp
+	p.respawn_at(Bubbleton.LIFT + Vector3(0.0, 0.7, 0.0))
+	inp.tap(&"jump")
+	await ticks(120)
+	check(p.global_position.y < 8.0, "the Great Bubble sleeps before the shards come home")
+	for s in w.shard_ids:
+		Progress.collect_shard(s)
+	await ticks(2)
+	p.respawn_at(Bubbleton.LIFT + Vector3(0.0, 0.7, 0.0))
+	await ticks(2)
+	inp.tap(&"jump")
+	var top := 0.0
+	for i in 600:
+		await ticks(1)
+		top = maxf(top, p.global_position.y)
+		# Steer toward world +X (the star flower) whatever way the camera faces.
+		var local := Basis(Vector3.UP, -p.camera_yaw) * Vector3.RIGHT
+		inp.move = Vector2(local.x, -local.z) if p.global_position.y > Bubbleton.STAR_Y + 0.5 or top > Bubbleton.STAR_Y + 0.5 else Vector2.ZERO
+		if Progress.is_world_complete(&"world_04"):
+			break
+	check(top > Bubbleton.STAR_Y, "the bubble lifts the hero above the star flower (top %.1f m)" % top)
+	check(Progress.is_world_complete(&"world_04"), "touching the Grand Star clears the world")
+	check(p.has_ability(&"dash"), "and teaches the Air Dash")
+	lvl.queue_free()
+	await ticks(3)

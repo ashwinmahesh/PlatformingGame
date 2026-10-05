@@ -3,7 +3,7 @@ extends Node3D
 ## A permanent bounce mushroom (plan §5.3). Landing gives a small bounce; a Plunge launches high.
 ## Only permanent bounce surfaces like this one may be on the required path.
 
-enum Look { MUSHROOM, CLOUD, GLOWCAP }
+enum Look { MUSHROOM, CLOUD, GLOWCAP, JELLY }
 
 var look: Look = Look.MUSHROOM
 ## 0 = use the hero's MovementSettings values.
@@ -14,7 +14,11 @@ var _squash: float = 0.0
 
 
 func _ready() -> void:
-	if look != Look.CLOUD:
+	if look == Look.JELLY:
+		# Build 5 (Bubbleton Reef): a big friendly jellyfish resting on a coral stump.
+		var stem := Kit.pillar(self, Vector3(0.0, 0.7, 0.0), 0.45, 0.7, &"coral_orange")
+		stem.collision_layer = Layers.WORLD
+	elif look != Look.CLOUD:
 		var stem := Kit.pillar(self, Vector3(0.0, 0.7, 0.0), 0.35, 0.7, &"cloth_cream")
 		stem.collision_layer = Layers.WORLD
 	_cap = Node3D.new()
@@ -52,6 +56,26 @@ func _ready() -> void:
 
 
 func _build_cap(dome: SphereMesh) -> void:
+	if look == Look.JELLY:
+		Kit.mesh_instance(_cap, dome, Kit.slime_mat(&"candy_pink", 0.03), Vector3.ZERO)
+		var inner := SphereMesh.new()
+		inner.radius = 0.6
+		inner.height = 0.6
+		inner.is_hemisphere = true
+		Kit.mesh_instance(_cap, inner, Kit.mat(&"coral_pink"), Vector3(0.0, 0.02, 0.0))
+		for i in 8:
+			var a := float(i) / 8.0 * TAU
+			var t := CapsuleMesh.new()
+			t.radius = 0.07
+			t.height = 0.9
+			var tm := Kit.mesh_instance(_cap, t, Kit.mat(&"gloop_pink"), Vector3(cos(a) * 0.95, -0.2, sin(a) * 0.95))
+			tm.rotation = Vector3(sin(a) * 0.3, 0.0, -cos(a) * 0.3)
+		for side: float in [-1.0, 1.0]:
+			var eye := SphereMesh.new()
+			eye.radius = 0.09
+			eye.height = 0.18
+			Kit.mesh_instance(_cap, eye, Kit.mat(&"ink_navy"), Vector3(0.28 * side, 0.32, 0.95))
+		return
 	Kit.mesh_instance(_cap, dome, Kit.mat(&"roof_red" if look == Look.MUSHROOM else &"portal_teal", 0.03), Vector3(0.0, 0.0, 0.0))
 	if look == Look.GLOWCAP:
 		var glow := OmniLight3D.new()

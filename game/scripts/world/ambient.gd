@@ -168,6 +168,42 @@ static func sparkles(parent: Node, center: Vector3, size: Vector3, count: int = 
 	parent.add_child(p)
 
 
+## Rising streams of bubbles (Bubbleton Reef).
+static func bubbles(parent: Node, center: Vector3, size: Vector3, count: int = 40) -> void:
+	var p := CPUParticles3D.new()
+	p.amount = count
+	p.lifetime = 6.0
+	p.preprocess = 6.0
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = size * 0.5
+	p.direction = Vector3.UP
+	p.spread = 10.0
+	p.gravity = Vector3(0.0, 0.6, 0.0)
+	p.initial_velocity_min = 0.6
+	p.initial_velocity_max = 1.6
+	var dot := SphereMesh.new()
+	dot.radius = 0.12
+	dot.height = 0.24
+	p.mesh = dot
+	p.scale_amount_min = 0.5
+	p.scale_amount_max = 2.0
+	p.material_override = Fx.fx_mat(Color(Palette.color(&"bubble"), 0.6))
+	p.position = center
+	parent.add_child(p)
+
+
+## A school of little fish swimming in a lazy loop.
+static func fish(parent: Node, center: Vector3, radius: float, count: int = 8, color: StringName = &"sunset_orange") -> void:
+	for i in count:
+		var f := Fish.new()
+		f.center = center + Vector3(0.0, sin(i * 1.3) * 1.5, 0.0)
+		f.radius = radius * (0.8 + 0.06 * (i % 5))
+		f.speed = 0.35 + 0.03 * (i % 4)
+		f.phase = float(i) / count * 1.2
+		f.color_name = color
+		parent.add_child(f)
+
+
 ## A fluttering butterfly on a wandering loop.
 class Butterfly:
 	extends Node3D
@@ -233,3 +269,44 @@ class Bird:
 		var flap := sin(_t * 6.0) * 0.6
 		_wings[0].rotation.z = flap
 		_wings[1].rotation.z = -flap
+
+
+class Fish:
+	extends Node3D
+	var center: Vector3
+	var radius: float = 6.0
+	var speed: float = 0.4
+	var phase: float = 0.0
+	var color_name: StringName = &"sunset_orange"
+	var _t: float = 0.0
+	var _tail: Node3D
+
+	func _ready() -> void:
+		_t = phase * 10.0
+		var body := SphereMesh.new()
+		body.radius = 0.25
+		body.height = 0.5
+		var b := Kit.mesh_instance(self, body, Kit.mat(color_name, 0.01))
+		b.scale = Vector3(0.6, 0.8, 1.4)
+		_tail = Node3D.new()
+		_tail.position = Vector3(0.0, 0.0, 0.35)
+		add_child(_tail)
+		var tail := PrismMesh.new()
+		tail.size = Vector3(0.4, 0.35, 0.05)
+		var t := Kit.mesh_instance(_tail, tail, Kit.mat(&"gold", 0.01), Vector3(0.0, 0.0, 0.12))
+		t.rotation = Vector3(PI * 0.5, PI * 0.5, 0.0)
+		var eye := SphereMesh.new()
+		eye.radius = 0.05
+		eye.height = 0.1
+		Kit.mesh_instance(self, eye, Kit.mat(&"ink_navy"), Vector3(0.1, 0.06, -0.22))
+		Kit.mesh_instance(self, eye, Kit.mat(&"ink_navy"), Vector3(-0.1, 0.06, -0.22))
+
+	func _process(delta: float) -> void:
+		_t += delta * speed
+		var a := _t + phase
+		var p := center + Vector3(cos(a) * radius, sin(a * 2.0) * 0.6, sin(a) * radius * 0.7)
+		var ahead := center + Vector3(cos(a + 0.05) * radius, sin((a + 0.05) * 2.0) * 0.6, sin(a + 0.05) * radius * 0.7)
+		position = p
+		if ahead.distance_to(p) > 0.001:
+			look_at(ahead, Vector3.UP)
+		_tail.rotation.y = sin(_t * 30.0) * 0.5

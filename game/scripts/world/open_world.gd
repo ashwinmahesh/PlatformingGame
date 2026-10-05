@@ -212,10 +212,11 @@ func bouncer(base_local: Vector3, look: Springcap.Look = Springcap.Look.MUSHROOM
 	return s
 
 
-func updraft(base_local: Vector3, size: Vector3, lift: float = 9.0) -> Updraft:
+func updraft(base_local: Vector3, size: Vector3, lift: float = 9.0, look: StringName = &"wind") -> Updraft:
 	var u := Updraft.new()
 	u.size = size
 	u.lift = lift
+	u.look = look
 	u.position = P(base_local)
 	add_child(u)
 	return u

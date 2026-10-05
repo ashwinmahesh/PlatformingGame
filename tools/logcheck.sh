@@ -6,6 +6,7 @@ while IFS= read -r line; do
   printf '%s\n' "$line"
   case "$line" in
     *"SCRIPT ERROR"*|*"ERROR:"*|*"Parse Error"*|*"Failed loading"*) status=1 ;;
+    "  FAIL "*) status=1 ;;
   esac
 done
 exit $status
