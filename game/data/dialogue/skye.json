@@ -1,0 +1,19 @@
+{
+  "id": "skye",
+  "name": "Skye",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Skye",
+          "text": "Best view in the canyon, up here on the plateau! The rope bridges link the whole high trail."
+        },
+        {
+          "speaker": "Skye",
+          "text": "See that lone pillar off the summit? Folks say you'd need to float to reach it."
+        }
+      ]
+    }
+  ]
+}

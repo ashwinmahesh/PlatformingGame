@@ -1,0 +1,19 @@
+{
+  "id": "dusty",
+  "name": "Dusty",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Dusty",
+          "text": "That's my old mine. Boarded it up years back, but the timbers are rotten. A good whack'd do it."
+        },
+        {
+          "speaker": "Dusty",
+          "text": "Lift's still running inside, if you can believe it. Watch your head on the shafts."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "quill",
+  "name": "Professor Quill",
+  "conversations": [
+    {
+      "when": "w3_found_book",
+      "lines": [
+        {
+          "speaker": "Professor Quill",
+          "text": "My notebook! Forty years of ruin rubbings, saved. You've earned this, my friend."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Professor Quill",
+          "text": "Drat and dust devils! The wind snatched my notebook clean up onto the high plateau."
+        },
+        {
+          "speaker": "Professor Quill",
+          "text": "It'll be up by the stacked mesas, I'm sure. Bring it back and I'll share a little treasure I dug up."
+        }
+      ]
+    }
+  ]
+}
