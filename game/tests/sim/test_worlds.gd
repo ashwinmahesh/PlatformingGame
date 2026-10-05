@@ -150,3 +150,31 @@ func test_every_world_has_a_high_tier() -> void:
 		check(lvl.player.global_position.y > 11.0, "%s: and up high (y %.1f)" % [w.id, lvl.player.global_position.y])
 		lvl.queue_free()
 		await ticks(3)
+
+
+## Regression (Ashwin, Build 6: "every time I try to go into world 2, the game just crashes",
+## right after a first clear of Bubbleton): from that save state, the hub and every world load and
+## the hero stands safely; then the same with every world cleared and every ability learned.
+func test_every_world_loads_from_a_played_save() -> void:
+	for cleared: Array in [["world_04"], ["world_01", "world_02", "world_03", "world_04", "world_05", "world_06"]]:
+		Progress.new_game()
+		for wid: String in cleared:
+			Progress.commit_victory(StringName(wid))
+		Progress.set_flag(&"w4_found_hat")
+		Progress.set_flag(&"w6_found_hook")
+		for s: StringName in [&"w6_seed_cellar", &"w6_seed_clock", &"w4_seed_kelp_crown"]:
+			Progress.collect_seed(s)
+		Progress.collect_shard(&"w6_shard_clock")
+		Router.pending_spawn = &"hub_rootway_exit"
+		var hub := (load("res://scenes/hub/mossbrook.tscn") as PackedScene).instantiate() as Level
+		add_child(hub)
+		await ticks(30)
+		check(hub.player != null and hub.player.state != Player.State.DEAD, "%d cleared: the hub loads" % cleared.size())
+		hub.queue_free()
+		await ticks(3)
+		for w in Progress.WORLD_DEFS:
+			var lvl := await _load(w, w.entrance_spawn)
+			await ticks(60)
+			check(lvl.player != null and lvl.player.state != Player.State.DEAD, "%d cleared: %s loads and the hero stands" % [cleared.size(), w.id])
+			lvl.queue_free()
+			await ticks(3)

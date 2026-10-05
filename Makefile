@@ -6,7 +6,15 @@ BLENDER ?= /Applications/Blender.app/Contents/MacOS/Blender
 G       := $(GODOT) --path game
 LOGCHK  := tools/logcheck.sh
 
-.PHONY: fetch-assets run import test loop lint check capture clip palette sfx music source-audio assets export-mac
+.PHONY: fetch-assets play run import test loop lint check capture clip palette sfx music source-audio assets export-mac
+
+## Play a snapshot of the last commit from builds/play/, so edits, imports and test runs in game/
+## can't change files under a running game (Build 6: a re-import mid-session crashed World 2).
+play:
+	rm -rf builds/play && mkdir -p builds/play
+	git archive HEAD game | tar -x -C builds/play
+	$(GODOT) --headless --path builds/play/game --import >/dev/null 2>&1 || true
+	$(GODOT) --path builds/play/game
 
 run:
 	$(G)

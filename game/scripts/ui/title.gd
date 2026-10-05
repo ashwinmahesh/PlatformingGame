@@ -7,6 +7,7 @@ var _continue: Button
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
+	Progress.save_dir = Progress.PLAYER_SAVE_DIR
 	var had_save := Progress.has_save()
 	var loaded := Progress.load_save()
 	AudioDirector.play_music(&"mossbrook")

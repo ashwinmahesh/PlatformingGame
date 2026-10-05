@@ -4,7 +4,7 @@ Source of truth: docs/contracts/*.md · Board: docs/board.md · Decisions: docs/
 Build notes for the human live in the vault: Zelda-like game/OpusPlatformer/
 
 ## Commands (use these; add new ones to the Makefile, don't improvise)
-make run | test | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets | fetch-assets
+make play | run | test | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets | fetch-assets
 make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 
 ## Godot

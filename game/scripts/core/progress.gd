@@ -18,7 +18,11 @@ const WORLD_DEFS: Array[WorldDef] = [
 ]
 const RETRY_SECONDS := 30.0
 
-var save_dir: String = "user://"
+## Build 6: only the real game (started from the title screen) uses the player's save in user://.
+## Dev tools, captures and scenes started directly write to user://dev_saves/ instead, so they
+## can never overwrite real progress. The test runner points this at user://test_saves/.
+var save_dir: String = "user://dev_saves/"
+const PLAYER_SAVE_DIR := "user://"
 var data: Dictionary = {}
 ## Set by tests/dev to quit the process between victory steps (plan §9.8 interruption test).
 var debug_kill_at_step: int = -1
@@ -280,6 +284,7 @@ func has_save() -> bool:
 
 ## Write tmp -> read back and validate -> keep previous as .bak -> rename over main.
 func save() -> bool:
+	DirAccess.make_dir_recursive_absolute(save_dir)
 	var tmp := main_path() + ".tmp"
 	var text := JSON.stringify(data, "\t")
 	var f := FileAccess.open(tmp, FileAccess.WRITE)
