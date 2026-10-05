@@ -1,0 +1,24 @@
+{
+  "id": "zephyr",
+  "name": "zephyr",
+  "conversations": [
+    {
+      "when": "w2_found_chime",
+      "lines": [
+        {
+          "speaker": "Zephyr",
+          "text": "Listen to that! The breeze sounds right again. A seed for your trouble!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Zephyr",
+          "text": "My wind chime! The wind snatched it off and dropped it on the Rainbow Mill, out east past the courtyard. The Kingdom is far too quiet without it."
+        }
+      ]
+    }
+  ]
+}

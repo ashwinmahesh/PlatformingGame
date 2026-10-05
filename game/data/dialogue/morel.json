@@ -1,0 +1,23 @@
+{
+  "id": "morel",
+  "name": "morel",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Old Morel",
+          "text": "Welcome to Capstool Village, the highest village in the Wilds."
+        },
+        {
+          "speaker": "Old Morel",
+          "text": "Folk down below never look up. More fool them!"
+        },
+        {
+          "speaker": "Old Morel",
+          "text": "Ring the bells in the Cap Garden and see what the sky gives you."
+        }
+      ]
+    }
+  ]
+}

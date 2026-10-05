@@ -133,3 +133,20 @@ func test_bubbleton_great_bubble_reaches_the_star() -> void:
 	check(p.has_ability(&"dash"), "and teaches the Air Dash")
 	lvl.queue_free()
 	await ticks(3)
+
+
+## Build 6 upper tiers (Ashwin: "a whole other world at higher levels"): each world's high
+## checkpoint stands on solid ground well above the valley floor.
+func test_every_world_has_a_high_tier() -> void:
+	var high: Dictionary[StringName, StringName] = {&"world_01": &"w1_cp_canopy", &"world_02": &"w2_cp_kingdom", &"world_03": &"w3_cp_town", &"world_04": &"w4_cp_heights", &"world_05": &"w5_cp_rim"}
+	for w in Progress.WORLD_DEFS:
+		var sp: StringName = high.get(w.id, &"")
+		check(sp != &"", "%s: has a high tier" % w.id)
+		if sp == &"":
+			continue
+		var lvl := await _load(w, sp)
+		await ticks(90)
+		check(lvl.player.is_on_floor(), "%s: the high checkpoint is on solid ground" % w.id)
+		check(lvl.player.global_position.y > 11.0, "%s: and up high (y %.1f)" % [w.id, lvl.player.global_position.y])
+		lvl.queue_free()
+		await ticks(3)

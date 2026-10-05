@@ -391,6 +391,45 @@ func updraft(base_local: Vector3, size: Vector3, lift: float = 9.0, look: String
 	return u
 
 
+# --- Upper tier (Build 6: "a whole other world at higher levels") ---------------------------
+# All of these take world coordinates. Decks are broad (12-30 m) so the high world is somewhere
+# to walk around, not a string of small jumps; bridges and ramps keep slopes under 22 degrees.
+
+## A broad raised deck with its top at `center.y`. legs: &"pillars" (four posts to leg_to),
+## &"stalk" (one fat central trunk), &"none" (floats).
+func deck(center: Vector3, size: Vector2, color: StringName = &"wood_plank", top_color: StringName = &"auto", legs: StringName = &"pillars", leg_to: float = INF, leg_color: StringName = &"bark_mid") -> StaticBody3D:
+	var body := Kit.block(self, center, Vector3(size.x, 1.4, size.y), color, Layers.WORLD | Layers.CAMERA_BLOCKER, top_color)
+	var bottom := (floor_y if leg_to == INF else leg_to)
+	var h := center.y - 1.4 - bottom
+	if h > 0.5:
+		match legs:
+			&"pillars":
+				for sx: float in [-1.0, 1.0]:
+					for sz: float in [-1.0, 1.0]:
+						Kit.pillar(self, Vector3(center.x + sx * (size.x * 0.5 - 1.6), center.y - 1.4, center.z + sz * (size.y * 0.5 - 1.6)), 0.9, h, leg_color, leg_color)
+			&"stalk":
+				Kit.pillar(self, Vector3(center.x, center.y - 1.4, center.z), minf(size.x, size.y) * 0.2, h, leg_color, leg_color)
+	var top := top_of(color) if top_color == &"auto" else top_color
+	if top in [&"grass_mid", &"moss", &"grass_light"]:
+		_add_grass_area(center, size * 0.9, int(size.x * size.y * grass_density))
+	return body
+
+
+## A walkway from a to b (deck-edge points, tops), with low rails you can't fall past.
+func bridge(a: Vector3, b: Vector3, width: float = 3.4, color: StringName = &"wood_plank", rails: bool = true, rail_color: StringName = &"bark_dark") -> Node3D:
+	return HighTier.bridge(self, a, b, width, color, rails, rail_color)
+
+
+## A square spiral ramp round a solid core up to a flat top at top_y (see HighTier).
+func ramp_tower(center: Vector3, base_y: float, top_y: float, core: float = 8.0, width: float = 4.0, color: StringName = &"stone_light", lane_color: StringName = &"wood_plank", top_color: StringName = &"auto") -> void:
+	HighTier.ramp_tower(self, center, base_y, top_y, core, width, color, lane_color, top_color)
+
+
+## A platform that rides straight up and down between base and top_y.
+func lift(base: Vector3, top_y: float, period: float = 7.0, color: StringName = &"wood_plank") -> MovingPlatform:
+	return HighTier.lift(self, base, top_y, period, color)
+
+
 # --- Things -----------------------------------------------------------------------------------
 
 func prop(id: StringName, base_local: Vector3, yaw: float = 0.0, scale_mul: float = 1.0, collide: bool = true, leaf: StringName = &"") -> Node3D:

@@ -1,0 +1,19 @@
+{
+  "id": "wren",
+  "name": "wren",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Wren",
+          "text": "Morning! I come up here to watch the sun rise over the lake."
+        },
+        {
+          "speaker": "Wren",
+          "text": "Jump off the edge if you're in a hurry. The lake's deep, it'll catch you."
+        }
+      ]
+    }
+  ]
+}

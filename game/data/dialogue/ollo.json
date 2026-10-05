@@ -1,0 +1,19 @@
+{
+  "id": "ollo",
+  "name": "ollo",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Ollo",
+          "text": "Water, fresh from the oasis, hauled up the balloon lift one bucket at a time."
+        },
+        {
+          "speaker": "Ollo",
+          "text": "The cellar under the square? You'll need something heavy on that plate to keep the door open."
+        }
+      ]
+    }
+  ]
+}

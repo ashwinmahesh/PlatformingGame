@@ -1,0 +1,23 @@
+{
+  "id": "celeste",
+  "name": "celeste",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Celeste",
+          "text": "You climbed the Beanstalk? Welcome to the Cloud Kingdom!"
+        },
+        {
+          "speaker": "Celeste",
+          "text": "The palace vault only opens to someone who rings the courtyard bells in the right order."
+        },
+        {
+          "speaker": "Celeste",
+          "text": "Pink, then gold, then blue. Everyone up here knows that."
+        }
+      ]
+    }
+  ]
+}

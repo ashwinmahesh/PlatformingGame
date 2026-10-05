@@ -1,0 +1,19 @@
+{
+  "id": "hoot",
+  "name": "hoot",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Hoot",
+          "text": "Hoo! You found the Owl Lookout. From up here I can see every arch in the Rootway."
+        },
+        {
+          "speaker": "Hoot",
+          "text": "Every world has a high road, if you look up. Treetops, clouds, rooftops, cliffs... Hoo!"
+        }
+      ]
+    }
+  ]
+}

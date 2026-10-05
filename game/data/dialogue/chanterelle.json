@@ -1,0 +1,24 @@
+{
+  "id": "chanterelle",
+  "name": "chanterelle",
+  "conversations": [
+    {
+      "when": "w1_found_lantern",
+      "lines": [
+        {
+          "speaker": "Chanterelle",
+          "text": "My lantern! Now the whole village can find its way home. Here, take this seed!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Chanterelle",
+          "text": "Oh dear, my spore lantern blew away to the top of the big purple cap, way out west along the bridges. Could you bring it back before dark?"
+        }
+      ]
+    }
+  ]
+}

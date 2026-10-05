@@ -1,0 +1,24 @@
+{
+  "id": "saguaro",
+  "name": "saguaro",
+  "conversations": [
+    {
+      "when": "w3_found_sundial",
+      "lines": [
+        {
+          "speaker": "Mayor Saguaro",
+          "text": "My sundial! Lunch is back on schedule. Here's a seed, with the whole town's thanks."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Mayor Saguaro",
+          "text": "Welcome to Mesa Town! I'd shake your hand, but I've lost my pocket sundial. I left it on the tallest mesa out west, past the Glider's Perch. Without it nobody knows when lunch is!"
+        }
+      ]
+    }
+  ]
+}

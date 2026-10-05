@@ -16,6 +16,8 @@ extends OpenWorld
 const WORLD := &"world_04"
 const LIFT := Vector3(0.0, 0.0, -6.0)
 const STAR_Y := 44.0
+## Build 6: Coral Heights, the reef town's upper streets (kept clear of seafloor scatter).
+const HEIGHTS := Rect2(-100.0, 72.0, 196.0, 70.0)
 
 var _great_bubble: Updraft
 
@@ -57,6 +59,7 @@ func build() -> void:
 	_coral_gardens()
 	_side_spots()
 	_landmarks()
+	_coral_heights()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life(&"kelp")
@@ -132,6 +135,8 @@ func _seafloor() -> void:
 
 
 func _busy(p: Vector3) -> bool:
+	if HEIGHTS.has_point(Vector2(p.x, p.z)):
+		return true
 	if p.x > -78.0 and p.x < -46.0 and p.z > 12.0 and p.z < 68.0:
 		return true
 	if absf(p.x) < 44.0 and absf(p.z) < 66.0:
@@ -779,3 +784,79 @@ func _on_shards_complete() -> void:
 	if hud != null:
 		hud.show_banner("The Great Bubble wakes! Ride it up to the Grand Star!", 2.6)
 	AudioDirector.play(&"warp")
+
+
+# --- Build 6: Coral Heights, a second town up on the coral towers --------------------------------
+# Broad coral-top terraces at 18-28 m south of Main Street, joined by kelp-rope bridges. Ways up:
+# the Shell Spire (a spiral ramp at the end of Main Street), a diving-bell lift, a bubble column
+# for gliders, and a chain of jelly pads up coral pillars.
+
+func _coral_heights() -> void:
+	region(Vector3.ZERO)
+	var plaza := Vector3(0.0, 18.0, 108.0)
+	var lanterns := Vector3(-40.0, 20.0, 110.0)
+	var terrace := Vector3(44.0, 22.0, 112.0)
+	var crown := Vector3(-78.0, 24.0, 110.0)
+	var lookout := Vector3(78.0, 28.0, 112.0)
+	ramp_tower(Vector3(0.0, 0.0, 84.0), 0.0, 18.0, 8.0, 4.0, &"coral_pink", &"wood_plank", &"sand_light")
+	sign_post(Vector3(-9.0, 0.0, 70.0), "The Shell Spire: up to\nCoral Heights!", PI)
+	deck(plaza, Vector2(30.0, 20.0), &"coral_orange", &"sand_light", &"pillars", INF, &"coral_pink")
+	deck(lanterns, Vector2(14.0, 40.0), &"sea_violet", &"sand_light", &"pillars", INF, &"mush_purple")
+	deck(terrace, Vector2(20.0, 20.0), &"coral_pink", &"sand_light", &"stalk", INF, &"coral_orange")
+	deck(crown, Vector2(12.0, 12.0), &"leaf_teal", &"sand_light", &"stalk", INF, &"leaf_teal")
+	deck(lookout, Vector2(10.0, 10.0), &"coral_orange", &"sand_light", &"stalk", INF, &"coral_pink")
+	bridge(Vector3(0.0, 18.0, 88.0), Vector3(0.0, 18.0, 98.0), 3.6, &"wood_plank", true, &"leaf_teal")
+	bridge(Vector3(-15.0, 18.0, 108.0), Vector3(-33.0, 20.0, 108.0), 3.4, &"wood_plank", true, &"leaf_teal")
+	bridge(Vector3(15.0, 18.0, 110.0), Vector3(34.0, 22.0, 112.0), 3.4, &"wood_plank", true, &"leaf_teal")
+	bridge(Vector3(-47.0, 20.0, 112.0), Vector3(-72.0, 24.0, 112.0), 3.4, &"wood_plank", true, &"leaf_teal")
+	bridge(Vector3(54.0, 22.0, 112.0), Vector3(73.0, 28.0, 112.0), 3.4, &"wood_plank", true, &"leaf_teal")
+	# Other ways up: a diving-bell lift, a bubble column, and jelly pads up coral pillars.
+	var bell := lift(Vector3(44.0, 0.0, 124.5), 22.0, 8.0, &"gold")
+	Kit.blob(bell, Vector3(0.0, 3.2, 0.0), 1.6, &"gold")
+	updraft(Vector3(-26.0, 0.0, 96.0), Vector3(4.0, 26.0, 4.0), 10.0, &"bubbles")
+	for i in 3:
+		var top := Vector3(-90.0 + i * 6.0, 6.0 + i * 6.0, 136.0 - i * 7.0)
+		Kit.pillar(self, top, 2.6, top.y, &"coral_pink", &"sand_light")
+		bouncer(top, Springcap.Look.JELLY, 7.5)
+	checkpoint(&"w4_cp_heights", plaza + Vector3(-8.0, 0.0, 4.0))
+	# The plaza: a kelp shake stand, shell cottages, lamps and two locals.
+	Whimsy.stall(self, plaza + Vector3(-9.0, 0.0, -5.0), 0.2, &"slime_blue")
+	Whimsy.shell_house(self, plaza + Vector3(9.0, 0.0, -4.0), -0.6, &"coral_pink", 0.8)
+	for k in 4:
+		Whimsy.lamp(self, plaza + Vector3(-12.0 + k * 8.0, 0.0, 8.0), k % 2 == 0)
+	Whimsy.bunting(self, plaza + Vector3(-12.0, 4.0, 8.0), plaza + Vector3(12.0, 4.0, 8.0))
+	villager("shelly", "Shelly", plaza + Vector3(2.0, 0.0, 3.0), &"w4_found_comb", &"w4_seed_heights_errand", lookout + Vector3(2.0, 0.3, 2.0), "Pearl comb")
+	villager("sculpin", "Old Sculpin", plaza + Vector3(-4.0, 0.0, -2.0))
+	critter(Armorling, plaza + Vector3(6.0, 0.5, 4.0))
+	big_gloplet(plaza + Vector3(-10.0, 0.5, 4.0), preload("res://data/enemies/pink_gloplet.tres"))
+	# Plaza bells open the Clam Vault on the terrace.
+	var vault: Array = secret_cave(terrace + Vector3(0.0, 0.0, -1.0), 0.0, Vector3(12.0, 8.0, 10.0), &"coral_pink", &"gate")
+	stone(Vector3(-3.0, 1.2, -1.0), 1.6, 1.2, &"coral_orange", &"sand_light")
+	ledge(Vector3(0.0, 3.2, -2.5), Vector3(3.0, 0.5, 2.4), &"wood_plank")
+	ledge(Vector3(3.5, 5.4, 0.0), Vector3(2.4, 0.5, 3.0), &"wood_plank")
+	seed_at(&"w4_seed_clam_vault", Vector3(3.5, 5.4, 0.0))
+	_frame = vault[0]
+	region(Vector3.ZERO)
+	var vault_door := vault[1] as VineGate
+	var bells := bell_puzzle(plaza + Vector3(0.0, 0.0, -6.0), 3.5, "Ring pink, gold, blue:\nthe Clam Vault opens (east).")
+	bells.solved.connect(func() -> void:
+		vault_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("The Clam Vault opens!", 2.0))
+	place(Puffcap.new(), terrace + Vector3(6.0, 0.5, 7.0))
+	# Lantern Walk: jellyfish lamps all along it, and Jellyfloats drifting by.
+	for i in 6:
+		var lp := lanterns + Vector3(-5.0 if i % 2 == 0 else 5.0, 0.0, -17.0 + i * 7.0)
+		Whimsy.lamp(self, lp, i % 2 == 0)
+	for i in 3:
+		critter(Jellyfloat, lanterns + Vector3(0.0, 4.0, -14.0 + i * 14.0))
+	# Kelp Crown: a seed at the very top.
+	for i in 4:
+		Whimsy.kelp(self, crown + Vector3(-4.0 + (i % 2) * 8.0, 0.0, -4.0 + (i / 2) * 8.0), 6.0)
+	seed_at(&"w4_seed_kelp_crown", crown)
+	for i in 8:
+		var a := float(i) / 8.0 * TAU
+		Whimsy.coral(self, plaza + Vector3(cos(a) * 18.0, -18.0, sin(a) * 14.0), [&"coral_pink", &"coral_orange", &"mush_purple"][i % 3] as StringName, 2.4)
+	Ambient.fish(self, plaza + Vector3(0.0, 4.0, 0.0), 20.0, 10, &"gold")
+	Ambient.bubbles(self, plaza + Vector3(0.0, 0.5, 0.0), Vector3(30.0, 2.0, 20.0), 20)
+	add_capture_point("heights", Vector3(30.0, 44.0, 40.0), Vector3(0.0, 18.0, 108.0))

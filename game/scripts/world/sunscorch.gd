@@ -35,6 +35,8 @@ const BOWLS: Array[Array] = [
 	[Vector2(-108.0, 42.0), 13.0], [Vector2(-38.0, -128.0), 15.0], [Vector2(40.0, 96.0), 14.0], [Vector2(0.0, 146.0), 13.0],
 ]
 const CHASM := Rect2(124.0, -74.0, 26.0, 48.0)
+## Build 6: Mesa Town on the plateau top (kept clear of the plateau scatter).
+const TOWN := Rect2(14.0, -12.0, 54.0, 66.0)
 
 
 func configure() -> void:
@@ -77,6 +79,7 @@ func build() -> void:
 	_flats()
 	_side_canyons()
 	_golem_gate()
+	_mesa_town()
 	_gorge_life()
 	finish_boss_world()
 	finish_life(&"moss")
@@ -598,7 +601,7 @@ func _gorge_life() -> void:
 	var top_props: Array[StringName] = [&"rock_tall_d", &"stone_tall_b", &"rock_large_d", &"cactus_short", &"q_rock_1", &"q_rock_2"]
 	for i in 110:
 		var q := Vector2(_rng.randf_range(-145.0, 145.0), _rng.randf_range(-155.0, 155.0))
-		if gorge_distance(q) < 7.0 or CHASM.grow(6.0).has_point(q) or q.distance_to(Vector2(ARENA.x, ARENA.z)) < 40.0:
+		if gorge_distance(q) < 7.0 or CHASM.grow(6.0).has_point(q) or TOWN.has_point(q) or q.distance_to(Vector2(ARENA.x, ARENA.z)) < 40.0:
 			continue
 		var p := Vector3(q.x, PLATEAU, q.y)
 		match i % 4:
@@ -618,3 +621,81 @@ func _near_feature(p: Vector3) -> bool:
 		if Vector2(p.x - c.x, p.z - c.z).length() < (24.0 if c.z == 70.0 else 14.0):
 			return true
 	return false
+
+
+# --- Build 6: Mesa Town, a settlement up on the plateau, and its rooftops ------------------------
+# Striped adobe houses with flat roofs you can walk (18-24 m), plank bridges between the roofs and
+# the Sun Tower (30 m) at the north end. Ways up from the gorge: the camp's balloon lift and Mesa
+# Stair (already there), a cactus bounce pad in the camp bowl, and the town's own ramps and lift.
+
+func _house(base: Vector3, size: Vector2, h: float, door_side: Vector3) -> void:
+	mesa(base + Vector3(0.0, h, 0.0), size, &"wood_warm", base.y, false)
+	var face := base + door_side * (size.x * 0.5 if absf(door_side.x) > 0.0 else size.y * 0.5)
+	var across := Vector3(door_side.z, 0.0, door_side.x)
+	var door := Kit.block(self, face + Vector3(0.0, 2.8, 0.0) + door_side * 0.15, Vector3(1.8, 2.8, 0.3) if absf(door_side.z) > 0.0 else Vector3(0.3, 2.8, 1.8), &"bark_dark", 0, &"")
+	door.name = "Door"
+	for k: float in [-1.0, 1.0]:
+		var wpos := face + across * k * 2.6 + Vector3(0.0, h - 2.0, 0.0) + door_side * 0.15
+		Kit.block(self, wpos, Vector3(1.2, 1.2, 0.3) if absf(door_side.z) > 0.0 else Vector3(0.3, 1.2, 1.2), &"slime_blue", 0, &"")
+
+
+func _mesa_town() -> void:
+	region(Vector3.ZERO)
+	var g := PLATEAU
+	var sq := Vector3(40.0, g, 28.0)
+	# Houses (base, footprint, height, door side) and their walkable roofs.
+	_house(Vector3(24.0, g, 14.0), Vector2(10.0, 10.0), 8.0, Vector3.BACK)
+	_house(Vector3(56.0, g, 14.0), Vector2(10.0, 10.0), 12.0, Vector3.BACK)
+	_house(Vector3(24.0, g, 44.0), Vector2(10.0, 10.0), 6.0, Vector3.FORWARD)
+	_house(Vector3(56.0, g, 44.0), Vector2(12.0, 10.0), 10.0, Vector3.FORWARD)
+	# Ramps from the square up to the roofs, and rooftop bridges.
+	bridge(Vector3(40.0, g, 31.0), Vector3(29.5, g + 8.0, 17.0), 3.2, &"wood_plank")
+	bridge(Vector3(29.0, g + 8.0, 14.0), Vector3(51.0, g + 12.0, 14.0), 3.0, &"wood_plank")
+	bridge(Vector3(24.0, g + 8.0, 19.0), Vector3(24.0, g + 6.0, 39.0), 3.0, &"wood_plank")
+	bridge(Vector3(56.0, g + 12.0, 19.0), Vector3(56.0, g + 10.0, 39.0), 3.0, &"wood_plank")
+	bridge(Vector3(29.0, g + 6.0, 44.0), Vector3(50.0, g + 10.0, 44.0), 3.0, &"wood_plank")
+	lift(Vector3(47.2, g, 44.0), g + 10.0, 7.0)
+	# A chimney on the tallest roof holds a seed (a jump from the roof).
+	Kit.block(self, Vector3(59.0, g + 14.4, 11.0), Vector3(2.6, 2.4, 2.6), &"roof_red", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_light")
+	seed_at(&"w3_seed_rooftops", Vector3(59.0, g + 14.4, 11.0))
+	# The Sun Tower: a spiral up to a lookout with a seed; a bridge drops back to the roofs.
+	ramp_tower(Vector3(40.0, g, 0.0), g, g + 18.0, 8.0, 4.0, &"sunset_orange", &"wood_plank", &"sand_light")
+	seed_at(&"w3_seed_sun_tower", Vector3(40.0, g + 18.0, 0.0))
+	Whimsy.bunting(self, Vector3(36.0, g + 22.0, -4.0), Vector3(44.0, g + 22.0, 4.0))
+	bridge(Vector3(44.0, g + 18.0, 2.0), Vector3(55.0, g + 12.0, 9.5), 3.0, &"wood_plank")
+	checkpoint(&"w3_cp_town", sq + Vector3(-6.0, 0.0, 4.0))
+	# The square: stalls, a well, palms, lamps and bunting.
+	Whimsy.stall(self, sq + Vector3(-8.0, 0.0, -4.0), 0.3, &"sunset_orange")
+	Whimsy.stall(self, sq + Vector3(8.0, 0.0, -4.0), -0.3, &"candy_pink")
+	prop(&"well", sq + Vector3(0.0, 0.0, -2.0), 0.0, 1.2)
+	for k in 4:
+		Whimsy.lamp(self, sq + Vector3(-9.0 + k * 6.0, 0.0, 7.0), k % 2 == 0)
+	Whimsy.bunting(self, Vector3(29.0, g + 7.0, 14.0), Vector3(51.0, g + 7.0, 14.0))
+	for spec: Array in [[18.0, 30.0], [62.0, 30.0], [33.0, 54.0], [47.0, 54.0]]:
+		prop(&"palm_tall", Vector3(spec[0] as float, g, spec[1] as float), _rng.randf() * TAU, 1.6)
+	for spec: Array in [[17.0, 4.0], [64.0, 4.0], [64.0, 52.0]]:
+		Whimsy.cactus(self, Vector3(spec[0] as float, g, spec[1] as float), 5.0)
+	villager("saguaro", "Mayor Saguaro", sq + Vector3(3.0, 0.0, 2.0), &"w3_found_sundial", &"w3_seed_town_errand", Vector3(-50.0, 21.3, 136.0), "Pocket sundial")
+	villager("tilly", "Tilly", sq + Vector3(-4.0, 0.0, -6.0))
+	villager("ollo", "Ollo", Vector3(24.0, g + 8.0, 12.0))
+	# The cellar: shove the crate onto the plate to hold its door open.
+	var cellar: Array = secret_cave(Vector3(40.0, g, 47.0), PI, Vector3(12.0, 8.0, 10.0), &"sunset_orange", &"gate")
+	stone(Vector3(-3.0, 1.2, -1.0), 1.6, 1.2, &"stone_light", &"sand_light")
+	ledge(Vector3(0.0, 3.2, -2.5), Vector3(3.0, 0.5, 2.4), &"wood_plank")
+	ledge(Vector3(3.5, 5.4, 0.0), Vector3(2.4, 0.5, 3.0), &"wood_plank")
+	seed_at(&"w3_seed_cellar", Vector3(3.5, 5.4, 0.0))
+	_frame = cellar[0]
+	region(Vector3.ZERO)
+	crate_puzzle(sq + Vector3(10.0, 0.0, 4.0), sq + Vector3(6.0, 0.0, 10.0), cellar[1] as VineGate)
+	sign_post(sq + Vector3(12.0, 0.0, 10.0), "The cellar door stays open\nwhile the plate is weighed down.", -PI * 0.5)
+	# Trouble at the edge of town.
+	boulderkin(Vector3(62.0, g + 0.5, -6.0), &"sunset_orange", &"sand_light", &"portal_teal")
+	critter(Armorling, sq + Vector3(0.0, 0.5, 12.0))
+	batling(Vector3(40.0, g + 14.0, 28.0))
+	for spec: Array in [[20.0, -6.0], [64.0, 24.0]]:
+		critter(Pricklepot, Vector3(spec[0] as float, g, spec[1] as float))
+	# A cactus bounce pad in the camp bowl: a quick way up to town.
+	bouncer(Vector3(14.0, 0.0, 50.0), Springcap.Look.GLOWCAP, 14.0)
+	sign_post(Vector3(10.0, 0.0, 52.0), "Bounce up to Mesa Town!", PI * 0.75)
+	sparkles(sq + Vector3(0.0, 2.0, 0.0), Vector3(40.0, 4.0, 40.0), 30)
+	add_capture_point("town", Vector3(10.0, g + 22.0, 64.0), Vector3(42.0, g + 6.0, 20.0))

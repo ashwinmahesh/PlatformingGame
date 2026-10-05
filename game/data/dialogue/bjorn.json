@@ -1,0 +1,24 @@
+{
+  "id": "bjorn",
+  "name": "bjorn",
+  "conversations": [
+    {
+      "when": "w5_found_globe",
+      "lines": [
+        {
+          "speaker": "Bjorn",
+          "text": "You got it back from the eagle? Brave little sprout! Here, a seed for your pocket."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Bjorn",
+          "text": "An eagle stole my snow globe! It's in that great nest at the east end of the Rimwalk. I'm too old to wrestle eagles. You're not!"
+        }
+      ]
+    }
+  ]
+}

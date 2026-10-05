@@ -1,0 +1,24 @@
+{
+  "id": "shelly",
+  "name": "shelly",
+  "conversations": [
+    {
+      "when": "w4_found_comb",
+      "lines": [
+        {
+          "speaker": "Shelly",
+          "text": "My comb! Now I'm fit to be seen in Coral Heights again. A seed, with thanks!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Shelly",
+          "text": "Have you seen my pearl comb? A cheeky current carried it to the Pearl Lookout, the very top of the east terrace. My hair is a disaster without it!"
+        }
+      ]
+    }
+  ]
+}

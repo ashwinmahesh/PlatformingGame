@@ -53,6 +53,7 @@ func build() -> void:
 	_links()
 	_build6()
 	_lake_depths()
+	_canopy()
 	_sky()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -135,7 +136,7 @@ func _meadow() -> void:
 	for i in 40:
 		var a := float(i) / 40.0 * TAU
 		var exit_gap := false
-		for e: float in [0.0, PI * 0.5, PI, PI * 1.5]:
+		for e: float in [0.0, PI * 0.5, PI, PI * 1.5, PI * 0.75]:
 			if absf(wrapf(a - e, -PI, PI)) < 0.32:
 				exit_gap = true
 		if exit_gap:
@@ -147,7 +148,7 @@ func _meadow() -> void:
 	# Giant flowers to bounce about on, and glowing crystals by the old stump.
 	Whimsy.flower(self, P(Vector3(16.0, 0.0, 10.0)), 2.5, 2.5, &"candy_pink")
 	Whimsy.flower(self, P(Vector3(20.0, 0.0, 16.0)), 4.5, 2.5, &"gold")
-	Whimsy.flower(self, P(Vector3(-16.0, 0.0, 14.0)), 3.0, 2.0, &"slime_blue")
+	Whimsy.flower(self, P(Vector3(12.0, 0.0, -22.0)), 3.0, 2.0, &"slime_blue")
 	Whimsy.crystal(self, P(Vector3(-6.0, 0.0, -10.0)), &"crystal_violet", 0.9)
 	Whimsy.crystal(self, P(Vector3(7.0, 0.0, -9.0)), &"portal_teal", 0.7)
 	animals(Bunny, Vector3.ZERO, 22.0, 8)
@@ -694,3 +695,90 @@ func on_player_respawned() -> void:
 	fight_started = false
 	gate.set_closed(not lock.open)
 	AudioDirector.play_music(&"glimmerbrook")
+
+
+# --- Build 6: the Canopy, a second world up in the treetops (Ashwin: "a whole other world at higher
+# levels") ---------------------------------------------------------------------------------------
+# Broad wooden decks round giant mushroom stalks at 22-30 m over the south-west forest, joined by
+# railed rope bridges. Ways up: the Canopy Stair in the meadow, a lift from the picnic clearing,
+# and a spore updraft for gliders. Any edge is a way back down.
+
+const CANOPY_Y := 22.0
+
+func _canopy() -> void:
+	region(Vector3.ZERO)
+	var y := CANOPY_Y
+	# The Canopy Stair: a spiral ramp in the meadow's south-west corner.
+	ramp_tower(Vector3(-17.0, 0.0, 17.0), 0.0, y, 8.0, 4.0, &"bark_mid", &"wood_plank", &"grass_mid")
+	sign_post(Vector3(-9.0, 0.0, 26.0), "The Canopy Stair: a whole\nvillage up in the treetops!", PI * 0.25)
+	# Decks (top centre, size) and the giant mushrooms they hang from.
+	var village := Vector3(-58.0, y, 24.0)
+	deck(village, Vector2(26.0, 22.0), &"wood_plank", &"grass_mid", &"none")
+	Whimsy.mushroom(self, Vector3(-58.0, floor_y, 24.0), y + 14.0 - floor_y, 15.0, &"red")
+	var lookout := Vector3(-62.0, y + 4.0, -10.0)
+	deck(lookout, Vector2(14.0, 14.0), &"wood_plank", &"moss", &"none")
+	var garden := Vector3(-92.0, y + 2.0, 30.0)
+	deck(garden, Vector2(18.0, 16.0), &"wood_plank", &"grass_mid", &"stalk", INF, &"cloth_cream")
+	var top_cap := Vector3(-90.0, y + 8.0, -8.0)
+	deck(top_cap, Vector2(12.0, 12.0), &"wood_plank", &"moss", &"none")
+	Whimsy.mushroom(self, Vector3(-90.0, floor_y, -8.0), y + 18.0 - floor_y, 9.0, &"purple")
+	var overlook := Vector3(-40.0, y + 2.0, 66.0)
+	deck(overlook, Vector2(16.0, 14.0), &"wood_plank", &"grass_mid", &"stalk", INF, &"cloth_cream")
+	# Bridges.
+	bridge(Vector3(-21.0, y, 17.0), Vector3(-45.0, y, 20.0))
+	bridge(Vector3(-60.0, y, 13.0), Vector3(-62.0, y + 4.0, -3.0))
+	bridge(Vector3(-71.0, y, 26.0), Vector3(-83.0, y + 2.0, 28.0))
+	bridge(Vector3(-92.0, y + 2.0, 22.0), Vector3(-90.0, y + 8.0, -2.0))
+	bridge(Vector3(-52.0, y, 35.0), Vector3(-42.0, y + 2.0, 59.0))
+	# A lift from the picnic clearing up to the village, and a spore updraft for gliders.
+	lift(Vector3(-45.5, 0.0, 37.4), y, 8.0)
+	updraft(Vector3(-24.0, 0.0, 30.0), Vector3(4.0, y + 6.0, 4.0), 10.0)
+	checkpoint(&"w1_cp_canopy", village + Vector3(6.0, 0.0, 6.0))
+	# Capstool Village: mushroom cottages, lamps and bunting under the big red cap.
+	Whimsy.mushroom_house(self, village + Vector3(-7.0, 0.0, -4.0), 0.6, &"orange", 2.0, 3.6, 4.4)
+	Whimsy.mushroom_house(self, village + Vector3(6.0, 0.0, -6.0), -0.5, &"teal", 2.0, 3.6, 4.4)
+	Whimsy.stall(self, village + Vector3(-6.0, 0.0, 7.0), 0.3, &"candy_pink")
+	for k in 4:
+		Whimsy.lamp(self, village + Vector3(-11.0 + k * 7.0, 0.0, 10.0), k % 2 == 0)
+	Whimsy.bunting(self, village + Vector3(-11.0, 4.0, 10.0), village + Vector3(10.0, 4.0, 10.0))
+	villager("chanterelle", "Chanterelle", village + Vector3(2.0, 0.0, 4.0), &"w1_found_lantern", &"w1_seed_canopy_errand", top_cap + Vector3(4.0, 0.3, 3.0), "Spore lantern")
+	villager("morel", "Old Morel", village + Vector3(-9.0, 0.0, 4.0))
+	place(Puffcap.new(), village + Vector3(9.0, 0.5, 5.0))
+	# The Cap Garden: three bells raise a stair of light to a floating cap with a seed.
+	var bells := bell_puzzle(garden + Vector3(0.0, 0.0, 2.0), 4.0, "Ring pink, gold, blue\nfor a stair to the sky cap.")
+	var steps: Array[GhostPlatform] = []
+	for i in 4:
+		var gp := GhostPlatform.new()
+		gp.size = Vector3(3.6, 0.6, 3.6)
+		gp.color_name = &"portal_teal"
+		gp.position = garden + Vector3(-12.0 - i * 2.0, 2.5 + i * 2.5, 6.0 + i * 3.0)
+		add_child(gp)
+		steps.append(gp)
+	var sky_cap := garden + Vector3(-22.0, 12.0, 18.0)
+	stone(sky_cap, 3.6, 1.5, &"cloth_cream", &"roof_red")
+	seed_at(&"w1_seed_canopy_bells", sky_cap)
+	bells.solved.connect(func() -> void:
+		for st in steps:
+			st.set_solid(true)
+		if hud != null:
+			hud.show_banner("A stair of light to the sky cap!", 2.0))
+	for i in 5:
+		Whimsy.flower(self, garden + Vector3(-7.0 + i * 3.5, 0.0, -5.0), 0.9, 0.8, [&"candy_pink", &"gold", &"slime_blue"][i % 3] as StringName, false)
+	big_gloplet(garden + Vector3(5.0, 0.5, -3.0))
+	# The Spore Lookout: a perched Batling hangs under the bridge; a hollow stump hides a seed.
+	batling(lookout + Vector3(0.0, -3.0, 10.0), true)
+	place(Puffcap.new(), lookout + Vector3(3.0, 0.5, -3.0))
+	var hollow: Array = secret_cave(overlook + Vector3(0.0, 0.0, -1.0), 0.0, Vector3(12.0, 7.0, 9.0), &"bark_mid", &"break")
+	ledge(Vector3(-3.5, 1.4, -1.5), Vector3(3.0, 1.4, 3.0), &"bark_light")
+	ledge(Vector3(0.0, 3.4, -2.6), Vector3(3.0, 0.5, 2.4), &"bark_light")
+	ledge(Vector3(3.5, 5.2, -1.0), Vector3(2.4, 0.5, 3.0), &"bark_light")
+	seed_at(&"w1_seed_canopy_hollow", Vector3(3.5, 5.2, -1.0))
+	_frame = hollow[0]
+	region(Vector3.ZERO)
+	# The very top of the purple cap: the best view in the Wilds.
+	seed_at(&"w1_seed_canopy_top", top_cap + Vector3(-3.0, 0.0, -3.0))
+	batling(top_cap + Vector3(0.0, 4.0, 8.0))
+	sparkles(village + Vector3(0.0, 2.0, 0.0), Vector3(30.0, 4.0, 26.0), 40)
+	butterflies(village, 12.0, 8)
+	add_capture_point("canopy", Vector3(-20.0, y + 16.0, 60.0), Vector3(-62.0, y, 18.0))
+	add_capture_point("canopy_stair", Vector3(4.0, 12.0, 40.0), Vector3(-17.0, 10.0, 17.0))

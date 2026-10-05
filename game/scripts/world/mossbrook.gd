@@ -53,6 +53,7 @@ func build() -> void:
 	_flowers()
 	_village_life()
 	_scenery()
+	_treetops()
 	add_capture_point("hub_overview", Vector3(0.0, 20.0, 46.0), Vector3(0.0, 2.0, -8.0))
 	add_capture_point("hub_oak", Vector3(12.0, 5.0, -8.0), Vector3(0.0, 4.0, -26.0))
 
@@ -316,3 +317,60 @@ func _process(delta: float) -> void:
 	if _course_running:
 		_course_time += delta
 		hud.set_timer_text("Rooftop course  %.2f s   (best %.2f)" % [_course_time, Progress.best_time(COURSE)])
+
+
+# --- Build 6: the Treetop Walk round the Great Oak ---------------------------------------------
+# A railed boardwalk ring under the oak's canopy at 12 m, with three treehouse decks reaching out
+# over the lake. Ways up: the Oak Stair (a spiral ramp by the windmill), a lift on the east side,
+# and bounce caps; jump off any edge into the lake to come back down.
+
+func _plank(top: Vector3, size: Vector2, legs: bool, leg_to: float = 0.0) -> void:
+	Kit.block(self, top, Vector3(size.x, 1.2, size.y), &"wood_plank", Layers.WORLD | Layers.CAMERA_BLOCKER, &"")
+	if legs:
+		for sx: float in [-1.0, 1.0]:
+			for sz: float in [-1.0, 1.0]:
+				Kit.pillar(self, Vector3(top.x + sx * (size.x * 0.5 - 0.8), top.y - 1.2, top.z + sz * (size.y * 0.5 - 0.8)), 0.6, top.y - 1.2 - leg_to, &"bark_mid", &"bark_mid")
+
+
+func _treetops() -> void:
+	var y := 12.0
+	# The ring round the trunk (the south side rests on the others, clear of the Rootway arches).
+	_plank(Vector3(0.0, y, -44.5), Vector2(26.0, 5.0), true)
+	_plank(Vector3(0.0, y, -23.5), Vector2(26.0, 5.0), false)
+	_plank(Vector3(-10.5, y, -34.0), Vector2(5.0, 16.0), true)
+	_plank(Vector3(10.5, y, -34.0), Vector2(5.0, 16.0), true)
+	for spec: Array in [[-13.0, -47.0, -13.0, -21.0], [13.0, -47.0, 13.0, -21.0], [-13.0, -47.0, 13.0, -47.0], [-13.0, -21.0, 13.0, -21.0]]:
+		var a := Vector3(spec[0] as float, y + 0.9, spec[1] as float)
+		var b := Vector3(spec[2] as float, y + 0.9, spec[3] as float)
+		HighTier.bridge(self, a, b, 0.24, &"bark_dark", false)
+	for k in 8:
+		var a := float(k) / 8.0 * TAU
+		Whimsy.lamp(self, Vector3(clampf(cos(a) * 12.0, -11.5, 11.5), y, -34.0 + clampf(sin(a) * 12.0, -11.5, 11.5)), k % 2 == 0)
+	Whimsy.bunting(self, Vector3(-12.0, y + 4.0, -45.0), Vector3(12.0, y + 4.0, -45.0))
+	# Ways up.
+	HighTier.ramp_tower(self, Vector3(-20.0, 0.0, -30.0), 0.0, y, 6.0, 3.5, &"bark_mid", &"wood_plank", &"grass_mid")
+	HighTier.bridge(self, Vector3(-17.0, y, -30.0), Vector3(-13.0, y, -30.0), 3.0)
+	_sign(Vector3(-12.0, 0.0, -22.0), "The Oak Stair: up to\nthe Treetop Walk!", 0.6)
+	HighTier.lift(self, Vector3(15.6, 0.0, -30.0), y, 7.0)
+	for spec: Array in [[-6.0, -50.0], [6.0, -50.0]]:
+		var sc := Springcap.new()
+		sc.land_height = 13.0
+		sc.position = Vector3(spec[0] as float, 0.0, spec[1] as float)
+		add_child(sc)
+	# Treehouses out over the lake.
+	var owl := Vector3(0.0, 18.0, -66.0)
+	var mill := Vector3(-32.0, 16.0, -40.0)
+	var sunrise := Vector3(34.0, 16.0, -50.0)
+	_plank(owl, Vector2(12.0, 12.0), true, -13.0)
+	_plank(mill, Vector2(10.0, 10.0), true, -13.0)
+	_plank(sunrise, Vector2(10.0, 10.0), true, -13.0)
+	HighTier.bridge(self, Vector3(0.0, y, -47.0), Vector3(0.0, owl.y, -60.0), 3.2)
+	HighTier.bridge(self, Vector3(-13.0, y, -38.0), Vector3(-27.0, mill.y, -40.0), 3.2)
+	HighTier.bridge(self, Vector3(13.0, y, -44.5), Vector3(29.0, sunrise.y, -48.0), 3.2)
+	for t: Vector3 in [owl, mill, sunrise]:
+		Kit.pillar(self, t + Vector3(0.0, 6.4, 0.0), 0.35, 5.8, &"bark_dark", &"")
+		Whimsy.canopy(self, t + Vector3(0.0, 7.6, 0.0), 4.2, &"lime")
+		Whimsy.lamp(self, t + Vector3(3.5, 0.0, 3.5), true)
+	_npc("hoot", "Hoot", owl + Vector3(2.0, 0.0, 2.0))
+	_npc("wren", "Wren", sunrise + Vector3(-2.0, 0.0, 1.0))
+	add_capture_point("hub_treetops", Vector3(30.0, 26.0, 0.0), Vector3(0.0, 12.0, -40.0))

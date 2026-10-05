@@ -47,6 +47,7 @@ func build() -> void:
 	_bounce_gardens()
 	_rainbow_ring()
 	_build6()
+	_kingdom()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life()
@@ -406,3 +407,90 @@ func _on_shards_complete() -> void:
 				AudioDirector.play(&"ui_blip", -6.0, 1.0 + i * 0.05))
 	if hud != null:
 		hud.show_banner("A stairway of light climbs the Star Spire!", 2.4)
+
+
+# --- Build 6: the Cloud Kingdom, a whole world above the clouds ---------------------------------
+# Broad cloud decks at 34-40 m in the north-east sky round a palace. Ways up: the Beanstalk Tower
+# on its own island off the plaza, a balloon lift from Puffball Path, and wind for gliders.
+
+const KINGDOM_Y := 34.0
+
+func _kingdom() -> void:
+	region(Vector3.ZERO)
+	var y := KINGDOM_Y
+	# The Beanstalk Tower on a new island, joined to the plaza by a cloud bridge.
+	island_at(Vector3(40.0, 0.0, -40.0), 12.0)
+	bridge(Vector3(17.5, 0.0, -17.5), Vector3(32.0, 0.0, -32.0), 3.6, &"foam", true, &"candy_pink")
+	ramp_tower(Vector3(40.0, 0.0, -40.0), 0.0, y, 10.0, 4.0, &"leaf_teal", &"foam", &"grass_mid")
+	sign_post(Vector3(26.0, 0.0, -30.0), "The Beanstalk Tower:\nup to the Cloud Kingdom!", PI * 0.75)
+	var court := Vector3(62.0, y, -62.0)
+	deck(court, Vector2(28.0, 24.0), &"foam", &"cloth_cream", &"none")
+	var gardens := Vector3(88.0, y + 4.0, -24.0)
+	deck(gardens, Vector2(20.0, 34.0), &"foam", &"grass_mid", &"none")
+	var palace := Vector3(36.0, y + 6.0, -100.0)
+	deck(palace, Vector2(22.0, 22.0), &"foam", &"cloth_cream", &"none")
+	var mill := Vector3(100.0, y + 2.0, -80.0)
+	deck(mill, Vector2(14.0, 14.0), &"foam", &"grass_mid", &"none")
+	for d: Array in [[court, Vector2(28.0, 24.0)], [gardens, Vector2(20.0, 34.0)], [palace, Vector2(22.0, 22.0)], [mill, Vector2(14.0, 14.0)]]:
+		var c := d[0] as Vector3
+		var sz := d[1] as Vector2
+		# Puffy cloud underbellies, kept below the walking surface.
+		var r := minf(sz.x, sz.y) * 0.2
+		for i in 6:
+			Kit.blob(self, c + Vector3(_rng.randf_range(-0.4, 0.4) * sz.x, -1.3 - r * 0.9, _rng.randf_range(-0.4, 0.4) * sz.y), r, &"cloth_cream")
+	bridge(Vector3(44.0, y, -44.0), Vector3(50.0, y, -50.0), 3.6, &"foam", true, &"candy_pink")
+	bridge(Vector3(76.0, y, -52.0), Vector3(82.0, y + 4.0, -41.0), 3.6, &"foam", true, &"candy_pink")
+	bridge(Vector3(54.0, y, -74.0), Vector3(44.0, y + 6.0, -89.0), 3.6, &"foam", true, &"candy_pink")
+	bridge(Vector3(76.0, y, -70.0), Vector3(93.0, y + 2.0, -78.0), 3.6, &"foam", true, &"candy_pink")
+	# A balloon lift from the Puffball Path island, and a wind column off the plaza for gliders.
+	var bl := lift(Vector3(84.0, 5.0, -5.0), y + 4.0, 9.0)
+	Whimsy.balloon(bl, Vector3(0.0, 0.5, 0.0), [&"candy_pink", &"gold"] as Array[StringName])
+	updraft(Vector3(24.0, 0.0, -2.0), Vector3(4.0, y + 8.0, 4.0), 11.0)
+	checkpoint(&"w2_cp_kingdom", court + Vector3(-8.0, 0.0, 6.0))
+	# The courtyard: stalls, lamps and bunting, two villagers and a Shieldknight on guard.
+	Whimsy.stall(self, court + Vector3(-8.0, 0.0, -6.0), 0.4, &"candy_pink")
+	Whimsy.stall(self, court + Vector3(6.0, 0.0, -7.0), -0.3, &"slime_blue")
+	for k in 4:
+		Whimsy.lamp(self, court + Vector3(-12.0 + k * 8.0, 0.0, 9.0), k % 2 == 0)
+	Whimsy.bunting(self, court + Vector3(-12.0, 4.2, 9.0), court + Vector3(12.0, 4.2, 9.0))
+	villager("zephyr", "Zephyr", court + Vector3(2.0, 0.0, 3.0), &"w2_found_chime", &"w2_seed_kingdom_errand", mill + Vector3(3.0, 0.3, 3.0), "Wind chime")
+	villager("celeste", "Celeste", court + Vector3(-3.0, 0.0, -2.0))
+	critter(Armorling, court + Vector3(8.0, 0.5, -2.0))
+	# The Sky Palace: towers and flags, and a bell-locked vault with a cloud climb inside.
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			var t := palace + Vector3(sx * 9.0, 0.0, sz * 9.0)
+			Kit.pillar(self, t + Vector3(0.0, 9.0, 0.0), 1.8, 9.0, &"cloth_cream", &"gold")
+			var spire := CylinderMesh.new()
+			spire.top_radius = 0.0
+			spire.bottom_radius = 2.2
+			spire.height = 4.0
+			Kit.mesh_instance(self, spire, Kit.mat(&"candy_pink", 0.03), t + Vector3(0.0, 11.0, 0.0))
+	var vault: Array = secret_cave(palace + Vector3(0.0, 0.0, -2.0), 0.0, Vector3(13.0, 9.0, 11.0), &"cloth_cream", &"gate")
+	cloud(Vector3(-3.5, 1.6, -1.0), Vector2(3.0, 3.0))
+	cloud(Vector3(0.5, 3.8, -3.2), Vector2(3.0, 3.0))
+	cloud(Vector3(4.0, 6.0, -0.5), Vector2(3.0, 3.0))
+	seed_at(&"w2_seed_palace", Vector3(4.0, 6.0, -0.5))
+	_frame = vault[0]
+	region(Vector3.ZERO)
+	var vault_door := vault[1] as VineGate
+	var bells := bell_puzzle(court + Vector3(0.0, 0.0, -8.0), 3.5, "Ring pink, gold, blue:\nthe palace vault opens.")
+	bells.solved.connect(func() -> void:
+		vault_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("The palace vault opens!", 2.0))
+	place(Puffcap.new(), palace + Vector3(-5.0, 0.5, 8.0))
+	# The Rainbow Mill: a windmill whose top is a seed's perch, up a cloud stair.
+	Props.spawn(self, &"windmill", mill + Vector3(-3.0, 0.0, -3.0), 0.8, 1.3, false)
+	for i in 4:
+		cloud(mill + Vector3(4.0 - i * 2.0, 2.4 + i * 2.4, 4.0 - i * 2.4), Vector2(2.6, 2.6))
+	seed_at(&"w2_seed_mill", mill + Vector3(-2.0, 9.6, -5.6))
+	batling(mill + Vector3(0.0, 6.0, 8.0))
+	# Starlight Gardens: sky flowers, a pink Big Gloplet and Batlings.
+	for i in 6:
+		Whimsy.sky_flower(self, gardens + Vector3(-6.0 + (i % 2) * 12.0, 0.0, -13.0 + i * 5.0), 1.6, [&"candy_pink", &"gold", &"slime_blue"][i % 3] as StringName)
+	big_gloplet(gardens + Vector3(0.0, 0.5, 4.0), preload("res://data/enemies/pink_gloplet.tres"))
+	batling(gardens + Vector3(0.0, 5.0, -10.0))
+	sparkles(court + Vector3(0.0, 2.0, 0.0), Vector3(30.0, 4.0, 26.0), 40)
+	add_capture_point("kingdom", Vector3(20.0, y + 22.0, -20.0), Vector3(66.0, y, -66.0))
+	add_capture_point("beanstalk", Vector3(10.0, 16.0, 6.0), Vector3(40.0, 14.0, -40.0))

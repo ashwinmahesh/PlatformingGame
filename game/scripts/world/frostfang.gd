@@ -61,6 +61,7 @@ func build() -> void:
 	_summit_gate()
 	_side_spots()
 	_build6()
+	_rimwalk()
 	finish_boss_world()
 	finish_life(&"bubble")
 
@@ -116,6 +117,8 @@ func _mountain() -> void:
 
 
 func _busy(p: Vector3) -> bool:
+	if p.z < -112.0:
+		return true
 	if p.x < -66.0 and p.x > -150.0 and absf(p.z) < 30.0:
 		return true
 	for c: Vector3 in [Vector3.ZERO, Vector3(0.0, 0.0, -90.0), Vector3(80.0, 0.0, -30.0), Vector3(-110.0, 0.0, 0.0), Vector3(0.0, 0.0, 70.0), ARENA, Vector3(62.0, 0.0, 70.0), Vector3(-60.0, 0.0, 60.0), Vector3(30.0, 0.0, -36.0), Vector3(-70.0, 0.0, -70.0), Vector3(48.0, 0.0, 76.0), Vector3(26.0, 0.0, 14.0)]:
@@ -466,3 +469,69 @@ func _summit_gate() -> void:
 	sign_post(Vector3(-5.0, 0.0, -44.0), "Dodge its belly-slide into a frozen pillar,\nthen PLUNGE onto its dizzy head!")
 	add_capture_point("gate", Vector3(0.0, 14.0, 52.0), Vector3(0.0, 2.0, 92.0))
 	add_capture_point("ape", ARENA + Vector3(0.0, 16.0, -12.0), ARENA + Vector3(0.0, 0.0, 6.0))
+
+
+# --- Build 6: the Rimwalk, a high road along the north cliffs ------------------------------------
+# Broad ledges bolted to the cliff face at 18-26 m, with an ice cave cut into the rock, a bell
+# puzzle and an eagle's nest at the east end. Ways up: the Ice Stair (a spiral ramp), the mine
+# lift, and the Icicle Steps (forgiving pillar hops). Any edge drops you back into the valley.
+
+func _rimwalk() -> void:
+	region(Vector3.ZERO)
+	var lantern := Vector3(-85.0, 18.0, -144.0)
+	var hall := Vector3(-30.0, 20.0, -144.0)
+	var terrace := Vector3(25.0, 22.0, -142.0)
+	var nest := Vector3(75.0, 26.0, -140.0)
+	deck(lantern, Vector2(50.0, 12.0), &"stone_light", &"mush_spot", &"pillars", 0.0, &"water_light")
+	deck(hall, Vector2(40.0, 12.0), &"stone_light", &"mush_spot", &"pillars", 0.0, &"water_light")
+	deck(terrace, Vector2(30.0, 16.0), &"stone_light", &"mush_spot", &"pillars", 0.0, &"water_light")
+	deck(nest, Vector2(20.0, 20.0), &"stone_light", &"mush_spot", &"pillars", 0.0, &"water_light")
+	bridge(Vector3(-60.0, 18.0, -144.0), Vector3(-50.0, 20.0, -144.0), 3.4, &"wood_plank", true, &"roof_red")
+	bridge(Vector3(-10.0, 20.0, -144.0), Vector3(10.0, 22.0, -144.0), 3.4, &"wood_plank", true, &"roof_red")
+	bridge(Vector3(40.0, 22.0, -142.0), Vector3(65.0, 26.0, -142.0), 3.4, &"wood_plank", true, &"roof_red")
+	# Ways up.
+	ramp_tower(Vector3(-85.0, 0.0, -120.0), 0.0, 18.0, 8.0, 4.0, &"water_light", &"wood_plank", &"mush_spot")
+	bridge(Vector3(-85.0, 18.0, -124.0), Vector3(-85.0, 18.0, -138.0), 3.6, &"wood_plank", true, &"roof_red")
+	sign_post(Vector3(-76.0, 0.0, -108.0), "The Ice Stair: up to\nthe Rimwalk!", PI * 0.25)
+	lift(Vector3(25.0, 0.0, -131.7), 22.0, 8.0)
+	sign_post(Vector3(31.0, 0.0, -126.0), "Mine lift to the Rimwalk", PI * 0.75)
+	for i in 8:
+		var top := Vector3(92.0 - i * 2.0, 3.0 + i * 3.0, -106.0 - i * 4.0)
+		Kit.pillar(self, top, 1.9, top.y, &"water_light", &"mush_spot")
+	checkpoint(&"w5_cp_rim", lantern + Vector3(14.0, 0.0, 2.0))
+	# Lantern Ledge: a little camp with igloos, lamps and two climbers.
+	Whimsy.igloo(self, lantern + Vector3(-14.0, 0.0, -1.0), 0.4, 3.2)
+	Whimsy.igloo(self, lantern + Vector3(-2.0, 0.0, -2.0), -0.3, 2.8)
+	for k in 5:
+		Whimsy.lamp(self, lantern + Vector3(-20.0 + k * 10.0, 0.0, 4.5), k % 2 == 0)
+	Whimsy.snowman(self, lantern + Vector3(8.0, 0.0, -3.0), 1.2, &"slime_blue")
+	villager("bjorn", "Bjorn", lantern + Vector3(4.0, 0.0, 2.0), &"w5_found_globe", &"w5_seed_rim_errand", nest + Vector3(4.0, 0.3, 4.0), "Snow globe")
+	villager("ingrid", "Ingrid", lantern + Vector3(18.0, 0.0, 1.0))
+	batling(lantern + Vector3(0.0, -4.0, 8.0), true, true)
+	# Frost Hall: an ice cave in the cliff, opened by the terrace bells.
+	var cave: Array = secret_cave(hall + Vector3(0.0, 0.0, -1.0), 0.0, Vector3(12.0, 8.0, 9.0), &"water_light", &"gate")
+	stone(Vector3(-3.0, 1.2, -1.0), 1.6, 1.2, &"water_light", &"mush_spot")
+	ledge(Vector3(0.0, 3.2, -2.4), Vector3(3.0, 0.5, 2.4), &"stone_light")
+	ledge(Vector3(3.5, 5.4, 0.0), Vector3(2.4, 0.5, 3.0), &"stone_light")
+	seed_at(&"w5_seed_frost_hall", Vector3(3.5, 5.4, 0.0))
+	_frame = cave[0]
+	region(Vector3.ZERO)
+	var cave_door := cave[1] as VineGate
+	var bells := bell_puzzle(terrace + Vector3(0.0, 0.0, 2.0), 3.5, "Ring pink, gold, blue:\nFrost Hall opens (west).")
+	bells.solved.connect(func() -> void:
+		cave_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("Frost Hall opens!", 2.0))
+	critter(Armorling, hall + Vector3(12.0, 0.5, 3.0))
+	boulderkin(terrace + Vector3(10.0, 0.5, -2.0), &"water_light", &"mush_spot", &"portal_magenta")
+	for i in 4:
+		Whimsy.pine(self, terrace + Vector3(-12.0 + i * 8.0, 0.0, -6.0), &"frost", 0.9)
+	# The Eagle's Nest: a seed in a giant nest of sticks at the east end.
+	for i in 10:
+		var a := float(i) / 10.0 * TAU
+		var stick := Kit.block(self, nest + Vector3(cos(a) * 4.0, 0.9, sin(a) * 4.0), Vector3(0.6, 0.9, 3.4), &"bark_mid", 0, &"")
+		stick.rotation.y = a
+	seed_at(&"w5_seed_eagle_nest", nest)
+	batling(nest + Vector3(0.0, 5.0, 10.0), false, true)
+	Whimsy.aurora(self, Vector3(0.0, 60.0, -150.0), 90.0)
+	add_capture_point("rimwalk", Vector3(-10.0, 36.0, -90.0), Vector3(-20.0, 18.0, -144.0))

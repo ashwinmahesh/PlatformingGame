@@ -1,0 +1,19 @@
+{
+  "id": "sculpin",
+  "name": "sculpin",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Old Sculpin",
+          "text": "Down on Main Street they think the reef ends at the rooftops. Hah!"
+        },
+        {
+          "speaker": "Old Sculpin",
+          "text": "Ring the plaza bells in order: pink, gold, blue. The old Clam Vault still opens for it."
+        }
+      ]
+    }
+  ]
+}
