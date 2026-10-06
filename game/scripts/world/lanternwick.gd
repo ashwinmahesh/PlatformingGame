@@ -69,6 +69,7 @@ func build() -> void:
 	_streets()
 	_alleys()
 	_vine_routes()
+	_more_stars()
 	_batch.build(self)
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -599,3 +600,44 @@ func _vine_routes() -> void:
 	region(Vector3.ZERO)
 	for b: Vector3 in [Vector3(-75.0, TERRACE, -17.6), Vector3(0.0, TERRACE, -17.6), Vector3(-70.0, TERRACE, 5.6), Vector3(70.0, TERRACE, 5.6)]:
 		hook(b)
+
+
+# --- Build 7: six stars per world -----------------------------------------------------------------
+
+func _more_stars() -> void:
+	region(Vector3.ZERO)
+	# Errand: Widow Wick's locket went off the west bridge into the river (dive for it).
+	errand_star("wick", "Widow Wick", Vector3(-46.0, 0.0, 6.0), &"w6_found_locket", &"w6_shard_errand", Vector3(-58.0, -7.7, -6.0), "Silver locket")
+	# Hidden: the walled garden in the north-west block has no door at all. Drop in from the
+	# rooftops; a ladder gets you out again.
+	var yard := Rect2(COLS[0].x, NORTH[1].x, COLS[0].y - COLS[0].x, NORTH[1].y - NORTH[1].x).grow(-TownHouse.MOD * 2.0)
+	var yc := Vector3(yard.get_center().x, 0.0, yard.get_center().y)
+	for i in 5:
+		Whimsy.flower(self, yc + Vector3(-5.0 + i * 2.5, 0.0, 3.0), 1.0, 0.8, [&"candy_pink", &"gold", &"slime_blue"][i % 3] as StringName, false)
+	stone(yc + Vector3(-3.0, 1.4, -2.0), 1.6, 1.4, &"stone_light", &"moss")
+	ledge(yc + Vector3(0.0, 3.4, -3.0), Vector3(2.6, 0.5, 2.4), &"wood_plank")
+	ledge(yc + Vector3(3.0, 5.6, -1.0), Vector3(2.4, 0.5, 2.6), &"wood_plank")
+	shard_at(&"w6_shard_garden", yc + Vector3(3.0, 5.6, -1.0))
+	# The way out: a ladder up the back of a west-side house to its roof.
+	var back: Dictionary = {}
+	for h in _houses:
+		var hp := h["pos"] as Vector3
+		if int(h["side"]) == 3 and absf(hp.x - (COLS[0].x + TownHouse.MOD)) < 0.2 and hp.z > yard.position.y and hp.z < yard.end.y:
+			back = h
+	if not back.is_empty():
+		ladder(Vector3(yard.position.x, 0.0, (back["pos"] as Vector3).z), float(back["eave"]), PI * 0.5)
+	# Puzzle: the Bell Inn's barrel lift. Shove the barrel-crate onto the plate in Lantern Lane and
+	# the goods hoist carries you to a star on the inn's roof.
+	var hoist := lift(Vector3(-19.0, 0.0, 40.0), 18.0, 8.0)
+	hoist.set_physics_process(false)
+	var crate := PushBlock.new()
+	crate.position = Vector3(-30.0, 0.0, 40.0)
+	add_child(crate)
+	var plate := PressurePlate.new()
+	plate.position = Vector3(-24.0, 0.0, 40.0)
+	add_child(plate)
+	plate.changed.connect(func(on: bool) -> void: hoist.set_physics_process(on))
+	Kit.block(self, Vector3(-19.0, 18.0, 46.0), Vector3(4.0, 0.6, 4.0), &"wood_plank", Layers.WORLD | Layers.CAMERA_BLOCKER, &"")
+	shard_at(&"w6_shard_hoist", Vector3(-19.0, 18.0, 46.0))
+	sign_post(Vector3(-26.0, 0.0, 43.0), "Goods hoist: runs while the plate\nis weighed down.", PI)
+

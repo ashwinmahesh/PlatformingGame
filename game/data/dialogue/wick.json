@@ -1,0 +1,24 @@
+{
+  "id": "wick",
+  "name": "wick",
+  "conversations": [
+    {
+      "when": "w6_found_locket",
+      "lines": [
+        {
+          "speaker": "Widow Wick",
+          "text": "My locket! The portrait's still dry inside. Bless you, take this Star Shard."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Widow Wick",
+          "text": "Oh, my locket slipped off the west bridge and sank to the river bed. My knees won't swim. Would you?"
+        }
+      ]
+    }
+  ]
+}
