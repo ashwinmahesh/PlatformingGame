@@ -603,6 +603,10 @@ static func lamp(parent: Node, pos: Vector3, with_light: bool = true) -> void:
 		l.light_color = Palette.color(&"gold")
 		l.light_energy = 0.8
 		l.omni_range = 6.0
+		# Build 7 performance: far lamps fade out instead of costing light passes everywhere.
+		l.distance_fade_enabled = true
+		l.distance_fade_begin = 40.0
+		l.distance_fade_length = 10.0
 		l.position = pos + Vector3(0.6, 2.2, 0.0)
 		parent.add_child(l)
 

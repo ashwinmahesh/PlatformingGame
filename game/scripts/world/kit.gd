@@ -80,12 +80,39 @@ static func outline(width: float) -> ShaderMaterial:
 
 
 static func mesh_instance(parent: Node, mesh: Mesh, material: Material, pos: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	lighten(mesh)
 	var mi := MeshInstance3D.new()
 	mi.mesh = mesh
 	mi.material_override = material
 	mi.position = pos
 	parent.add_child(mi)
 	return mi
+
+
+## Build 7 performance: Godot's primitive meshes default to 64 segments (a sphere is 4,000
+## triangles). The toon look doesn't need that, so any left at the default are cut to a sensible
+## count. Done once per mesh, wherever a mesh is added through Kit.
+static func lighten(mesh: Mesh) -> void:
+	if mesh is SphereMesh:
+		var m := mesh as SphereMesh
+		if m.radial_segments == 64:
+			m.radial_segments = 14 if m.radius < 1.0 else 20
+			m.rings = 8 if m.radius < 1.0 else 12
+	elif mesh is CylinderMesh:
+		var c := mesh as CylinderMesh
+		if c.radial_segments == 64:
+			c.radial_segments = 14 if maxf(c.top_radius, c.bottom_radius) < 1.0 else 24
+			c.rings = 1
+	elif mesh is CapsuleMesh:
+		var cap := mesh as CapsuleMesh
+		if cap.radial_segments == 64:
+			cap.radial_segments = 16
+			cap.rings = 6
+	elif mesh is TorusMesh:
+		var t := mesh as TorusMesh
+		if t.rings == 64:
+			t.rings = 24
+			t.ring_segments = 10
 
 
 static func static_body(parent: Node, pos: Vector3, layers: int = Layers.WORLD | Layers.CAMERA_BLOCKER) -> StaticBody3D:

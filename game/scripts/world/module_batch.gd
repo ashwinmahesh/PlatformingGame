@@ -4,14 +4,22 @@ extends RefCounted
 ## so instead of one scene per piece, every placement of a model is gathered here and drawn as one
 ## MultiMesh per mesh, under the same toon materials Models.instance gives.
 
+## Build 7 performance (Ashwin: "the city level is really laggy"): copies are grouped per model
+## AND per 32 m cell, so each MultiMesh is small enough to be frustum-culled and faded out by
+## distance. Wall pieces don't cast shadows (each house's plain interior box does instead).
+const CELL := 32.0
+const VISIBLE_TO := 120.0
+const NO_SHADOW: Array[String] = ["Wall_", "Corner_", "Window", "Door", "Prop_Crate", "Prop_ExteriorBorder", "Balcony"]
+
 var _xf: Dictionary[String, Array] = {}
 
 
 ## Queue one copy of `path` at `xf` (the model's own origin, as Models.instance would place it).
 func add(path: String, xf: Transform3D) -> void:
-	if not _xf.has(path):
-		_xf[path] = []
-	_xf[path].append(xf)
+	var key := "%s|%d|%d" % [path, int(floor(xf.origin.x / CELL)), int(floor(xf.origin.z / CELL))]
+	if not _xf.has(key):
+		_xf[key] = []
+	_xf[key].append(xf)
 
 
 ## Places `path` with its base centre at `pos` (like Models.spawn), scaled `s`, turned `yaw`.
@@ -30,8 +38,9 @@ func count() -> int:
 
 
 func build(parent: Node3D) -> void:
-	for path: String in _xf:
-		var xfs: Array = _xf[path]
+	for key: String in _xf:
+		var path := key.get_slice("|", 0)
+		var xfs: Array = _xf[key]
 		var inst := Models.instance(path)
 		for n in inst.find_children("*", "MeshInstance3D", true, false):
 			var mi := n as MeshInstance3D
@@ -54,6 +63,12 @@ func build(parent: Node3D) -> void:
 				mm.set_instance_transform(i, (xfs[i] as Transform3D) * local)
 			var mmi := MultiMeshInstance3D.new()
 			mmi.multimesh = mm
+			mmi.visibility_range_end = VISIBLE_TO
+			mmi.visibility_range_end_margin = 12.0
+			mmi.visibility_range_fade_mode = GeometryInstance3D.VISIBILITY_RANGE_FADE_SELF
+			for prefix in NO_SHADOW:
+				if path.get_file().begins_with(prefix):
+					mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			mmi.name = path.get_file().get_basename()
 			parent.add_child(mmi)
 		inst.free()

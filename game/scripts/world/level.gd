@@ -45,6 +45,8 @@ func _ready() -> void:
 	Props.tree_kinds = tree_kinds
 	Toon.world_tint = model_tint
 	build()
+	# Build 7 performance: merge the static scenery into a few draw calls per area.
+	StaticMerge.merge(self)
 	resolver = CombatResolver.new()
 	resolver.name = "CombatResolver"
 	add_child(resolver)
