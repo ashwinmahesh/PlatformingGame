@@ -266,3 +266,39 @@ func test_golem_gem_takes_hits_and_only_hops_you() -> void:
 	check(golem.hp < hp, "a sword slash at the open gem hurts it too")
 	lvl.queue_free()
 	await ticks(3)
+
+
+## Same regression for the Avalanche Ape (Ashwin: "same thing with the Avalanche Ape"): dizzy
+## after a pillar bonk, its head takes a Plunge from above and the hop off is small.
+func test_ape_head_takes_a_plunge_and_only_hops_you() -> void:
+	var w := Progress.world_def(&"world_05")
+	var lvl := await _load(w, w.entrance_spawn)
+	var bw := lvl as BossWorld
+	var p := lvl.player
+	var inp := ScriptedInput.new()
+	p.input_source = inp
+	p.respawn_at(bw.arena_center + Vector3(0.0, 0.05, -6.0))
+	p.invuln_left = 9999.0
+	await ticks(3)
+	var ape := bw.boss as AvalancheApe
+	for i in 140:
+		await ticks(1)
+		p.invuln_left = 9999.0
+	ape.open_weak_spot()
+	ape.set_state(AvalancheApe.S.DIZZY)
+	await ticks(20)
+	var head := (ape.get("_weak_area") as Area3D).global_position
+	var hp := ape.hp
+	p.respawn_at(head + Vector3(0.0, 3.0, 0.0))
+	p.invuln_left = 9999.0
+	await ticks(2)
+	inp.tap(&"plunge")
+	var peak := -INF
+	for i in 90:
+		await ticks(1)
+		p.invuln_left = 9999.0
+		peak = maxf(peak, p.global_position.y)
+	check_eq(ape.hp, hp - 1, "a Plunge onto the dizzy Ape's head hurts it")
+	check(peak < head.y + 6.0, "and the hop off is small (peak %.1f m, head at %.1f m)" % [peak, head.y])
+	lvl.queue_free()
+	await ticks(3)
