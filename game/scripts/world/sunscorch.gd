@@ -82,6 +82,7 @@ func build() -> void:
 	_mesa_town()
 	_gorge_ladders()
 	_vine_routes()
+	_more_stars()
 	_gorge_life()
 	finish_boss_world()
 	finish_life(&"moss")
@@ -686,10 +687,25 @@ func _mesa_town() -> void:
 	ledge(Vector3(0.0, 3.2, -2.5), Vector3(3.0, 0.5, 2.4), &"wood_plank")
 	ledge(Vector3(3.5, 5.4, 0.0), Vector3(2.4, 0.5, 3.0), &"wood_plank")
 	seed_at(&"w3_seed_cellar", Vector3(3.5, 5.4, 0.0))
+	ledge(Vector3(0.5, 6.8, 2.6), Vector3(2.4, 0.5, 2.4), &"wood_plank")
+	shard_at(&"w3_shard_mirrors", Vector3(0.5, 6.8, 2.6))
 	_frame = cellar[0]
 	region(Vector3.ZERO)
-	crate_puzzle(sq + Vector3(10.0, 0.0, 4.0), sq + Vector3(6.0, 0.0, 10.0), cellar[1] as VineGate)
-	sign_post(sq + Vector3(12.0, 0.0, 10.0), "The cellar door stays open\nwhile the plate is weighed down.", -PI * 0.5)
+	# Build 7 puzzle variety: bounce the sun lens's beam off the mirrors onto the crystal (hit a
+	# mirror to flip it) and the cellar opens.
+	var beam := BeamPuzzle.new()
+	beam.position = Vector3(50.0, g, 23.0)
+	beam.source_dir = Vector3.RIGHT
+	beam.target = Vector3(11.0, 0.0, 6.0)
+	add_child(beam)
+	beam.add_mirror(Vector3(6.0, 0.0, 0.0), true)
+	beam.add_mirror(Vector3(6.0, 0.0, 6.0), true)
+	var cellar_door := cellar[1] as VineGate
+	beam.solved.connect(func() -> void:
+		cellar_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("Sunlight wakes the cellar door!", 2.0))
+	sign_post(sq + Vector3(12.0, 0.0, 10.0), "Catch the sun in the mirrors\nand the cellar wakes.", -PI * 0.5)
 	# Trouble at the edge of town.
 	boulderkin(Vector3(62.0, g + 0.5, -6.0), &"sunset_orange", &"sand_light", &"portal_teal")
 	critter(Armorling, sq + Vector3(0.0, 0.5, 12.0))
@@ -781,3 +797,21 @@ func _vine_routes() -> void:
 	hook(Vector3(-38.0, 23.0, 122.0))
 	hook(Vector3(-38.0, 18.0, 110.0))
 	hook(Vector3(22.0, PLATEAU, 44.0))
+
+
+# --- Build 7: six stars per world -----------------------------------------------------------------
+
+func _more_stars() -> void:
+	region(Vector3.ZERO)
+	# Errand: Juniper dropped her goggles in the hidden oasis pool (dive for them).
+	errand_star("juniper", "Juniper", Vector3(4.0, 0.0, 128.0), &"w3_found_goggles", &"w3_shard_errand", Vector3(-108.0, -8.3, 45.0), "Diving goggles")
+	# Hidden: the Hermit's Hideaway, a cracked hut far out on the north-east plateau.
+	var hut: Array = secret_cave(Vector3(118.0, PLATEAU, -138.0), 0.0, Vector3(12.0, 9.0, 10.0), &"wood_warm", &"break")
+	stone(Vector3(-3.5, 1.3, -1.5), 1.5, 1.3, &"stone_light", &"sand_light")
+	ledge(Vector3(-0.5, 3.4, -3.0), Vector3(2.6, 0.5, 2.4), &"wood_plank")
+	crumble(Vector3(2.8, 5.4, -1.2), Vector3(2.4, 0.5, 2.4), CrumblePlatform.Look.CLOUD)
+	ledge(Vector3(0.0, 7.4, 2.0), Vector3(2.6, 0.5, 2.6), &"wood_plank")
+	shard_at(&"w3_shard_hermit", Vector3(0.0, 7.4, 2.0))
+	_frame = hut[0]
+	region(Vector3.ZERO)
+

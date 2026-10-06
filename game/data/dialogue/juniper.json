@@ -1,0 +1,24 @@
+{
+  "id": "juniper",
+  "name": "juniper",
+  "conversations": [
+    {
+      "when": "w3_found_goggles",
+      "lines": [
+        {
+          "speaker": "Juniper",
+          "text": "My goggles! You're a better diver than me. This Star Shard washed up in the oasis last year. Take it."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Juniper",
+          "text": "I was diving in the hidden oasis way out west and my goggles sank right to the bottom. You can hold your breath, right?"
+        }
+      ]
+    }
+  ]
+}
