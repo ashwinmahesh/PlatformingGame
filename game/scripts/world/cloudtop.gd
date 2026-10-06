@@ -543,4 +543,7 @@ func _more_stars() -> void:
 	add_child(dig)
 	# Errand: Skipper's compass rolled off to the Bounce Gardens' top cloud.
 	errand_star("skipper", "Skipper", Vector3(10.0, 0.0, 6.0), &"w2_found_compass", &"w2_shard_errand", Vector3(-1.0, 17.3, 73.0), "Compass")
-
+	# Build 7: the six new monsters, spread across the worlds.
+	critter(Wyrmling, Vector3(62.0, KINGDOM_Y + 3.0, -62.0))
+	critter(Buzzbee, Vector3(-10.0, 2.0, -12.0))
+	critter(Buzzbee, Vector3(40.0, 2.0, 40.0))

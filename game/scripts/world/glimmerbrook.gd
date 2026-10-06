@@ -828,4 +828,7 @@ func _more_stars() -> void:
 	shard_at(&"w1_shard_cellar", Vector3(0.5, 7.8, 2.0))
 	_frame = cellar[0]
 	region(Vector3.ZERO)
-
+	# Build 7: the six new monsters, spread across the worlds.
+	critter(Hopfrog, Vector3(-26.0, 0.05, 32.0))
+	critter(Buzzbee, Vector3(-50.0, CANOPY_Y + 2.0, 20.0))
+	critter(Hopfrog, Vector3(6.0, 0.05, -60.0))

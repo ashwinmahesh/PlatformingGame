@@ -162,3 +162,86 @@ func test_perched_batling_drops_on_you() -> void:
 			dropped = true
 			break
 	check(dropped, "it drops when you pass beneath")
+
+
+# --- Build 7: six more monsters ----------------------------------------------------------------
+
+func _until(c: Critter, s: int, n: int = 400) -> bool:
+	for i in n:
+		await ticks(1)
+		if c.state == s:
+			return true
+	return false
+
+
+func test_wispghost_only_solid_when_it_strikes_and_fire_lights_it() -> void:
+	var g := _spawn(Wispghost.new(), Vector3(0.0, 1.0, -6.0)) as Wispghost
+	await ticks(4)
+	var res := g.receive_player_attack(_atk(&"slash_1", p.global_position, 1), null)
+	check(res.is_empty(), "a sword passes through it while it drifts")
+	check(not g.is_lockable(), "and you can't lock on")
+	g.receive_player_attack(_atk(&"fireball", p.global_position, 2), null)
+	check_eq(g.state, Wispghost.S.LIT, "a Fireball lights it up")
+	var hp := g.hp
+	g.receive_player_attack(_atk(&"slash_1", p.global_position, 3), null)
+	check(g.hp < hp, "lit, the sword lands")
+
+
+func test_wyrmling_inhales_then_breathes_and_frost_drops_it() -> void:
+	var w := _spawn(Wyrmling.new(), Vector3(0.0, 4.0, -6.0)) as Wyrmling
+	check(await _until(w, Wyrmling.S.INHALE), "it rears back first (the tell)")
+	check(await _until(w, Wyrmling.S.BREATH, 80), "then breathes fire")
+	w.receive_player_attack(_atk(&"frost", p.global_position, 5), null)
+	check(w.frozen_ticks > 0 and w.state == Wyrmling.S.GROUNDED, "Frost Burst freezes it and down it comes")
+
+
+func test_buzzbee_armour_and_vine() -> void:
+	var b := _spawn(Buzzbee.new(), Vector3(0.0, 1.5, -5.0)) as Buzzbee
+	await ticks(4)
+	b.facing = Vector3.BACK
+	var res := b.receive_player_attack(_atk(&"slash_1", b.global_position + Vector3.BACK * 2.0, 1), null)
+	check(bool(res.get("blocked", false)), "its armour turns the sword from the front")
+	check(await _until(b, Buzzbee.S.BUZZ), "it buzzes before it stings")
+	b.receive_player_attack(_atk(&"vine", p.global_position, 2), null)
+	check_eq(b.state, Buzzbee.S.DOWNED, "a Vinelash yank drags it down")
+
+
+func test_whirlwisp_drags_you_in_and_an_orb_breaks_it() -> void:
+	var w := _spawn(Whirlwisp.new(), Vector3(0.0, 0.3, -6.0)) as Whirlwisp
+	check(await _until(w, Whirlwisp.S.SPIN_UP), "it spins up first (the tell)")
+	check(await _until(w, Whirlwisp.S.VORTEX, 80), "then becomes a vortex")
+	var z0 := p.global_position.z
+	await ticks(30)
+	check(p.global_position.z < z0 - 0.5, "the vortex drags the hero in")
+	var orb := GravityOrb.new()
+	add_child(orb)
+	orb.global_position = w.global_position + Vector3.UP
+	await ticks(3)
+	check_eq(w.state, Whirlwisp.S.DIZZY, "a Gravity Orb nearby breaks it")
+
+
+func test_hopfrog_tongue_and_dash() -> void:
+	var f := _spawn(Hopfrog.new(), Vector3(0.0, 0.05, -5.0)) as Hopfrog
+	check(await _until(f, Hopfrog.S.PUFF), "its throat puffs first (the tell)")
+	check(await _until(f, Hopfrog.S.LASH, 60), "then the tongue lashes")
+	await ticks(6)
+	p.invuln_left = 0.0
+	check(not f.damage_to_player(p).is_empty(), "the tongue reaches you")
+	p.dash_left = 5
+	check(f.damage_to_player(p).is_empty(), "an Air Dash slips it")
+	p.dash_left = 0
+	p.invuln_left = 999.0
+
+
+func test_hexwizard_casts_homing_orbs_and_fire_fizzles_it() -> void:
+	var w := _spawn(Hexwizard.new(), Vector3(0.0, 0.05, -8.0)) as Hexwizard
+	check(await _until(w, Hexwizard.S.CAST), "it raises its staff first (the tell)")
+	w.receive_player_attack(_atk(&"fireball", p.global_position, 7), null)
+	check(w.stunned_ticks > 0, "a Fireball mid-cast fizzles it and stuns it")
+	w.stunned_ticks = 0
+	w.set_state(Hexwizard.S.CAST)
+	var shots := 0
+	for i in 70:
+		await ticks(1)
+		shots = maxi(shots, _count(EnemyShot))
+	check_eq(shots, 3, "three homing hex orbs")

@@ -640,4 +640,7 @@ func _more_stars() -> void:
 	Kit.block(self, Vector3(-19.0, 18.0, 46.0), Vector3(4.0, 0.6, 4.0), &"wood_plank", Layers.WORLD | Layers.CAMERA_BLOCKER, &"")
 	shard_at(&"w6_shard_hoist", Vector3(-19.0, 18.0, 46.0))
 	sign_post(Vector3(-26.0, 0.0, 43.0), "Goods hoist: runs while the plate\nis weighed down.", PI)
-
+	# Build 7: the six new monsters, spread across the worlds.
+	critter(Hexwizard, Vector3(-30.0, 0.05, -60.0))
+	critter(Wispghost, Vector3(-57.0, 1.0, 56.0))
+	critter(Hexwizard, Vector3(70.0, 0.05, 88.0))

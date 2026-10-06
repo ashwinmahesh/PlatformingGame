@@ -5,8 +5,9 @@ extends Node3D
 ##   a SporeCloud. Slash it in the air to pop it harmlessly.
 ## - NEEDLE: one of a Pricklepot's fan of needles, flying flat and straight; slash or glide
 ##   over them.
+## - HEX (Build 7): a Hexwizard's slow homing orb; slash it, or outrun it.
 
-enum Kind { SPORE, NEEDLE }
+enum Kind { SPORE, NEEDLE, HEX }
 
 var kind: Kind = Kind.SPORE
 var color_name: StringName = &"portal_magenta"
@@ -35,6 +36,14 @@ func _ready() -> void:
 			dot.height = 0.16
 			var a := float(i) / 4.0 * TAU
 			Kit.mesh_instance(self, dot, Kit.mat(&"cloth_cream"), Vector3(cos(a) * 0.26, 0.12, sin(a) * 0.26))
+	elif kind == Kind.HEX:
+		var s := SphereMesh.new()
+		s.radius = 0.35
+		s.height = 0.7
+		var hm := Kit.unique_mat(color_name)
+		hm.set_shader_parameter(&"flash", 1.0)
+		hm.set_shader_parameter(&"flash_color", Palette.color(color_name))
+		mi = Kit.mesh_instance(self, s, hm)
 	else:
 		var c := CylinderMesh.new()
 		c.top_radius = 0.0
@@ -85,10 +94,27 @@ func shoot(from: Vector3, dir: Vector3, travel: float = 12.0) -> void:
 		look_at(from + _dir, Vector3.UP)
 
 
+## A slow homing hex orb (Hexwizard): it turns gently toward the hero for a few seconds.
+func home_in(from: Vector3, dir: Vector3) -> void:
+	kind = Kind.HEX
+	_from = from
+	_dir = dir.normalized()
+	global_position = from
+
+
 func _physics_process(delta: float) -> void:
 	if _done:
 		return
 	_t += delta
+	if kind == Kind.HEX:
+		var p := get_tree().get_first_node_in_group(&"player") as Node3D
+		if p != null:
+			var want := (p.global_position + Vector3.UP * 0.8 - global_position).normalized()
+			_dir = _dir.slerp(want, minf(delta * 1.6, 1.0)).normalized()
+		global_position += _dir * 6.0 * delta
+		if _t > 4.0:
+			_finish()
+		return
 	if kind == Kind.SPORE:
 		var k := clampf(_t / _flight, 0.0, 1.0)
 		global_position = _from.lerp(_to, k) + Vector3.UP * (_arc * 4.0 * k * (1.0 - k))
@@ -121,7 +147,7 @@ func damage_to_player(p: Player) -> Dictionary:
 	if d.length() > 0.75:
 		return {}
 	_finish.call_deferred()
-	return {"halves": 1, "from": global_position - (_dir if kind == Kind.NEEDLE else Vector3.ZERO), "cause": "needle" if kind == Kind.NEEDLE else "spore_ball"}
+	return {"halves": 1, "from": global_position - (_dir if kind != Kind.SPORE else Vector3.ZERO), "cause": ["spore_ball", "needle", "hex_orb"][kind]}
 
 
 func _finish() -> void:

@@ -4,7 +4,7 @@ Source of truth: docs/contracts/*.md · Board: docs/board.md · Decisions: docs/
 Build notes for the human live in the vault: Zelda-like game/OpusPlatformer/
 
 ## Commands (use these; add new ones to the Makefile, don't improvise)
-make play | run | test | bench | bench | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets | fetch-assets
+make play | run | test | bench | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets | fetch-assets
 make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 
 ## Godot
@@ -65,10 +65,6 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
   world and the hub. Build scenery through Kit (primitive meshes get sensible segment counts),
   let StaticMerge combine static scenery, chunk repeated kit pieces (ModuleBatch) with distance
   fades, and keep lights unshadowed with distance fade.
-- Dense worlds must still hold 60 fps on the Mac Mini at 1920x1080: `make bench` checks every
-  world and the hub. Build scenery through Kit (primitive meshes get sensible segment counts),
-  let StaticMerge combine static scenery, chunk repeated kit pieces (ModuleBatch) with distance
-  fades, and keep lights unshadowed with distance fade.
 - Water is deep (8-12 m) in a walled basin with a bed, with things to find underwater; the sword
   works while swimming.
 
@@ -80,8 +76,8 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
   explore for), at least one in a hidden area, at least one behind a puzzle; the rest from the
   goal, upper-world platforming and ability routes. No two stars in a world feel alike.
 - Every world teaches one magic ability once it is finished AND all 6 stars are in (stored in
-  the save; saves from before keep what they earned), alternating combat and movement. Each ability counters at least two enemy types
-  (docs/bestiary.md) and has routes in the worlds that use it. Keyboard casts abilities with
+  the save; saves from before keep what they earned), alternating combat and movement. Each
+  ability counters at least two enemy types (docs/bestiary.md) and has routes in the worlds that use it. Keyboard casts abilities with
   number keys 1-9 (plus R, G, C, V shortcuts); gamepad picks one with D-pad left/right and casts
   with RT (LB/RB stay Thunderclap/Air Dash).
 - The Glimmer Seed shop in Mossbrook sells upgrades (never a downgrade) and at most one bonus
@@ -103,7 +99,8 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 - Ashwin plays from `make play` (a snapshot in builds/play/). Never restart the game while Ashwin
   is mid-game (check the newest telemetry session); offer `make play` instead.
 - Crashes and bugs Ashwin reports jump the queue.
-- Ashwin pushes git themselves; commit locally only. No model identifiers in commits or files.
+- Commit to main as work lands and push when it works (Ashwin may push too). No model
+  identifiers in commits or files.
 - Markdown notes go in the Obsidian vault (Zelda-like game/OpusPlatformer/); README.md is the one
   exception in the repo.
 - Use they/them for Ashwin.

@@ -590,4 +590,7 @@ func _more_stars() -> void:
 	shard_at(&"w5_shard_den", Vector3(3.0, 5.6, 0.0))
 	_frame = den[0]
 	region(Vector3.ZERO)
-
+	# Build 7: the six new monsters, spread across the worlds.
+	critter(Wispghost, Vector3(52.0, 1.0, -6.0))
+	critter(Whirlwisp, Vector3(-40.0, 0.3, 30.0))
+	critter(Wyrmling, Vector3(25.0, 26.0, -142.0))

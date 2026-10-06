@@ -106,6 +106,8 @@ var _bubble_left: float = 0.0
 var _swim_grace: float = 0.0
 ## Set each tick by an Updraft the hero is inside (Build 4 wind columns).
 var external_lift: float = 0.0
+## Build 7: a sideways tug from the world (a Whirlwisp's vortex), set each tick by its source.
+var external_push: Vector3 = Vector3.ZERO
 var on_ice: bool = false
 # Magic state (Build 5).
 ## Abilities granted directly (tests); otherwise they come from Progress.
@@ -670,6 +672,10 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 	# 6. Gravity and horizontal movement, then move.
 	_apply_gravity(delta, inp.jump_held)
 	_apply_horizontal(delta, inp.move, is_grounded() or _step_hold > 0)
+	if external_push != Vector3.ZERO:
+		velocity.x += external_push.x
+		velocity.z += external_push.z
+		external_push = Vector3.ZERO
 	if _step_hold > 0 or (is_grounded() and state in [State.NORMAL, State.ATTACK] and _try_step_up(delta)):
 		_step_move()
 	else:

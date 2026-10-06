@@ -911,4 +911,7 @@ func _more_stars() -> void:
 	shard_at(&"w4_shard_grotto", Vector3(0.5, 7.8, 2.5))
 	_frame = grotto[0]
 	region(Vector3.ZERO)
-
+	# Build 7: the six new monsters, spread across the worlds.
+	critter(Hopfrog, Vector3(10.0, 0.05, 30.0))
+	critter(Wispghost, Vector3(-60.0, 1.0, 40.0))
+	critter(Hopfrog, Vector3(-30.0, 0.05, -40.0))
