@@ -93,7 +93,7 @@ func _from_behind(from: Vector3) -> bool:
 func on_hit(atk: Dictionary) -> Dictionary:
 	var kind := StringName(str(atk.get("kind", "")))
 	var from := atk.get("from", global_position) as Vector3
-	if kind == &"thunder" and state != S.TOPPLED:
+	if Critter.shakes(kind) and state != S.TOPPLED:
 		# Thunderclap rattles it: it drops whatever it's holding and staggers.
 		_held.visible = false
 		set_state(S.RECOVER)

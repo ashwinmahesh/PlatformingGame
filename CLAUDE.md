@@ -43,8 +43,14 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 - Never reuse a layout between worlds. Each world gets its own shape (meadow ring, sky islands,
   winding gorge, town grid, valley, walled town...).
 - Dense, lively sandbox, never sparse: talkable villagers in every level (some with errands that
-  reward a seed), interaction puzzles (bells, crates and plates, switches, breakable or bramble
-  doors), and expansive secret rooms that each have platforming inside.
+  reward a seed), interaction puzzles, and expansive secret rooms that each have platforming inside.
+- Puzzles have real variety: every world has at least two different puzzle types, and no puzzle
+  type appears in more than two worlds (crate-on-plate and bells-in-order are already used up).
+  Draw on mirrors and light beams, water levels, rotating bridges or rooms, ability puzzles
+  (Fireball torches, Thunderclap machines, Vinelash routes...), notes played by ear, weight
+  scales, gears, following a critter, a villager's riddle, timed switch runs, colour mixing,
+  platforms set in sequence, creatures that react to the hero. Each is readable without a wall
+  of text and has a small hint from a villager or a visual cue.
 - Vertical accessibility is a core focus:
   - every level has a full upper world (decks, rooftops, ledges) with its own paths, villagers,
     secrets, seeds and enemies, not just a few platforms;
@@ -61,8 +67,14 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 ### Combat and movement
 - Never shorten the sword's reach or width; the slash swings toward the camera's facing.
 - Hitboxes match visuals, especially bosses. Every enemy shows a tell before it attacks.
-- Each magic ability counters at least two enemy types (docs/bestiary.md). One ability is learned
-  per world cleared, alternating combat and movement.
+- Every world teaches one magic ability when its 3 Star Shards are collected and the world is
+  finished (abilities come from world completion, so they apply to old saves automatically),
+  alternating combat and movement. Each ability counters at least two enemy types
+  (docs/bestiary.md) and has routes in the worlds that use it. Keyboard casts abilities with
+  number keys 1-9 (plus R, G, C, V shortcuts); gamepad picks one with D-pad left/right and casts
+  with RT (LB/RB stay Thunderclap/Air Dash).
+- The Glimmer Seed shop in Mossbrook sells upgrades (never a downgrade) and at most one bonus
+  ability; world abilities are never sold.
 - The Plunge is a visible straight-down sword thrust; the landing shadow shows where you'll land.
 - Wall jumps: a kick neither uses nor refills air jumps; bouncing between different walls is
   unlimited; never off the same wall twice in a row.

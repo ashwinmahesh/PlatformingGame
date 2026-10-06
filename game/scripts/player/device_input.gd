@@ -24,4 +24,10 @@ func sample() -> PlayerInput:
 	i.fireball_pressed = Input.is_action_just_pressed(&"fireball")
 	i.clap_pressed = Input.is_action_just_pressed(&"thunderclap")
 	i.dash_pressed = Input.is_action_just_pressed(&"dash")
+	i.vine_pressed = Input.is_action_just_pressed(&"vine")
+	for k in 9:
+		if Input.is_action_just_pressed(StringName("ability_%d" % (k + 1))):
+			i.cast_slot = k
+	i.cast_selected_pressed = Input.is_action_just_pressed(&"cast_selected")
+	i.select_step = (1 if Input.is_action_just_pressed(&"ability_next") else 0) - (1 if Input.is_action_just_pressed(&"ability_prev") else 0)
 	return i

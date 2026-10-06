@@ -27,7 +27,7 @@ func _ready() -> void:
 	if _scenario == "plunge_springcap":
 		_level.player.respawn_at(Vector3(0.0, 5.05, -62.0))
 	if _scenario == "magic":
-		_level.player.abilities_override = [&"fireball", &"glide", &"thunderclap", &"dash"]
+		_level.player.abilities_override = [&"fireball", &"vine", &"thunderclap", &"dash"]
 
 
 func _physics_process(_delta: float) -> void:
@@ -50,7 +50,7 @@ func _physics_process(_delta: float) -> void:
 			if _t in [20, 32, 46]:
 				_inp.tap(&"attack")
 		"magic":
-			# Fireball, Thunderclap, then a jump held into a Glide and an Air Dash.
+			# Fireball, Thunderclap, then a triple jump and an Air Dash.
 			if _t in [20, 48]:
 				_inp.tap(&"fireball")
 			if _t == 80:

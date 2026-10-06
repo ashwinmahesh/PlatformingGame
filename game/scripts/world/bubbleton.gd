@@ -60,6 +60,7 @@ func build() -> void:
 	_side_spots()
 	_landmarks()
 	_coral_heights()
+	_vine_routes()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life(&"kelp")
@@ -864,3 +865,11 @@ func _coral_heights() -> void:
 	Ambient.fish(self, plaza + Vector3(0.0, 4.0, 0.0), 20.0, 10, &"gold")
 	Ambient.bubbles(self, plaza + Vector3(0.0, 0.5, 0.0), Vector3(30.0, 2.0, 20.0), 20)
 	add_capture_point("heights", Vector3(30.0, 44.0, 40.0), Vector3(0.0, 18.0, 108.0))
+
+
+## Build 7 Vinelash: hook flowers just off Coral Heights' edges, catchable from the seafloor.
+func _vine_routes() -> void:
+	region(Vector3.ZERO)
+	hook(Vector3(12.0, 18.0, 97.0))
+	hook(Vector3(-78.0, 24.0, 117.2))
+	hook(Vector3(78.0, 28.0, 118.2))

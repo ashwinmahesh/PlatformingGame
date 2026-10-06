@@ -84,7 +84,7 @@ func is_lockable() -> bool:
 func on_hit(atk: Dictionary) -> Dictionary:
 	if state == S.HIDDEN:
 		return {}
-	if state in [S.POP, S.SPIN] and StringName(str(atk.get("kind", ""))) == &"thunder":
+	if state in [S.POP, S.SPIN] and Critter.shakes(StringName(str(atk.get("kind", "")))):
 		set_state(S.DIZZY)
 	elif state in [S.POP, S.SPIN]:
 		AudioDirector.play(&"hit", 0.0, 1.9)

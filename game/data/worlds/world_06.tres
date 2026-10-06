@@ -16,3 +16,4 @@ shard_ids = Array[StringName]([&"w6_shard_clock", &"w6_shard_sweep", &"w6_shard_
 shards_required = 3
 goal = &"star"
 color = &"gold"
+ability = &"boots"

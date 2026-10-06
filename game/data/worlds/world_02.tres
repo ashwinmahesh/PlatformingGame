@@ -16,4 +16,4 @@ shard_ids = Array[StringName]([&"w2_shard_heights", &"w2_shard_puffball", &"w2_s
 shards_required = 3
 goal = &"star"
 color = &"sky_top"
-ability = &"glide"
+ability = &"vine"

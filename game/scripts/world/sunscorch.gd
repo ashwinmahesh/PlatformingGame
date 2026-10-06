@@ -81,6 +81,7 @@ func build() -> void:
 	_golem_gate()
 	_mesa_town()
 	_gorge_ladders()
+	_vine_routes()
 	_gorge_life()
 	finish_boss_world()
 	finish_life(&"moss")
@@ -772,3 +773,11 @@ func _gorge_ladders() -> void:
 	ladder(Vector3(61.0, g, 14.0), 12.0, PI * 0.5)
 	ladder(Vector3(62.0, g, 44.0), 10.0, PI * 0.5)
 
+
+## Build 7 Vinelash (replacing the old Glide route): hook flowers carry you from the summit out to
+## the Glider's Perch, and off the plateau edge above the camp.
+func _vine_routes() -> void:
+	region(Vector3.ZERO)
+	hook(Vector3(-38.0, 23.0, 122.0))
+	hook(Vector3(-38.0, 18.0, 110.0))
+	hook(Vector3(22.0, PLATEAU, 44.0))

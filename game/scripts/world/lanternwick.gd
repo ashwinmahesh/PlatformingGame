@@ -68,6 +68,7 @@ func build() -> void:
 	_courtyards()
 	_streets()
 	_alleys()
+	_vine_routes()
 	_batch.build(self)
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -591,3 +592,10 @@ func _alleys() -> void:
 	for z: float in [-40.0, 20.0, 60.0]:
 		ladder(Vector3(-96.0, 0.0, z), WALL_H, PI * 0.5)
 		ladder(Vector3(96.0, 0.0, z), WALL_H, -PI * 0.5)
+
+
+## Build 7 Vinelash: hook flowers just off the roof terraces on both banks, catchable from the quays.
+func _vine_routes() -> void:
+	region(Vector3.ZERO)
+	for b: Vector3 in [Vector3(-75.0, TERRACE, -17.6), Vector3(0.0, TERRACE, -17.6), Vector3(-70.0, TERRACE, 5.6), Vector3(70.0, TERRACE, 5.6)]:
+		hook(b)

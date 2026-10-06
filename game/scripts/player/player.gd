@@ -45,8 +45,17 @@ const CLAP_RADIUS := 5.5
 const DASH_TICKS := 11
 const DASH_SPEED := 24.0
 const DASH_COOLDOWN := 30
-const GLIDE_FALL := 2.6
-const GLIDE_HOLD_TICKS := 10
+## Build 7 Vinelash (replaces Glide): zip to a HookBloom, or lash a monster in reach.
+const VINE_SPEED := 24.0
+const VINE_COOLDOWN := 30
+const VINE_ENEMY_RANGE := 12.0
+## Build 7 world abilities 5-9 (frost, boots, orb, rush, roar).
+const FROST_RADIUS := 6.0
+const BOOTS_HEIGHT := 8.5
+const RUSH_TICKS := 45
+const RUSH_SPEED := 13.0
+const ROAR_RADIUS := 11.0
+const MAGIC_COOLDOWNS: Dictionary[StringName, int] = {&"frost": 90, &"boots": 40, &"orb": 70, &"rush": 120, &"roar": 180}
 
 @export var settings: MovementSettings = preload("res://data/movement/hero_movement.tres")
 
@@ -101,7 +110,21 @@ var on_ice: bool = false
 # Magic state (Build 5).
 ## Abilities granted directly (tests); otherwise they come from Progress.
 var abilities_override: Array[StringName] = []
-var gliding: bool = false
+var vine_target: HookBloom = null
+## Ability picked for the gamepad's cast button (D-pad left/right), and per-ability cooldowns.
+var selected_ability: StringName = &""
+var magic_cooldowns: Dictionary[StringName, int] = {}
+## Area spells the resolver applies: {atk, center (Vector3), follow (bool), radius, ticks, hit}.
+var area_attacks: Array[Dictionary] = []
+var boots_used: bool = false
+var rush_left: int = 0
+var rush_id: int = 0
+var _cast_queue: Array[StringName] = []
+var vine_cooldown: int = 0
+var vine_lash_id: int = 0
+var _vine_pending: bool = false
+var _vine_ticks: int = 0
+var _vine_line: MeshInstance3D
 var dash_left: int = 0
 var dash_dir: Vector3 = Vector3.FORWARD
 var clap_tick: int = -1
@@ -110,14 +133,12 @@ var clap_cooldown: int = 0
 var fireball_cooldown: int = 0
 var dash_cooldown: int = 0
 var air_dash_used: bool = false
-var _jump_hold_ticks: int = 0
 var _fireball_pending: bool = false
 var _clap_pending: bool = false
 var _dash_pending: bool = false
 var _cast_anim_left: float = 0.0
 ## Build 6 (Ashwin: "swinging the sword should also be allowed" in water): a swim slash.
 var swim_attack_tick: int = -1
-var _glider: Node3D
 
 # Combat (plan §4.1)
 var attack: AttackDef
@@ -191,7 +212,7 @@ func _ready() -> void:
 	_build_shadow()
 	_build_landing_marker()
 	_build_plunge_streaks()
-	_build_glider()
+	_build_vine()
 	max_hp = Progress.max_halves()
 	hp = max_hp
 	safe_position = global_position
@@ -199,17 +220,19 @@ func _ready() -> void:
 
 # --- Public API -------------------------------------------------------------------------------
 
-## The Glide flower: a big pink blossom held overhead like a parasol (Build 5).
-func _build_glider() -> void:
-	_glider = Node3D.new()
-	_glider.position = Vector3(0.0, 0.35, 0.0)
-	_glider.visible = false
-	body_pivot.add_child(_glider)
-	var mi := MeshInstance3D.new()
-	mi.mesh = Whimsy.flower_mesh(&"candy_pink", 1.0, 1.0)
-	mi.material_override = Whimsy.material()
-	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_glider.add_child(mi)
+## The Vinelash's vine: a green line from the hero's hand to whatever it caught.
+func _build_vine() -> void:
+	_vine_line = MeshInstance3D.new()
+	var c := CylinderMesh.new()
+	c.top_radius = 0.06
+	c.bottom_radius = 0.06
+	c.height = 1.0
+	_vine_line.mesh = c
+	_vine_line.material_override = Kit.mat(&"leaf_teal")
+	_vine_line.top_level = true
+	_vine_line.visible = false
+	_vine_line.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_vine_line)
 
 
 func has_ability(ability: StringName) -> bool:
@@ -399,7 +422,7 @@ func respawn_at(pos: Vector3, look: Vector3 = Vector3.FORWARD) -> void:
 	_ignore_floor_ticks = 0
 	_left_ground_by_launch = false
 	_slow_left = 0.0
-	gliding = false
+	vine_target = null
 	dash_left = 0
 	clap_tick = -1
 	air_dash_used = false
@@ -468,12 +491,24 @@ func _physics_process(delta: float) -> void:
 			stored_attack_tick = tick
 	if inp.plunge_pressed and state in [State.NORMAL, State.ATTACK]:
 		_plunge_press_pending = true
+	if state in [State.NORMAL, State.ATTACK]:
+		if inp.cast_slot >= 0 and inp.cast_slot < Abilities.ORDER.size():
+			_cast_queue.append(Abilities.ORDER[inp.cast_slot])
+		if inp.select_step != 0:
+			_cycle_selected(inp.select_step)
+		if inp.cast_selected_pressed:
+			if selected_ability == &"" or not has_ability(selected_ability):
+				_cycle_selected(1)
+			if selected_ability != &"":
+				_cast_queue.append(selected_ability)
 	if inp.fireball_pressed and state in [State.NORMAL, State.ATTACK]:
 		_fireball_pending = true
 	if inp.clap_pressed and state in [State.NORMAL, State.ATTACK]:
 		_clap_pending = true
 	if inp.dash_pressed and state in [State.NORMAL, State.ATTACK]:
 		_dash_pending = true
+	if inp.vine_pressed and state in [State.NORMAL, State.ATTACK]:
+		_vine_pending = true
 	if inp.interact_pressed and state == State.NORMAL and is_grounded():
 		_try_interact()
 	# Local hit-stop: position, animation and timers pause; buffers pause rather than drain.
@@ -538,14 +573,6 @@ func _movement_tick(delta: float, inp: PlayerInput) -> void:
 	if inp.jump_released and _short_hop_ok and velocity.y > 0.0:
 		velocity.y *= settings.short_hop_factor
 		_short_hop_ok = false
-	# Glide (Build 5): hold jump while falling; hold through the apex, or after the third jump.
-	_jump_hold_ticks = _jump_hold_ticks + 1 if inp.jump_held else 0
-	var was_gliding := gliding
-	gliding = has_ability(&"glide") and state == State.NORMAL and not is_grounded() and dash_left <= 0 \
-		and velocity.y < 0.0 and inp.jump_held and (jumps_used >= 3 or _jump_hold_ticks > GLIDE_HOLD_TICKS)
-	if gliding and not was_gliding:
-		AudioDirector.play(&"glide", -6.0)
-		_air_speed_cap = maxf(_air_speed_cap, settings.run_speed)
 	# 6. Gravity and horizontal movement, then move.
 	_apply_gravity(delta, inp.jump_held)
 	_apply_horizontal(delta, inp.move, is_grounded() or _step_hold > 0)
@@ -659,7 +686,7 @@ func _try_grab_ladder(inp: PlayerInput) -> bool:
 	state = State.CLIMB
 	velocity = Vector3.ZERO
 	jumps_used = 0
-	gliding = false
+	vine_target = null
 	wall_sliding = false
 	AudioDirector.play(&"step", -4.0, 1.3)
 	return true
@@ -830,7 +857,8 @@ func _on_landed() -> void:
 	_locked_wall_id = 0
 	jumps_used = 0
 	air_dash_used = false
-	gliding = false
+	boots_used = false
+	vine_target = null
 	air_slash_ready = false
 	_left_ground_by_launch = false
 	_landed_at_tick = tick
@@ -893,6 +921,8 @@ func _tick_magic(grounded: bool) -> void:
 		clap_cooldown -= 1
 	if dash_cooldown > 0:
 		dash_cooldown -= 1
+	if vine_cooldown > 0:
+		vine_cooldown -= 1
 	if clap_tick >= 0:
 		clap_tick += 1
 		if clap_tick >= CLAP_ACTIVE:
@@ -909,6 +939,253 @@ func _tick_magic(grounded: bool) -> void:
 		_dash_pending = false
 		if state == State.NORMAL and has_ability(&"dash") and dash_cooldown <= 0 and (grounded or not air_dash_used):
 			_start_dash(grounded)
+	for id in _cast_queue:
+		match id:
+			&"fireball":
+				_fireball_pending = true
+			&"vine":
+				_vine_pending = true
+			&"thunderclap":
+				_clap_pending = true
+			&"dash":
+				_dash_pending = true
+			_:
+				_cast_world_magic(id, grounded)
+	_cast_queue.clear()
+	for k: StringName in magic_cooldowns.keys():
+		magic_cooldowns[k] = maxi(int(magic_cooldowns[k]) - 1, 0)
+	for a in area_attacks:
+		a["ticks"] = int(a["ticks"]) - 1
+	area_attacks = area_attacks.filter(func(a: Dictionary) -> bool: return int(a["ticks"]) > 0)
+	if rush_left > 0:
+		rush_left -= 1
+		invuln_left = maxf(invuln_left, 0.1)
+		if rush_left == 0:
+			_air_speed_cap = settings.run_speed
+	if _vine_pending:
+		_vine_pending = false
+		if state == State.NORMAL and has_ability(&"vine") and vine_cooldown <= 0 and vine_target == null:
+			_cast_vine()
+	if vine_target != null:
+		_vine_zip_tick()
+
+
+## Vinelash: the nearest HookBloom in range (in front of you first) pulls you to it; with none in
+## reach, the vine lashes the nearest monster instead (damage through CombatResolver).
+func _cast_vine() -> void:
+	vine_cooldown = VINE_COOLDOWN
+	var best: HookBloom = null
+	var best_score := INF
+	for n in get_tree().get_nodes_in_group(&"hook_bloom"):
+		var hb := n as HookBloom
+		var to := hb.anchor() - (global_position + Vector3.UP * 1.0)
+		if to.length() > HookBloom.RANGE or to.length() < 1.5:
+			continue
+		var flat := Vector3(to.x, 0.0, to.z)
+		var ahead := facing.dot(flat.normalized()) if flat.length() > 0.5 else 1.0
+		var score := to.length() - ahead * 6.0
+		if score < best_score and _vine_clear(hb.anchor()):
+			best = hb
+			best_score = score
+	if best != null:
+		vine_target = best
+		_vine_ticks = 0
+		dash_left = 0
+		AudioDirector.play(&"slash", -2.0, 1.6)
+		Telemetry.log_event("vine", {"pos": global_position})
+		return
+	var foe := _vine_enemy()
+	if foe != null:
+		vine_lash_id += 1
+		_cast_anim_left = 0.3
+		_vine_flash_to = foe.global_position + Vector3.UP * 0.8
+		_vine_flash_left = 0.18
+		AudioDirector.play(&"slash", -2.0, 1.4)
+		var resolver := get_tree().get_first_node_in_group(&"combat_resolver")
+		if resolver != null and resolver.has_method(&"vine_lash"):
+			resolver.call(&"vine_lash", foe)
+
+
+var _vine_flash_to: Vector3 = Vector3.ZERO
+var _vine_flash_left: float = 0.0
+
+
+func _vine_clear(to: Vector3) -> bool:
+	var from := global_position + Vector3.UP * 1.0
+	var q := PhysicsRayQueryParameters3D.create(from, to - (to - from).normalized() * 0.6, Layers.WORLD)
+	q.exclude = [get_rid()]
+	return get_world_3d().direct_space_state.intersect_ray(q).is_empty()
+
+
+func _vine_enemy() -> Node3D:
+	var best: Node3D = null
+	var best_d := VINE_ENEMY_RANGE
+	for n in get_tree().get_nodes_in_group(&"lockable"):
+		var e := n as Node3D
+		if e == null or not e.has_method(&"receive_player_attack") or (e.has_method(&"is_lockable") and not bool(e.call(&"is_lockable"))):
+			continue
+		var d := e.global_position.distance_to(global_position)
+		if d < best_d and _vine_clear(e.global_position + Vector3.UP * 0.8):
+			best = e
+			best_d = d
+	return best
+
+
+## Each tick of a zip: fly along the vine; arriving pops you up over the bloom.
+func _vine_zip_tick() -> void:
+	if vine_target == null or not is_instance_valid(vine_target):
+		vine_target = null
+		return
+	_vine_ticks += 1
+	var to := vine_target.anchor() + Vector3.UP * 0.4 - global_position
+	if to.length() < 1.4 or _vine_ticks > 90:
+		vine_target = null
+		var flat := Vector3(to.x, 0.0, to.z)
+		velocity = Vector3.UP * 9.0 + (flat.normalized() * 3.0 if flat.length() > 0.1 else Vector3.ZERO)
+		jumps_used = maxi(jumps_used, 1)
+		air_dash_used = false
+		_left_ground_by_launch = true
+		_ignore_floor_ticks = 2
+		_air_speed_cap = settings.run_speed
+		AudioDirector.play(&"bounce", -4.0, 1.3)
+		return
+	velocity = to.normalized() * VINE_SPEED
+	var flat_dir := Vector3(to.x, 0.0, to.z)
+	if flat_dir.length() > 0.1:
+		facing = flat_dir.normalized()
+	if has_buffered_jump():
+		# Let go with a jump.
+		vine_target = null
+		buffer_age = -1
+		velocity.y = maxf(velocity.y, settings.jump_velocity(1))
+		jumps_used = maxi(jumps_used, 1)
+
+
+func _update_vine_line() -> void:
+	if _vine_line == null:
+		return
+	_vine_flash_left = maxf(_vine_flash_left - get_physics_process_delta_time(), 0.0)
+	var to := Vector3.ZERO
+	if vine_target != null and is_instance_valid(vine_target):
+		to = vine_target.anchor()
+	elif _vine_flash_left > 0.0:
+		to = _vine_flash_to
+	else:
+		_vine_line.visible = false
+		return
+	var from := global_position + Vector3.UP * 1.0 + facing * 0.3
+	var d := to - from
+	if d.length() < 0.2:
+		_vine_line.visible = false
+		return
+	_vine_line.visible = true
+	var y := d.normalized()
+	var x := y.cross(Vector3.FORWARD if absf(y.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
+	var z := x.cross(y)
+	_vine_line.global_transform = Transform3D(Basis(x, y * d.length(), z), from + d * 0.5)
+
+
+func _cycle_selected(step: int) -> void:
+	var owned: Array[StringName] = []
+	for id in Abilities.ORDER:
+		if has_ability(id):
+			owned.append(id)
+	if owned.is_empty():
+		selected_ability = &""
+		return
+	var i := owned.find(selected_ability)
+	selected_ability = owned[posmod(i + step, owned.size())] if i >= 0 else owned[0]
+
+
+func magic_ready(id: StringName) -> bool:
+	match id:
+		&"fireball":
+			return fireball_cooldown <= 0
+		&"thunderclap":
+			return clap_cooldown <= 0
+		&"dash":
+			return dash_cooldown <= 0 and (is_grounded() or not air_dash_used)
+		&"vine":
+			return vine_cooldown <= 0 and vine_target == null
+		&"boots":
+			return int(magic_cooldowns.get(id, 0)) <= 0 and (is_grounded() or not boots_used)
+	return int(magic_cooldowns.get(id, 0)) <= 0
+
+
+## Abilities 5-9 (Frostfang, Lanternwick and Worlds 7-9).
+func _cast_world_magic(id: StringName, grounded: bool) -> void:
+	if state != State.NORMAL or not has_ability(id) or not magic_ready(id):
+		return
+	magic_cooldowns[id] = int(MAGIC_COOLDOWNS.get(id, 60))
+	attack_id += 1
+	_cast_anim_left = 0.4
+	match id:
+		&"frost":
+			# A burst of frost: monsters around you freeze solid; water in front freezes into floes.
+			area_attacks.append({"atk": {"id": attack_id, "damage": 1, "kind": &"frost", "from": global_position, "hitstop": 3, "knockback": 0.5}, "center": global_position, "follow": true, "radius": FROST_RADIUS, "ticks": 8, "hit": {}})
+			Fx.ring(get_parent(), global_position + Vector3.UP * 0.3, Palette.color(&"water_light"), FROST_RADIUS)
+			Fx.burst(get_parent(), global_position + Vector3.UP * 1.0, Palette.color(&"foam"), 30, 7.0, 0.1, 0.0, 0.5)
+			for d: float in [2.5, 5.5, 8.5, 11.5]:
+				var at := global_position + facing * d
+				var surface := _water_surface_at(at)
+				if not is_nan(surface):
+					IceFloe.spawn(get_parent(), Vector3(at.x, surface, at.z))
+			AudioDirector.play(&"thunder", -6.0, 1.6)
+		&"boots":
+			# Spring Boots: a huge spring off the ground (or once in the air) that kicks away
+			# anything right beside you.
+			velocity.y = settings.launch_velocity(BOOTS_HEIGHT)
+			if not grounded:
+				boots_used = true
+			jumps_used = maxi(jumps_used, 1)
+			_left_ground_by_launch = true
+			_ignore_floor_ticks = 2
+			area_attacks.append({"atk": {"id": attack_id, "damage": 1, "kind": &"boots", "from": global_position, "hitstop": 2, "knockback": 2.5}, "center": global_position, "follow": false, "radius": 2.6, "ticks": 4, "hit": {}})
+			Fx.ring(get_parent(), global_position + Vector3.UP * 0.1, Palette.color(&"gold"), 2.6)
+			AudioDirector.play(&"springcap", -2.0, 1.2)
+		&"orb":
+			var orb := GravityOrb.new()
+			orb.dir = facing
+			orb.attack_id = attack_id
+			get_parent().add_child(orb)
+			orb.global_position = global_position + Vector3.UP * 1.0 + facing * 0.8
+			AudioDirector.play(&"fireball", -3.0, 0.6)
+		&"rush":
+			# Star Rush: a steerable sprint you can't be hurt in; it bowls monsters over.
+			rush_left = RUSH_TICKS
+			rush_id = attack_id
+			var b := _move_basis()
+			var dir := b * Vector3(last_input.move.x, 0.0, -last_input.move.y)
+			dash_dir = dir.normalized() if dir.length() > 0.2 else facing
+			facing = dash_dir
+			_air_speed_cap = RUSH_SPEED
+			area_attacks.append({"atk": {"id": attack_id, "damage": 2, "kind": &"rush", "from": global_position, "hitstop": 2, "knockback": 3.0}, "center": global_position, "follow": true, "radius": 1.8, "ticks": RUSH_TICKS, "hit": {}})
+			AudioDirector.play(&"dash", -2.0, 0.8)
+		&"roar":
+			# Mighty Roar: every monster in a wide ring is stunned, shields fly, flyers drop.
+			area_attacks.append({"atk": {"id": attack_id, "damage": 1, "kind": &"roar", "from": global_position, "hitstop": 4, "knockback": 3.0}, "center": global_position, "follow": true, "radius": ROAR_RADIUS, "ticks": 10, "hit": {}})
+			Fx.ring(get_parent(), global_position + Vector3.UP * 0.3, Palette.color(&"sunset_orange"), ROAR_RADIUS)
+			Fx.ring(get_parent(), global_position + Vector3.UP * 1.0, Palette.color(&"roof_red"), ROAR_RADIUS * 0.7)
+			AudioDirector.play(&"boss_roar", 0.0, 1.4)
+			if camera_rig != null and camera_rig.has_method(&"add_trauma"):
+				camera_rig.call(&"add_trauma", 0.5)
+	Telemetry.log_event(String(id), {"pos": global_position})
+
+
+## Surface height of water at a point (NAN when dry).
+func _water_surface_at(at: Vector3) -> float:
+	var space := get_world_3d().direct_space_state
+	for dy: float in [-0.5, -2.0, 1.0]:
+		var pq := PhysicsPointQueryParameters3D.new()
+		pq.position = at + Vector3.UP * dy
+		pq.collide_with_areas = true
+		pq.collide_with_bodies = false
+		pq.collision_mask = Layers.HAZARD
+		for r in space.intersect_point(pq, 4):
+			var a := r["collider"] as Area3D
+			if a != null and StringName(str(a.get_meta(&"kind", ""))) == &"water":
+				return float(a.get_meta(&"surface", at.y))
+	return NAN
 
 
 func _cast_fireball() -> void:
@@ -960,7 +1237,7 @@ func _start_dash(grounded: bool) -> void:
 	dash_cooldown = DASH_COOLDOWN
 	if not grounded:
 		air_dash_used = true
-	gliding = false
+	vine_target = null
 	_squash = Vector3(0.8, 0.8, 1.3)
 	Fx.burst(get_parent(), global_position + Vector3.UP * 0.6, Palette.color(&"water_light"), 12, 3.0, 0.1, 0.0, 0.3)
 	AudioDirector.play(&"dash", -3.0)
@@ -1007,7 +1284,7 @@ func _start_attack(def: AttackDef) -> void:
 
 func _start_plunge() -> void:
 	dash_left = 0
-	gliding = false
+	vine_target = null
 	attack = null
 	state = State.PLUNGE
 	plunge_tick = 0
@@ -1101,7 +1378,7 @@ func _apply_gravity(delta: float, jump_held: bool) -> void:
 	if external_lift > 0.0 and not is_grounded():
 		# Wind column: rise toward the lift speed; still counts as being launched. Gliding
 		# opens the flower like a sail and rides it higher.
-		velocity.y = move_toward(velocity.y, external_lift * (1.4 if gliding or (has_ability(&"glide") and last_input.jump_held) else 1.0), 70.0 * delta)
+		velocity.y = move_toward(velocity.y, external_lift, 70.0 * delta)
 		air_slash_ready = true
 		external_lift = 0.0
 		return
@@ -1109,8 +1386,7 @@ func _apply_gravity(delta: float, jump_held: bool) -> void:
 	if is_grounded() and velocity.y <= 0.0:
 		velocity.y = -0.5
 		return
-	if gliding:
-		velocity.y = maxf(velocity.y - settings.gravity_down * delta, -GLIDE_FALL)
+	if vine_target != null:
 		return
 	var g := settings.gravity_up if velocity.y > 0.0 else settings.gravity_down
 	if absf(velocity.y) < settings.apex_threshold and jump_held:
@@ -1147,6 +1423,14 @@ func _apply_horizontal(delta: float, move: Vector2, grounded: bool) -> void:
 		return
 	if _wall_kick_left > 0:
 		_wall_kick_left -= 1
+		return
+	if rush_left > 0:
+		var steer := _move_basis() * Vector3(move.x, 0.0, -move.y)
+		if steer.length() > 0.2:
+			dash_dir = dash_dir.slerp(steer.normalized(), 0.08).normalized()
+			facing = dash_dir
+		velocity.x = dash_dir.x * RUSH_SPEED
+		velocity.z = dash_dir.z * RUSH_SPEED
 		return
 	if dash_left > 0:
 		dash_left -= 1
@@ -1588,12 +1872,7 @@ func _update_visual(delta: float) -> void:
 	_land_anim_left = maxf(_land_anim_left - delta, 0.0)
 	_cheer_left = maxf(_cheer_left - delta, 0.0)
 	_cast_anim_left = maxf(_cast_anim_left - delta, 0.0)
-	if _glider != null:
-		if gliding and not _glider.visible:
-			_glider.scale = Vector3.ONE * 0.2
-		_glider.visible = gliding
-		_glider.scale = _glider.scale.lerp(Vector3.ONE, 1.0 - exp(-14.0 * delta))
-		_glider.rotation.y += delta * 2.0
+	_update_vine_line()
 	_sword_trail.emitting = state == State.ATTACK and attack != null and attack.phase_at(attack_tick) != AttackDef.Phase.STARTUP and attack.phase_at(attack_tick) != AttackDef.Phase.DONE and attack_tick < attack.startup + attack.active + 3
 	if sword != null and state != State.PLUNGE:
 		sword.transform = _sword_rest
@@ -1671,9 +1950,9 @@ func _animate(grounded: bool, h_speed: float) -> void:
 	if wall_sliding:
 		hero.play(&"Jump_Idle", 0.1, 0.0)
 		return
-	if gliding:
-		hero.play(&"Jump_Idle", 0.15, 0.5)
-		body_pivot.rotation.x = 0.25
+	if vine_target != null:
+		hero.play(&"Jump_Idle", 0.1, 0.8)
+		body_pivot.rotation.x = -0.3
 		return
 	if _cheer_left > 0.0 and grounded and h_speed < 0.5:
 		hero.play(&"Cheer", 0.2)

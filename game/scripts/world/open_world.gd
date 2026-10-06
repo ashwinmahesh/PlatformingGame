@@ -425,6 +425,14 @@ func ramp_tower(center: Vector3, base_y: float, top_y: float, core: float = 8.0,
 	HighTier.ramp_tower(self, center, base_y, top_y, core, width, color, lane_color, top_color)
 
 
+## Build 7: a Vinelash hook flower whose base sits at `base` (world); the vine catches 1.5 m above.
+func hook(base: Vector3) -> HookBloom:
+	var h := HookBloom.new()
+	h.position = base
+	add_child(h)
+	return h
+
+
 ## A ladder whose foot is at `base` (world) against a wall, climbing side facing `yaw` (0 = +Z).
 func ladder(base: Vector3, height: float, yaw: float = 0.0) -> Ladder:
 	var l := Ladder.new()

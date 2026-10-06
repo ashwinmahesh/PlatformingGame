@@ -352,6 +352,9 @@ func _treetops() -> void:
 	HighTier.bridge(self, Vector3(-17.0, y, -30.0), Vector3(-13.0, y, -30.0), 3.0)
 	_sign(Vector3(-12.0, 0.0, -22.0), "The Oak Stair: up to\nthe Treetop Walk!", 0.6)
 	HighTier.lift(self, Vector3(15.6, 0.0, -30.0), y, 7.0)
+	var hb := HookBloom.new()
+	hb.position = Vector3(14.0, y, -34.0)
+	add_child(hb)
 	for x: float in [-11.0, 11.0]:
 		var l := Ladder.new()
 		l.height = y

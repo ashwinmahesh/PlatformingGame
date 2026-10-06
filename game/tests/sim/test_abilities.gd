@@ -1,5 +1,6 @@
 extends TestCase
-## Build 5 magic on the real loop with the real resolver: Fireball, Glide, Thunderclap, Air Dash.
+## Magic on the real loop with the real resolver: Fireball, Vinelash, Thunderclap, Air Dash (Build 5/7)
+## and the Build 7 world abilities: Frost Burst, Spring Boots, Gravity Orb, Star Rush, Mighty Roar.
 ## Locked until learned; once learned (abilities_override here), each does its job.
 
 class Target:
@@ -92,34 +93,101 @@ func test_fireball_burns_brambles_but_swords_do_not() -> void:
 	check(not is_instance_valid(b) or b.collision_layer == 0, "a Fireball burns them away")
 
 
-func test_glide_slows_the_fall() -> void:
-	p.respawn_at(Vector3(0.0, 30.0, 0.0))
-	await ticks(1)
-	inp.press(&"jump")
-	var fastest := 0.0
-	for i in 120:
-		await ticks(1)
-		if p.velocity.y < 0.0:
-			fastest = minf(fastest, p.velocity.y)
-	check(fastest < -10.0, "without Glide the hero falls fast")
-	p.abilities_override = [&"glide"]
-	p.respawn_at(Vector3(0.0, 30.0, 0.0))
-	await ticks(1)
-	inp.release(&"jump")
-	await ticks(1)
-	inp.press(&"jump")
-	fastest = 0.0
-	var glided := false
-	for i in 150:
-		await ticks(1)
-		glided = glided or p.gliding
-		if p.gliding:
-			fastest = minf(fastest, p.velocity.y)
-	check(glided, "holding jump while falling glides")
-	check(fastest >= -Player.GLIDE_FALL - 0.01, "the glide caps the fall speed")
-	inp.release(&"jump")
+## Build 7: the Vinelash replaces Glide. A hook flower 12 m up and ahead: one press zips you
+## up to it and pops you over the top.
+func test_vinelash_zips_to_a_hook_flower() -> void:
+	var hb := HookBloom.new()
+	hb.position = Vector3(0.0, 10.0, -8.0)
+	add_child(hb)
 	await ticks(2)
-	check(not p.gliding, "letting go stops the glide")
+	inp.tap(&"vine")
+	await ticks(3)
+	check(p.vine_target == null, "no Vinelash before it is learned")
+	p.abilities_override = [&"vine"]
+	inp.tap(&"vine")
+	var best := 0.0
+	for i in 90:
+		await ticks(1)
+		best = maxf(best, p.global_position.y)
+	check(best > 10.5, "zipped up to the flower and over it (peak %.1f m)" % best)
+
+
+## With no flower in reach, the vine lashes the nearest monster.
+func test_vinelash_lashes_a_monster() -> void:
+	p.abilities_override = [&"vine"]
+	var t := _target(Vector3(0.0, 1.0, -8.0))
+	t.add_to_group(&"lockable")
+	inp.tap(&"vine")
+	await ticks(3)
+	check(&"vine" in t.kinds, "the vine hits it")
+
+
+func test_number_keys_cast_by_slot() -> void:
+	p.abilities_override = [&"fireball"]
+	inp.tap(&"ability_1")
+	await ticks(3)
+	check_eq(_fireballs(), 1, "key 1 casts slot 1, the Fireball")
+
+
+func test_frost_burst_freezes_and_makes_floes() -> void:
+	p.abilities_override = [&"frost"]
+	var g := Puffcap.new()
+	g.position = Vector3(0.0, 0.05, -4.0)
+	add_child(g)
+	var w := Kit.water(self, Vector3(0.0, 0.0, -14.0), Vector2(8.0, 12.0), 4.0)
+	await ticks(6)
+	p.facing = Vector3.FORWARD
+	inp.tap(&"ability_5")
+	await ticks(6)
+	check(g.frozen_ticks > 0, "a monster in reach freezes")
+	check(get_tree().get_nodes_in_group(&"ice_floe").size() >= 1, "water ahead freezes into floes")
+	check(g.damage_to_player(p).is_empty(), "a frozen monster can't hurt you")
+	w.queue_free()
+
+
+func test_spring_boots_bound_high() -> void:
+	p.abilities_override = [&"boots"]
+	inp.tap(&"ability_6")
+	var best := 0.0
+	for i in 70:
+		await ticks(1)
+		best = maxf(best, p.global_position.y)
+	check(best > Player.BOOTS_HEIGHT - 0.6, "a spring of about %.1f m (%.1f)" % [Player.BOOTS_HEIGHT, best])
+
+
+func test_gravity_orb_drags_monsters_in() -> void:
+	p.abilities_override = [&"orb"]
+	var a := Puffcap.new()
+	a.position = Vector3(4.0, 0.05, -9.0)
+	add_child(a)
+	await ticks(4)
+	p.facing = Vector3.FORWARD
+	var start := a.global_position
+	inp.tap(&"ability_7")
+	await ticks(90)
+	check(not is_instance_valid(a) or a.global_position.distance_to(start) > 1.0, "the vortex drags it in")
+
+
+func test_star_rush_bowls_through() -> void:
+	p.abilities_override = [&"rush"]
+	var t := _target(Vector3(0.0, 1.0, -6.0))
+	p.facing = Vector3.FORWARD
+	inp.tap(&"ability_8")
+	await ticks(40)
+	check(&"rush" in t.kinds, "the rush bowls into it")
+	check(p.global_position.z < -6.0, "and carries on past")
+
+
+func test_mighty_roar_stuns_far_around() -> void:
+	p.abilities_override = [&"roar"]
+	var k := Armorling.new()
+	k.position = Vector3(8.0, 0.05, 0.0)
+	add_child(k)
+	await ticks(4)
+	inp.tap(&"ability_9")
+	await ticks(4)
+	check(k.stunned_ticks > 0, "a Shieldknight 8 m off is stunned")
+	check(not k.has_shield, "and its shield flies off")
 
 
 func test_thunderclap_hits_everything_around() -> void:

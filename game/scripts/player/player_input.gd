@@ -18,3 +18,8 @@ var switch_target_pressed: bool = false
 var fireball_pressed: bool = false
 var clap_pressed: bool = false
 var dash_pressed: bool = false
+## Build 7: the Vinelash, number keys 1-9 (ability slots), and the gamepad's pick-and-cast.
+var vine_pressed: bool = false
+var cast_slot: int = -1
+var cast_selected_pressed: bool = false
+var select_step: int = 0

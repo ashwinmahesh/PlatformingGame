@@ -48,6 +48,7 @@ func build() -> void:
 	_rainbow_ring()
 	_build6()
 	_kingdom()
+	_vine_routes()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life()
@@ -494,3 +495,12 @@ func _kingdom() -> void:
 	sparkles(court + Vector3(0.0, 2.0, 0.0), Vector3(30.0, 4.0, 26.0), 40)
 	add_capture_point("kingdom", Vector3(20.0, y + 22.0, -20.0), Vector3(66.0, y, -66.0))
 	add_capture_point("beanstalk", Vector3(10.0, 16.0, 6.0), Vector3(40.0, 14.0, -40.0))
+
+
+## Build 7 Vinelash: the Sky Hooks, a chain of hook flowers from the Beanstalk island up to the
+## Starlight Gardens (catch the next one as you pop off the last).
+func _vine_routes() -> void:
+	region(Vector3.ZERO)
+	for b: Vector3 in [Vector3(54.0, 10.0, -34.0), Vector3(63.0, 19.0, -30.0), Vector3(72.0, 28.0, -27.0), Vector3(77.0, KINGDOM_Y + 4.0, -24.0)]:
+		hook(b)
+	sign_post(Vector3(46.0, 0.0, -32.0), "Sky Hooks: Vinelash (2 / G)\nfrom flower to flower!", -PI * 0.5)

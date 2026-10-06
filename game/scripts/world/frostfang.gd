@@ -62,6 +62,7 @@ func build() -> void:
 	_side_spots()
 	_build6()
 	_rimwalk()
+	_vine_routes()
 	finish_boss_world()
 	finish_life(&"bubble")
 
@@ -540,3 +541,11 @@ func _rimwalk() -> void:
 	batling(nest + Vector3(0.0, 5.0, 10.0), false, true)
 	Whimsy.aurora(self, Vector3(0.0, 60.0, -150.0), 90.0)
 	add_capture_point("rimwalk", Vector3(-10.0, 36.0, -90.0), Vector3(-20.0, 18.0, -144.0))
+
+
+## Build 7 Vinelash: hook flowers just off the Rimwalk's front edges, catchable from the valley.
+func _vine_routes() -> void:
+	region(Vector3.ZERO)
+	hook(Vector3(-100.0, 18.0, -137.0))
+	hook(Vector3(15.0, 22.0, -133.0))
+	hook(Vector3(80.0, 26.0, -129.0))

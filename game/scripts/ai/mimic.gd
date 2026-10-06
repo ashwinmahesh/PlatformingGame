@@ -80,7 +80,7 @@ func on_hit(atk: Dictionary) -> Dictionary:
 	if state == S.RECOVER or kind == &"plunge":
 		take(int(atk.get("damage", 1)), from)
 		return {"hit": true}
-	if kind == &"fireball" or kind == &"thunder":
+	if kind == &"fireball" or Critter.shakes(kind):
 		take(int(atk.get("damage", 1)), from)
 		set_state(S.RECOVER)
 		return {"hit": true}

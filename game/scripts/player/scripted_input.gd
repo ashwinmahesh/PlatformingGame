@@ -40,6 +40,12 @@ func sample() -> PlayerInput:
 	i.fireball_pressed = &"fireball" in _pressed
 	i.clap_pressed = &"thunderclap" in _pressed
 	i.dash_pressed = &"dash" in _pressed
+	i.vine_pressed = &"vine" in _pressed
+	for k in 9:
+		if StringName("ability_%d" % (k + 1)) in _pressed:
+			i.cast_slot = k
+	i.cast_selected_pressed = &"cast_selected" in _pressed
+	i.select_step = (1 if &"ability_next" in _pressed else 0) - (1 if &"ability_prev" in _pressed else 0)
 	_pressed.clear()
 	_released.clear()
 	return i

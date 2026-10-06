@@ -15,6 +15,7 @@ var _clap_hit: Dictionary[int, bool] = {}
 
 
 func _ready() -> void:
+	add_to_group(&"combat_resolver")
 	process_physics_priority = 100
 	feet_shape = SphereShape3D.new()
 	feet_shape.radius = 0.38
@@ -121,6 +122,49 @@ func _magic_attacks() -> void:
 			var res: Dictionary = actor.call(&"receive_player_attack", atk, area)
 			if bool(res.get("hit", false)):
 				hit_this_tick[actor.get_instance_id()] = true
+
+
+	# Build 7: area spells (Frost Burst, Spring Boots kick, Star Rush, Mighty Roar): one hit each
+	# per actor per cast.
+	for spell in player.area_attacks:
+		var atk: Dictionary = spell["atk"]
+		var centre: Vector3 = player.global_position if bool(spell["follow"]) else spell["center"] as Vector3
+		var s := SphereShape3D.new()
+		s.radius = float(spell["radius"])
+		var seen: Dictionary = spell["hit"]
+		for area in _query(s, Transform3D(Basis(), centre + Vector3.UP * 0.6), Layers.ENEMY_HURTBOX | Layers.REFLECTABLE):
+			var actor := actor_of(area)
+			if actor == null or not actor.has_method(&"receive_player_attack") or seen.has(actor.get_instance_id()):
+				continue
+			seen[actor.get_instance_id()] = true
+			var a := atk.duplicate()
+			a["from"] = centre
+			var res: Dictionary = actor.call(&"receive_player_attack", a, area)
+			if bool(res.get("hit", false)):
+				hit_this_tick[actor.get_instance_id()] = true
+	# Gravity Orbs pop on everything still in the middle of the vortex.
+	for n in get_tree().get_nodes_in_group(&"gravity_orb"):
+		var orb := n as GravityOrb
+		if orb == null or not orb.popped or orb.has_meta(&"resolved"):
+			continue
+		orb.set_meta(&"resolved", true)
+		var s := SphereShape3D.new()
+		s.radius = GravityOrb.POP_RADIUS
+		for area in _query(s, Transform3D(Basis(), orb.global_position), Layers.ENEMY_HURTBOX):
+			var actor := actor_of(area)
+			if actor != null and actor.has_method(&"receive_player_attack"):
+				actor.call(&"receive_player_attack", orb.pop_attack_dict(), area)
+
+
+## Build 7 Vinelash with no hook flower in reach: the vine lashes one monster.
+func vine_lash(actor: Node) -> void:
+	if actor == null or not is_instance_valid(actor) or not actor.has_method(&"receive_player_attack"):
+		return
+	var atk := {"id": 900000 + player.vine_lash_id, "damage": 1, "kind": &"vine", "from": player.global_position, "hitstop": 3, "knockback": -2.0}
+	var res: Dictionary = actor.call(&"receive_player_attack", atk, null)
+	if bool(res.get("hit", false)):
+		hit_this_tick[actor.get_instance_id()] = true
+		AudioDirector.play(&"hit", -3.0, 1.3)
 
 
 func _impact(actor: Node, area: Area3D, hitstop: int) -> void:

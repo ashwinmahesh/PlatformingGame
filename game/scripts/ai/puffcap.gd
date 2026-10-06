@@ -58,7 +58,7 @@ func on_player_land(_p: Player) -> float:
 func on_hit(atk: Dictionary) -> Dictionary:
 	var kind := StringName(str(atk.get("kind", "")))
 	if state == S.DUCK:
-		if kind == &"fireball" or kind == &"thunder":
+		if kind == &"fireball" or Critter.shakes(kind):
 			Fx.burst(get_parent(), global_position + Vector3.UP * 1.2, Palette.color(&"gold" if kind == &"fireball" else &"portal_teal"), 12, 3.0, 0.1)
 			set_state(S.SCORCHED)
 			take(int(atk.get("damage", 1)), atk.get("from", global_position) as Vector3)

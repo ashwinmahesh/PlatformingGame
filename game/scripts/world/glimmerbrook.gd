@@ -54,6 +54,7 @@ func build() -> void:
 	_build6()
 	_lake_depths()
 	_canopy()
+	_vine_routes()
 	_sky()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -184,6 +185,8 @@ func _fernway() -> void:
 	plat(Vector3(0.0, CLIFF, -66.0), Vector2(42.0, 32.0))
 	# Build 6 accessibility: a ladder up the cliff's east end, besides the Springcap.
 	ladder(P(Vector3(12.0, 0.0, -50.0)), CLIFF, Y())
+	# Build 7 Vinelash: a hook flower just off the cliff edge.
+	hook(P(Vector3(-6.0, CLIFF, -49.0)))
 	checkpoint(&"w1_cp_clearing", Vector3(0.0, CLIFF, -54.0))
 	gloplets(Vector3(-8.0, CLIFF, -68.0), 10.0, [Vector3.ZERO, Vector3(-4.0, 0.0, 4.0), Vector3(3.0, 0.0, -4.0)])
 	gloplets(Vector3(11.0, CLIFF, -70.0), 6.0, [], [Vector3.ZERO])
@@ -784,3 +787,10 @@ func _canopy() -> void:
 	butterflies(village, 12.0, 8)
 	add_capture_point("canopy", Vector3(-20.0, y + 16.0, 60.0), Vector3(-62.0, y, 18.0))
 	add_capture_point("canopy_stair", Vector3(4.0, 12.0, 40.0), Vector3(-17.0, 10.0, 17.0))
+
+
+## Build 7 Vinelash routes: hook flowers just off the canopy's edges, catchable from below.
+func _vine_routes() -> void:
+	region(Vector3.ZERO)
+	hook(Vector3(-56.0, CANOPY_Y, 36.2))
+	hook(Vector3(-40.0, CANOPY_Y + 2.0, 74.2))

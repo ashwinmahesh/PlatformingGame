@@ -228,20 +228,21 @@ func _build_abilities(root: Control) -> void:
 	for id in Abilities.ORDER:
 		var info: Array = Abilities.INFO[id]
 		var slot := VBoxContainer.new()
-		slot.custom_minimum_size = Vector2(110, 110)
+		slot.custom_minimum_size = Vector2(84, 96)
+		slot.pivot_offset = Vector2(42, 48)
 		var orb := PanelContainer.new()
-		orb.custom_minimum_size = Vector2(76, 76)
+		orb.custom_minimum_size = Vector2(62, 62)
 		orb.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = Palette.color(info[4] as StringName)
-		sb.set_corner_radius_all(38)
+		sb.set_corner_radius_all(31)
 		sb.border_color = Palette.INK
 		sb.set_border_width_all(4)
 		orb.add_theme_stylebox_override(&"panel", sb)
-		var initial := _label(orb, str(info[0]).substr(0, 1), 40, HORIZONTAL_ALIGNMENT_CENTER)
+		var initial := _label(orb, str(info[0]).substr(0, 1), 32, HORIZONTAL_ALIGNMENT_CENTER)
 		initial.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		slot.add_child(orb)
-		var key := _label(slot, str(info[1]), 22, HORIZONTAL_ALIGNMENT_CENTER)
+		var key := _label(slot, str(info[1]), 18, HORIZONTAL_ALIGNMENT_CENTER)
 		key.name = "Key"
 		slot.visible = false
 		_ability_bar.add_child(slot)
@@ -288,16 +289,10 @@ func _update_abilities() -> void:
 		slot.visible = player.has_ability(id)
 		if not slot.visible:
 			continue
-		var ready := true
-		match id:
-			&"fireball":
-				ready = player.fireball_cooldown <= 0
-			&"thunderclap":
-				ready = player.clap_cooldown <= 0
-			&"dash":
-				ready = player.dash_cooldown <= 0 and (player.is_grounded() or not player.air_dash_used)
-			&"glide":
-				ready = not player.gliding
+		var ready := player.magic_ready(id)
+		# The gamepad's picked ability (D-pad left/right, cast with RT) stands out.
+		var picked := id == player.selected_ability
+		slot.scale = slot.scale.lerp(Vector2.ONE * (1.15 if picked else 1.0), 0.3)
 		slot.modulate = Color(1.0, 1.0, 1.0, 1.0 if ready else 0.4)
 
 

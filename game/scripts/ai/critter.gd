@@ -36,6 +36,11 @@ var _debug: Label3D
 var _player: Player
 var _last_hit_id: int = -1
 var _dead: bool = false
+## Build 7 magic: Frost Burst freezes, Mighty Roar stuns (ticks left). Frozen or stunned monsters
+## don't think, can't hurt you, and take an extra point from every hit.
+var frozen_ticks: int = 0
+var stunned_ticks: int = 0
+var _ice: MeshInstance3D
 
 
 func _ready() -> void:
@@ -236,6 +241,19 @@ func _physics_process(delta: float) -> void:
 	var p := player_ref()
 	if p == null or p.global_position.distance_to(global_position) > WAKE_RADIUS:
 		return
+	if frozen_ticks > 0 or stunned_ticks > 0:
+		frozen_ticks = maxi(frozen_ticks - 1, 0)
+		stunned_ticks = maxi(stunned_ticks - 1, 0)
+		if _ice != null:
+			_ice.visible = frozen_ticks > 0
+		velocity.x = 0.0
+		velocity.z = 0.0
+		if uses_gravity and not is_on_floor():
+			velocity.y -= 30.0 * delta
+		elif not uses_gravity:
+			velocity.y = -4.0 if stunned_ticks > 0 else 0.0
+		move_and_slide()
+		return
 	state_ticks += 1
 	think(delta)
 	if uses_gravity and not is_on_floor():
@@ -260,13 +278,45 @@ func receive_player_attack(atk: Dictionary, _area: Area3D) -> Dictionary:
 	if id == _last_hit_id:
 		return {"bounce": bounce_h}
 	_last_hit_id = id
+	var kind := StringName(str(atk.get("kind", "")))
+	if frozen_ticks > 0 or stunned_ticks > 0:
+		take(int(atk.get("damage", 1)) + 1, atk.get("from", global_position) as Vector3)
+		return {"hit": true}
+	if kind == &"frost":
+		_freeze(180)
+	elif kind == &"roar":
+		stunned_ticks = 150
+		Fx.burst(get_parent(), global_position + Vector3.UP * (body_center + body_half_height + 0.4), Palette.color(&"gold"), 6, 1.5, 0.1, 0.0, 0.6)
+	elif kind == &"vine" and float(atk.get("knockback", 0.0)) < 0.0:
+		# The vine yanks small monsters toward you.
+		var pull := flat_to(atk.get("from", global_position) as Vector3)
+		if pull.length() > 2.0 and max_hp <= 3:
+			global_position += pull.normalized() * minf(3.0, pull.length() - 1.5)
 	var res := on_hit(atk)
 	if plunge and not res.has("bounce"):
 		res["bounce"] = bounce_h
 	return res
 
 
+func _freeze(ticks: int) -> void:
+	frozen_ticks = ticks
+	if _ice == null:
+		var s := SphereMesh.new()
+		s.radius = maxf(body_radius, body_half_height) + 0.25
+		s.height = s.radius * 2.0
+		_ice = Kit.mesh_instance(self, s, Fx.fx_mat(Color(Palette.color(&"water_light"), 0.45)), Vector3(0.0, body_center, 0.0))
+	_ice.visible = true
+	AudioDirector.play(&"hit", -2.0, 1.8)
+
+
+## Shield-breaking magic: Thunderclap and the Mighty Roar.
+static func shakes(kind: StringName) -> bool:
+	return kind == &"thunder" or kind == &"roar"
+
+
 func damage_to_player(p: Player) -> Dictionary:
+	if frozen_ticks > 0 or stunned_ticks > 0:
+		return {}
 	if _dead or not harmful():
 		return {}
 	var rx := body_radius + 0.33

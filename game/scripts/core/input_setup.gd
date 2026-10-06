@@ -31,8 +31,16 @@ static func register() -> void:
 	_action(&"pause", [_key(KEY_ESCAPE), _joy(JOY_BUTTON_START)])
 	_action(&"cam_zoom_in", [_key(KEY_EQUAL), _key(KEY_KP_ADD), _joy(JOY_BUTTON_DPAD_UP)])
 	_action(&"cam_zoom_out", [_key(KEY_MINUS), _key(KEY_KP_SUBTRACT), _joy(JOY_BUTTON_DPAD_DOWN)])
-	# Build 5 magic: R Fireball, C Thunderclap, V Air Dash; Glide is holding Space while falling.
-	_action(&"fireball", [_key(KEY_R), _key(KEY_L), _axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
+	# Build 5 magic: R Fireball, C Thunderclap, V Air Dash (Build 7 adds G Vinelash and slots 1-9).
+	_action(&"fireball", [_key(KEY_R), _key(KEY_L)])
+	# Build 7: nine abilities. Number keys cast slots 1-9; R/G/C/V stay shortcuts. Gamepad: D-pad
+	# left/right picks an ability, RT casts it; LB/RB stay Thunderclap/Air Dash.
+	_action(&"vine", [_key(KEY_G)])
+	for k in 9:
+		_action(StringName("ability_%d" % (k + 1)), [_key((KEY_1 + k) as Key)])
+	_action(&"cast_selected", [_axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
+	_action(&"ability_prev", [_joy(JOY_BUTTON_DPAD_LEFT)])
+	_action(&"ability_next", [_joy(JOY_BUTTON_DPAD_RIGHT)])
 	_action(&"thunderclap", [_key(KEY_C), _joy(JOY_BUTTON_LEFT_SHOULDER)])
 	_action(&"dash", [_key(KEY_V), _joy(JOY_BUTTON_RIGHT_SHOULDER)])
 	_action(&"dev_feel_lab", [_key(KEY_F1)])

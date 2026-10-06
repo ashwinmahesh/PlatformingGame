@@ -75,7 +75,7 @@ func state_name() -> String:
 func on_hit(atk: Dictionary) -> Dictionary:
 	var kind := StringName(str(atk.get("kind", "")))
 	var from := atk.get("from", global_position) as Vector3
-	if kind == &"thunder" and has_shield:
+	if Critter.shakes(kind) and has_shield:
 		_lose_shield()
 		set_state(S.STUNNED)
 		take(int(atk.get("damage", 1)), from)
