@@ -47,6 +47,7 @@ static func spawn_seed(parent: Node, at: Vector3, id: StringName) -> Pickup:
 
 
 func _ready() -> void:
+	add_to_group(&"pickup")
 	collision_layer = Layers.PICKUP
 	collision_mask = Layers.PLAYER_BODY
 	var s := SphereShape3D.new()
@@ -123,8 +124,9 @@ func _physics_process(delta: float) -> void:
 		return
 	var to := p.global_position + Vector3.UP * 0.4 - global_position
 	var d := to.length()
-	if d < MAGNET and d > 0.05:
-		global_position += to / d * minf(MAGNET_SPEED * (1.0 - d / MAGNET * 0.6) * delta, d)
+	var reach := 9.0 if Progress.has_upgrade(&"magnet") else MAGNET
+	if d < reach and d > 0.05:
+		global_position += to / d * minf(MAGNET_SPEED * (1.0 - d / reach * 0.6) * delta, d)
 
 
 func _on_body_entered(body: Node3D) -> void:

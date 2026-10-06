@@ -216,9 +216,90 @@ func _ready() -> void:
 	max_hp = Progress.max_halves()
 	hp = max_hp
 	safe_position = global_position
+	apply_upgrades()
 
 
 # --- Public API -------------------------------------------------------------------------------
+
+## Build 7 shop: refresh what bought upgrades change on the hero (hearts, sword size, hats).
+var _hat: Node3D
+
+
+func apply_upgrades() -> void:
+	var before := max_hp
+	max_hp = Progress.max_halves()
+	hp = mini(hp + maxi(max_hp - before, 0), max_hp)
+	if sword != null:
+		sword.scale = Vector3(1.0, SWORD_LENGTH_SCALE * sword_scale(), 1.0)
+	if _hat != null:
+		_hat.queue_free()
+		_hat = null
+	var crown := Progress.has_upgrade(&"hat_crown")
+	if crown or Progress.has_upgrade(&"hat_party"):
+		_hat = Node3D.new()
+		_hat.position = Vector3(0.0, 1.95, 0.0)
+		body_pivot.add_child(_hat)
+		if crown:
+			var band := CylinderMesh.new()
+			band.top_radius = 0.26
+			band.bottom_radius = 0.24
+			band.height = 0.16
+			Kit.mesh_instance(_hat, band, Kit.mat(&"gold", 0.02))
+			for i in 5:
+				var a := float(i) / 5.0 * TAU
+				var spike := CylinderMesh.new()
+				spike.top_radius = 0.0
+				spike.bottom_radius = 0.07
+				spike.height = 0.18
+				Kit.mesh_instance(_hat, spike, Kit.mat(&"gold", 0.02), Vector3(cos(a) * 0.22, 0.16, sin(a) * 0.22))
+		else:
+			var cone := CylinderMesh.new()
+			cone.top_radius = 0.0
+			cone.bottom_radius = 0.2
+			cone.height = 0.45
+			Kit.mesh_instance(_hat, cone, Kit.mat(&"candy_pink", 0.02), Vector3(0.0, 0.2, 0.0))
+			var pom := SphereMesh.new()
+			pom.radius = 0.07
+			pom.height = 0.14
+			Kit.mesh_instance(_hat, pom, Kit.mat(&"gold"), Vector3(0.0, 0.45, 0.0))
+
+
+## Bonus magic from the shop, Seed Sense (key 0): a beam of light over the nearest seed you
+## haven't found in this level.
+var _sense_cooldown: int = 0
+
+
+func _seed_sense() -> void:
+	if _sense_cooldown > 0 or not Progress.has_upgrade(&"seed_sense"):
+		return
+	_sense_cooldown = 180
+	var best: Pickup = null
+	var best_d := INF
+	for n in get_tree().get_nodes_in_group(&"pickup"):
+		var pk := n as Pickup
+		if pk == null or pk.kind != Pickup.Kind.SEED:
+			continue
+		var d := pk.global_position.distance_to(global_position)
+		if d < best_d:
+			best = pk
+			best_d = d
+	AudioDirector.play(&"ability", -8.0, 1.4)
+	if best == null:
+		return
+	var beam := MeshInstance3D.new()
+	var c := CylinderMesh.new()
+	c.top_radius = 0.5
+	c.bottom_radius = 0.5
+	c.height = 60.0
+	c.cap_top = false
+	c.cap_bottom = false
+	beam.mesh = c
+	beam.material_override = Fx.fx_mat(Color(Palette.color(&"gold"), 0.35))
+	beam.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	get_parent().add_child(beam)
+	beam.global_position = best.global_position + Vector3.UP * 30.0
+	get_tree().create_timer(6.0).timeout.connect(beam.queue_free)
+
 
 ## The Vinelash's vine: a green line from the hero's hand to whatever it caught.
 func _build_vine() -> void:
@@ -272,8 +353,17 @@ func attack_phase() -> AttackDef.Phase:
 
 
 ## Hitbox transforms for the resolver (queried directly, never through animation).
+## Build 7 shop blades: Thornedge reaches 25% further, Bloomsteel 50% (never shorter).
+func sword_scale() -> float:
+	if Progress.has_upgrade(&"blade_2"):
+		return 1.5
+	if Progress.has_upgrade(&"blade_1"):
+		return 1.25
+	return 1.0
+
+
 func sword_transform() -> Transform3D:
-	var reach := attack.reach if attack != null else 0.9
+	var reach := (attack.reach if attack != null else 0.9) * sword_scale()
 	# The capsule's axis (local Y) lies along the hero's right, so the slash sweeps wide.
 	var right := facing.cross(Vector3.UP).normalized()
 	var b := Basis(facing.cross(right).normalized(), right, facing)
@@ -293,7 +383,7 @@ func current_attack_dict() -> Dictionary:
 		return {"id": attack_id, "damage": ATTACK_PLUNGE.damage, "kind": &"plunge", "from": global_position, "hitstop": ATTACK_PLUNGE.hitstop, "knockback": ATTACK_PLUNGE.knockback, "bounce": settings.plunge_bounce_height}
 	if attack == null:
 		return {}
-	return {"id": attack_id, "damage": attack.damage, "kind": attack.id, "from": global_position, "hitstop": attack.hitstop, "knockback": attack.knockback}
+	return {"id": attack_id, "damage": attack.damage + (1 if Progress.has_upgrade(&"blade_2") else 0), "kind": attack.id, "from": global_position, "hitstop": attack.hitstop, "knockback": attack.knockback}
 
 
 ## Plunge bounce off a hurtbox or bounce surface (plan §3.3 rule 8, §4.1).
@@ -503,6 +593,10 @@ func _physics_process(delta: float) -> void:
 				_cast_queue.append(selected_ability)
 	if inp.fireball_pressed and state in [State.NORMAL, State.ATTACK]:
 		_fireball_pending = true
+	if _sense_cooldown > 0:
+		_sense_cooldown -= 1
+	if inp.sense_pressed and state in [State.NORMAL, State.ATTACK]:
+		_seed_sense()
 	if inp.clap_pressed and state in [State.NORMAL, State.ATTACK]:
 		_clap_pending = true
 	if inp.dash_pressed and state in [State.NORMAL, State.ATTACK]:
@@ -973,13 +1067,15 @@ func _tick_magic(grounded: bool) -> void:
 ## Vinelash: the nearest HookBloom in range (in front of you first) pulls you to it; with none in
 ## reach, the vine lashes the nearest monster instead (damage through CombatResolver).
 func _cast_vine() -> void:
-	vine_cooldown = VINE_COOLDOWN
+	var quick := Progress.has_upgrade(&"vine_quick")
+	vine_cooldown = VINE_COOLDOWN / 2 if quick else VINE_COOLDOWN
+	var reach := HookBloom.RANGE + (6.0 if quick else 0.0)
 	var best: HookBloom = null
 	var best_score := INF
 	for n in get_tree().get_nodes_in_group(&"hook_bloom"):
 		var hb := n as HookBloom
 		var to := hb.anchor() - (global_position + Vector3.UP * 1.0)
-		if to.length() > HookBloom.RANGE or to.length() < 1.5:
+		if to.length() > reach or to.length() < 1.5:
 			continue
 		var flat := Vector3(to.x, 0.0, to.z)
 		var ahead := facing.dot(flat.normalized()) if flat.length() > 0.5 else 1.0
@@ -1233,7 +1329,7 @@ func _start_dash(grounded: bool) -> void:
 	var dir := b * Vector3(last_input.move.x, 0.0, -last_input.move.y)
 	dash_dir = dir.normalized() if dir.length() > 0.2 else facing
 	facing = dash_dir
-	dash_left = DASH_TICKS
+	dash_left = DASH_TICKS + (6 if Progress.has_upgrade(&"dash_long") else 0)
 	dash_cooldown = DASH_COOLDOWN
 	if not grounded:
 		air_dash_used = true
@@ -1680,7 +1776,7 @@ func _build_visual() -> void:
 		sword = (load(SWORD_PATH) as PackedScene).instantiate() as Node3D
 		Toon.apply(sword, 0.03)
 		sword.transform = knife.transform
-		sword.scale = Vector3(1.0, SWORD_LENGTH_SCALE, 1.0)
+		sword.scale = Vector3(1.0, SWORD_LENGTH_SCALE * sword_scale(), 1.0)
 		knife.get_parent().add_child(sword)
 		_sword_rest = sword.transform
 	var crown := hero.attach_on_top("head", "Rogue_Head")

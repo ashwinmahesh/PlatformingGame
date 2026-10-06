@@ -72,8 +72,8 @@ func test_hub_loads_with_rootway() -> void:
 			portals += 1
 	check(portals >= 1, "the Rootway portal to World 1 exists")
 	# Build 5 (Ashwin: "make the hub less sparse"): Fern, Pip and Bramble plus Bea, Kip and Marlo.
-	# Build 6: Hoot and Wren up on the Treetop Walk make eight.
-	check_eq(get_tree().get_nodes_in_group(&"interactable").size(), 8, "eight villagers to talk to")
+	# Build 6: Hoot and Wren up on the Treetop Walk make eight; Build 7 adds Clover at the shop.
+	check_eq(get_tree().get_nodes_in_group(&"interactable").size(), 9, "nine villagers to talk to")
 	check_eq(portals, Progress.WORLD_DEFS.size(), "one Rootway arch per world")
 	hub.queue_free()
 	await ticks(2)

@@ -1,0 +1,419 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="55%" stop-color="#0984E3"/>
+      <stop offset="100%" stop-color="#1B1464"/>
+    </radialGradient>
+
+    <!-- Starburst Gradient -->
+    <radialGradient id="burstGrad" cx="50%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#FFF200"/>
+      <stop offset="60%" stop-color="#FF9F1A"/>
+      <stop offset="100%" stop-color="#FF3838"/>
+    </radialGradient>
+
+    <!-- Fur Shading Gradient -->
+    <linearGradient id="furGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8B4513"/>
+      <stop offset="60%" stop-color="#6F340D"/>
+      <stop offset="100%" stop-color="#4A1E04"/>
+    </linearGradient>
+
+    <!-- Skin / Muzzle Gradient -->
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFEAA7"/>
+      <stop offset="100%" stop-color="#FDCB6E"/>
+    </linearGradient>
+
+    <!-- Wood Gradient for Bongos -->
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E17055"/>
+      <stop offset="35%" stop-color="#FAB1A0"/>
+      <stop offset="70%" stop-color="#D63031"/>
+      <stop offset="100%" stop-color="#7B1113"/>
+    </linearGradient>
+
+    <!-- Drumhead Skin Gradient -->
+    <radialGradient id="drumSkinGrad" cx="45%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="65%" stop-color="#FFF6E0"/>
+      <stop offset="100%" stop-color="#DFBA7A"/>
+    </radialGradient>
+
+    <!-- Rim Chrome Gradient -->
+    <linearGradient id="chromeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#DFE6E9"/>
+      <stop offset="40%" stop-color="#FFFFFF"/>
+      <stop offset="70%" stop-color="#B2BEC3"/>
+      <stop offset="100%" stop-color="#636E72"/>
+    </linearGradient>
+
+    <!-- Hard Retro Drop Shadow Filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="8" dy="10" stdDeviation="0" flood-color="#0F0C24" flood-opacity="0.95"/>
+    </filter>
+
+    <filter id="popShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="5" dy="6" stdDeviation="0" flood-color="#111111" flood-opacity="1"/>
+    </filter>
+  </defs>
+
+  <!-- ================= BACKGROUND ================= -->
+  <rect width="1000" height="1000" fill="url(#bgGrad)" />
+
+  <!-- 90s Memphis Shapes in Background -->
+  <g opacity="0.45">
+    <!-- Confetti Triangles -->
+    <polygon points="120,130 155,90 175,140" fill="#FF007F" stroke="#111111" stroke-width="3"/>
+    <polygon points="870,140 910,100 930,160" fill="#39FF14" stroke="#111111" stroke-width="3"/>
+    <polygon points="90,750 135,710 145,770" fill="#FFEAA7" stroke="#111111" stroke-width="3"/>
+    <polygon points="890,780 940,750 920,820" fill="#FF007F" stroke="#111111" stroke-width="3"/>
+    
+    <!-- Neon Squiggles -->
+    <path d="M 60,300 Q 95,270 130,300 T 200,300" fill="none" stroke="#FFE600" stroke-width="9" stroke-linecap="round"/>
+    <path d="M 820,380 Q 855,350 890,380 T 960,380" fill="none" stroke="#FF007F" stroke-width="9" stroke-linecap="round"/>
+    <path d="M 120,890 Q 155,860 190,890 T 260,890" fill="none" stroke="#39FF14" stroke-width="8" stroke-linecap="round"/>
+    <path d="M 760,890 Q 795,860 830,890 T 900,890" fill="none" stroke="#00F0FF" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Geometric Circles & Crosses -->
+    <circle cx="250" cy="160" r="16" fill="none" stroke="#FFFFFF" stroke-width="6"/>
+    <circle cx="920" cy="520" r="14" fill="#FFE600"/>
+    <path d="M 110,480 L 150,480 M 130,460 L 130,500" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 870,590 L 910,590 M 890,570 L 890,610" stroke="#FFE600" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Giant Comic Sunburst behind Character -->
+  <g transform="translate(500, 470)" filter="url(#shadow)">
+    <polygon points="
+      0,-440 65,-250 250,-380 160,-180 410,-220 230,-65 450,0
+      230,65 410,220 160,180 250,380 65,250 0,440
+      -65,250 -250,380 -160,180 -410,220 -230,65 -450,0
+      -230,-65 -410,-220 -160,-180 -250,-380 -65,-250"
+      fill="url(#burstGrad)" stroke="#111111" stroke-width="10" stroke-linejoin="round"/>
+  </g>
+
+  <!-- ================= MONKEY LOWER BODY (BEHIND BONGOS) ================= -->
+  <!-- Curled Prehensile Tail (Swooping to Left) -->
+  <g filter="url(#shadow)">
+    <path d="M 390,540 C 260,560 140,500 130,370 C 120,270 230,250 260,330 C 275,370 230,405 195,380 C 175,360 185,330 205,330"
+          fill="none" stroke="url(#furGrad)" stroke-width="38" stroke-linecap="round"/>
+    <path d="M 390,540 C 260,560 140,500 130,370 C 120,270 230,250 260,330 C 275,370 230,405 195,380 C 175,360 185,330 205,330"
+          fill="none" stroke="#111111" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- Monkey Torso & Hips -->
+  <g filter="url(#shadow)">
+    <!-- Base Fur Torso -->
+    <ellipse cx="500" cy="510" rx="140" ry="145" fill="url(#furGrad)" stroke="#111111" stroke-width="9"/>
+
+    <!-- 90s Funky Vest (Hot Pink with Neon Memphis Print) -->
+    <path d="M 390,440 C 430,420 570,420 610,440 C 625,505 615,590 595,620 C 530,640 470,640 405,620 C 385,590 375,505 390,440 Z"
+          fill="#FF007F" stroke="#111111" stroke-width="9"/>
+    
+    <!-- Cutout showing monkey chest and tummy -->
+    <path d="M 455,428 C 470,515 530,515 545,428 Z" fill="url(#furGrad)" stroke="#111111" stroke-width="7"/>
+    <ellipse cx="500" cy="505" rx="38" ry="46" fill="url(#skinGrad)" stroke="#111111" stroke-width="6"/>
+
+    <!-- Vest 90s Shapes -->
+    <polygon points="415,480 435,460 445,495 425,510" fill="#39FF14" stroke="#111111" stroke-width="3"/>
+    <polygon points="565,490 585,470 595,505 575,520" fill="#FFE600" stroke="#111111" stroke-width="3"/>
+    <path d="M 405,560 L 425,540 L 445,560 L 465,540 L 475,555" fill="none" stroke="#00F0FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M 525,560 L 545,540 L 565,560 L 585,540" fill="none" stroke="#39FF14" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Left Leg & Cartoon Foot -->
+  <g filter="url(#shadow)">
+    <path d="M 380,560 C 320,600 270,660 280,720 C 300,740 350,730 365,680 C 380,640 395,590 380,560 Z"
+          fill="url(#furGrad)" stroke="#111111" stroke-width="8" stroke-linejoin="round"/>
+    <ellipse cx="275" cy="728" rx="17" ry="12" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="297" cy="734" rx="14" ry="11" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="318" cy="736" rx="13" ry="10" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+  </g>
+
+  <!-- Right Leg & Cartoon Foot -->
+  <g filter="url(#shadow)">
+    <path d="M 620,560 C 680,600 730,660 720,720 C 700,740 650,730 635,680 C 620,640 605,590 620,560 Z"
+          fill="url(#furGrad)" stroke="#111111" stroke-width="8" stroke-linejoin="round"/>
+    <ellipse cx="725" cy="728" rx="17" ry="12" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="703" cy="734" rx="14" ry="11" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="682" cy="736" rx="13" ry="10" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+  </g>
+
+  <!-- ================= MONKEY HEAD & FACE ================= -->
+  <g id="headGroup" filter="url(#shadow)">
+    <!-- Left Ear -->
+    <g>
+      <circle cx="330" cy="275" r="75" fill="url(#furGrad)" stroke="#111111" stroke-width="9"/>
+      <circle cx="335" cy="275" r="50" fill="url(#skinGrad)" stroke="#111111" stroke-width="7"/>
+      <path d="M 345,255 C 320,260 320,295 345,300" fill="none" stroke="#D4773B" stroke-width="6" stroke-linecap="round"/>
+      <!-- Gold 90s Hooped Earring in left ear -->
+      <circle cx="270" cy="315" r="22" fill="none" stroke="#FFE600" stroke-width="8" filter="url(#popShadow)"/>
+      <circle cx="270" cy="315" r="22" fill="none" stroke="#111111" stroke-width="2"/>
+    </g>
+
+    <!-- Right Ear -->
+    <g>
+      <circle cx="670" cy="275" r="75" fill="url(#furGrad)" stroke="#111111" stroke-width="9"/>
+      <circle cx="665" cy="275" r="50" fill="url(#skinGrad)" stroke="#111111" stroke-width="7"/>
+      <path d="M 655,255 C 680,260 680,295 655,300" fill="none" stroke="#D4773B" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- Head Base Shape -->
+    <ellipse cx="500" cy="275" rx="165" ry="145" fill="url(#furGrad)" stroke="#111111" stroke-width="9"/>
+    
+    <!-- Cheek fluff tufts -->
+    <path d="M 345,330 L 315,355 L 348,365 L 320,395 L 368,385" fill="url(#furGrad)" stroke="#111111" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M 655,330 L 685,355 L 652,365 L 680,395 L 632,385" fill="url(#furGrad)" stroke="#111111" stroke-width="7" stroke-linejoin="round"/>
+
+    <!-- Face / Mask Area (Peach) -->
+    <!-- Heart-shaped upper eye mask -->
+    <path d="M 500,260 C 475,190 375,190 375,260 C 375,310 440,330 500,350 C 560,330 625,310 625,260 C 625,190 525,190 500,260 Z"
+          fill="url(#skinGrad)" stroke="#111111" stroke-width="8" stroke-linejoin="round"/>
+
+    <!-- Giant Muzzle / Snout -->
+    <ellipse cx="500" cy="375" rx="125" ry="85" fill="url(#skinGrad)" stroke="#111111" stroke-width="8"/>
+    <!-- Nostrils -->
+    <ellipse cx="480" cy="330" rx="9" ry="13" transform="rotate(-15,480,330)" fill="#683416"/>
+    <ellipse cx="520" cy="330" rx="9" ry="13" transform="rotate(15,520,330)" fill="#683416"/>
+
+    <!-- Wacky Big Open Mouth Grin -->
+    <g>
+      <!-- Mouth cavity -->
+      <path d="M 410,360 C 440,355 560,355 590,360 C 595,435 545,455 500,455 C 455,455 405,435 410,360 Z"
+            fill="#800E2C" stroke="#111111" stroke-width="8" stroke-linejoin="round"/>
+      <!-- Big Goofy Cartoon Buck Teeth -->
+      <path d="M 470,358 L 470,380 C 470,384 476,386 484,386 L 497,386 L 497,358 Z" fill="#FFFFFF" stroke="#111111" stroke-width="5"/>
+      <path d="M 503,358 L 503,386 L 516,386 C 524,386 530,384 530,380 L 530,358 Z" fill="#FFFFFF" stroke="#111111" stroke-width="5"/>
+      <!-- Joyful Puffed Tongue -->
+      <path d="M 440,425 C 465,395 535,395 560,425 C 540,450 460,450 440,425 Z" fill="#FF5E86" stroke="#111111" stroke-width="5"/>
+      <path d="M 500,402 L 500,425" stroke="#D13B63" stroke-width="4" stroke-linecap="round"/>
+      <!-- Cheek smile crinkle lines -->
+      <path d="M 398,345 C 392,360 396,375 406,382" fill="none" stroke="#111111" stroke-width="6" stroke-linecap="round"/>
+      <path d="M 602,345 C 608,360 604,375 594,382" fill="none" stroke="#111111" stroke-width="6" stroke-linecap="round"/>
+    </g>
+
+    <!-- Eyes (Big, Expressive Cartoon Eyes) -->
+    <!-- Left Eye -->
+    <g>
+      <ellipse cx="445" cy="250" rx="36" ry="46" transform="rotate(-6,445,250)" fill="#FFFFFF" stroke="#111111" stroke-width="8"/>
+      <ellipse cx="452" cy="265" rx="20" ry="24" fill="#111111"/>
+      <circle cx="445" cy="258" r="8" fill="#FFFFFF"/>
+      <circle cx="458" cy="274" r="4" fill="#FFFFFF"/>
+      <circle cx="463" cy="258" r="3" fill="#39FF14"/>
+    </g>
+    <!-- Right Eye -->
+    <g>
+      <ellipse cx="555" cy="250" rx="36" ry="46" transform="rotate(6,555,250)" fill="#FFFFFF" stroke="#111111" stroke-width="8"/>
+      <ellipse cx="548" cy="265" rx="20" ry="24" fill="#111111"/>
+      <circle cx="541" cy="258" r="8" fill="#FFFFFF"/>
+      <circle cx="554" cy="274" r="4" fill="#FFFFFF"/>
+      <circle cx="559" cy="258" r="3" fill="#39FF14"/>
+    </g>
+
+    <!-- Exaggerated Arched Cartoon Eyebrows -->
+    <path d="M 395,195 Q 440,160 480,200" fill="none" stroke="#111111" stroke-width="12" stroke-linecap="round"/>
+    <path d="M 605,195 Q 560,160 520,200" fill="none" stroke="#111111" stroke-width="12" stroke-linecap="round"/>
+
+    <!-- ================= 90s BACKWARDS SNAPBACK CAP ================= -->
+    <!-- Crown of Cap tilted backward -->
+    <path d="M 370,205 C 380,110 620,110 630,205 C 570,175 430,175 370,205 Z"
+          fill="#00E5FF" stroke="#111111" stroke-width="9" stroke-linejoin="round"/>
+    <!-- Cap front seam and top squatchee (button) -->
+    <path d="M 500,118 L 500,185" stroke="#111111" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="500" cy="116" r="13" fill="#FFE600" stroke="#111111" stroke-width="6"/>
+    <!-- Backwards/Sideways Bill (visor) popping to the right -->
+    <path d="M 590,175 Q 710,160 760,205 Q 670,230 575,200 Z"
+          fill="#FF007F" stroke="#111111" stroke-width="9" stroke-linejoin="round"/>
+    <!-- Plastic snapback strap detail at forehead -->
+    <path d="M 465,188 Q 500,195 535,188" fill="none" stroke="#111111" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="485" cy="191" r="3" fill="#FFFFFF"/>
+    <circle cx="500" cy="192" r="3" fill="#FFFFFF"/>
+    <circle cx="515" cy="191" r="3" fill="#FFFFFF"/>
+  </g>
+
+  <!-- ================= SPEED & MOTION TRAILS ================= -->
+  <!-- Left hand slam wind lines -->
+  <g opacity="0.85">
+    <path d="M 270,470 C 275,530 290,600 320,630" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-dasharray="14,14"/>
+    <path d="M 235,490 C 245,550 265,615 295,645" fill="none" stroke="#00F0FF" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Right hand high-speed wind lines -->
+  <g opacity="0.85">
+    <path d="M 720,290 C 765,240 820,270 805,330" fill="none" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round" stroke-dasharray="16,12"/>
+    <path d="M 740,265 C 795,220 845,250 830,310" fill="none" stroke="#FFE600" stroke-width="6" stroke-linecap="round"/>
+    <path d="M 760,240 C 825,200 870,230 855,290" fill="none" stroke="#FF007F" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- ================= BONGOS (FOREGROUND CENTER) ================= -->
+  <g id="bongosGroup" filter="url(#shadow)">
+    <!-- Wooden Center Connector Block -->
+    <rect x="470" y="650" width="60" height="70" rx="10" fill="#6A2E05" stroke="#111111" stroke-width="8"/>
+    <!-- Metal bolts on connector -->
+    <circle cx="500" cy="670" r="8" fill="#D0D5DD" stroke="#111111" stroke-width="4"/>
+    <circle cx="500" cy="700" r="8" fill="#D0D5DD" stroke="#111111" stroke-width="4"/>
+
+    <!-- LEFT BONGO (Macho - Smaller, High Pitch) -->
+    <g transform="rotate(-8, 380, 700)">
+      <!-- Drum Body / Shell -->
+      <path d="M 290,640 L 320,820 C 340,835 420,835 440,820 L 470,640 Z"
+            fill="url(#woodGrad)" stroke="#111111" stroke-width="9" stroke-linejoin="round"/>
+
+      <!-- 90s Geometric Tropical Bands on Drum Body -->
+      <!-- Band 1: Cyan with Pink zigzags -->
+      <path d="M 300,690 C 350,705 410,705 460,690 L 455,725 C 410,740 350,740 305,725 Z" fill="#00E5FF" stroke="#111111" stroke-width="6"/>
+      <path d="M 310,708 L 330,695 L 350,715 L 370,695 L 390,715 L 410,695 L 430,715 L 450,700" fill="none" stroke="#FF007F" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- Band 2: Yellow -->
+      <path d="M 315,760 C 355,772 405,772 445,760 L 440,785 C 405,795 355,795 320,785 Z" fill="#FFE600" stroke="#111111" stroke-width="6"/>
+
+      <!-- Chrome Tuning Lugs / Rods on Sides -->
+      <rect x="290" y="645" width="10" height="60" rx="4" fill="url(#chromeGrad)" stroke="#111111" stroke-width="4"/>
+      <circle cx="295" cy="705" r="7" fill="#98A2B3" stroke="#111111" stroke-width="3"/>
+      <rect x="460" y="645" width="10" height="60" rx="4" fill="url(#chromeGrad)" stroke="#111111" stroke-width="4"/>
+      <circle cx="465" cy="705" r="7" fill="#98A2B3" stroke="#111111" stroke-width="3"/>
+
+      <!-- Drum Rim Outer Edge -->
+      <ellipse cx="380" cy="640" rx="92" ry="34" fill="url(#chromeGrad)" stroke="#111111" stroke-width="9"/>
+      <!-- Drum Head / Skin (Taut) -->
+      <ellipse cx="380" cy="638" rx="82" ry="27" fill="url(#drumSkinGrad)" stroke="#111111" stroke-width="6"/>
+
+      <!-- Sound impact vibration wave rings on left drum -->
+      <ellipse cx="370" cy="638" rx="55" ry="17" fill="none" stroke="#FF9E00" stroke-width="4" stroke-dasharray="8,6" opacity="0.8"/>
+      <ellipse cx="370" cy="638" rx="30" ry="9" fill="none" stroke="#FF007F" stroke-width="4" opacity="0.9"/>
+    </g>
+
+    <!-- RIGHT BONGO (Hembra - Larger, Low Pitch) -->
+    <g transform="rotate(7, 620, 700)">
+      <!-- Drum Body / Shell -->
+      <path d="M 515,630 L 545,835 C 570,852 670,852 695,835 L 725,630 Z"
+            fill="url(#woodGrad)" stroke="#111111" stroke-width="9" stroke-linejoin="round"/>
+
+      <!-- 90s Bands on Right Drum -->
+      <path d="M 524,685 C 580,702 660,702 716,685 L 710,725 C 660,742 580,742 530,725 Z" fill="#39FF14" stroke="#111111" stroke-width="6"/>
+      <circle cx="555" cy="705" r="7" fill="#FF007F"/>
+      <circle cx="585" cy="707" r="7" fill="#FFE600"/>
+      <circle cx="615" cy="708" r="7" fill="#00E5FF"/>
+      <circle cx="645" cy="708" r="7" fill="#FF007F"/>
+      <circle cx="675" cy="707" r="7" fill="#FFE600"/>
+
+      <path d="M 538,765 C 585,780 655,780 702,765 L 696,792 C 655,805 585,805 544,792 Z" fill="#FF007F" stroke="#111111" stroke-width="6"/>
+
+      <!-- Chrome Tuning Lugs -->
+      <rect x="515" y="638" width="11" height="65" rx="4" fill="url(#chromeGrad)" stroke="#111111" stroke-width="4"/>
+      <circle cx="520" cy="703" r="7" fill="#98A2B3" stroke="#111111" stroke-width="3"/>
+      <rect x="715" y="638" width="11" height="65" rx="4" fill="url(#chromeGrad)" stroke="#111111" stroke-width="4"/>
+      <circle cx="720" cy="703" r="7" fill="#98A2B3" stroke="#111111" stroke-width="3"/>
+
+      <!-- Drum Rim Outer Edge -->
+      <ellipse cx="620" cy="630" rx="108" ry="38" fill="url(#chromeGrad)" stroke="#111111" stroke-width="9"/>
+      <!-- Drum Head / Skin -->
+      <ellipse cx="620" cy="628" rx="96" ry="31" fill="url(#drumSkinGrad)" stroke="#111111" stroke-width="6"/>
+      <ellipse cx="620" cy="628" rx="65" ry="20" fill="none" stroke="#D4A359" stroke-width="3" stroke-dasharray="10,8" opacity="0.6"/>
+    </g>
+  </g>
+
+  <!-- ================= MONKEY ARMS & HANDS (IN FRONT/ACTION) ================= -->
+  <!-- LEFT HAND: SLAMMING DOWN ON THE LEFT BONGO -->
+  <g id="leftArmSlam" filter="url(#shadow)">
+    <!-- Arm swooping down in dynamic curve -->
+    <path d="M 390,470 C 330,490 280,550 320,625"
+          fill="none" stroke="url(#furGrad)" stroke-width="64" stroke-linecap="round"/>
+    <path d="M 390,470 C 330,490 280,550 320,625"
+          fill="none" stroke="#111111" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- 90s Neon Yellow Sweatband -->
+    <ellipse cx="325" cy="615" rx="35" ry="18" transform="rotate(25, 325, 615)" fill="#FFE600" stroke="#111111" stroke-width="7"/>
+    <line x1="305" y1="610" x2="345" y2="625" stroke="#FF007F" stroke-width="5"/>
+
+    <!-- Slapping Hand flattened on drumhead -->
+    <!-- Big Comic Impact Star at contact point -->
+    <polygon points="340,590 355,560 375,585 405,570 395,600 425,615 395,630 410,660 380,640 365,670 350,640 320,655 335,625 305,610 335,600"
+             fill="#FFF000" stroke="#111111" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="345,595 358,572 372,590 398,580 390,602 412,614 390,626 400,648 376,634 364,656 354,634 330,645 342,622 318,610 342,602"
+             fill="#FFFFFF"/>
+
+    <!-- Hand & Splayed Fingers -->
+    <path d="M 320,615 C 330,595 390,600 395,625 C 400,640 385,660 355,660 C 330,660 315,640 320,615 Z"
+          fill="url(#skinGrad)" stroke="#111111" stroke-width="7"/>
+    <ellipse cx="360" cy="615" rx="14" ry="9" transform="rotate(-15, 360, 615)" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="382" cy="622" rx="14" ry="9" transform="rotate(5, 382, 622)" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="392" cy="638" rx="13" ry="8" transform="rotate(25, 392, 638)" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+    <ellipse cx="370" cy="650" rx="12" ry="8" transform="rotate(45, 370, 650)" fill="url(#skinGrad)" stroke="#111111" stroke-width="5"/>
+  </g>
+
+  <!-- RIGHT HAND: RAISED HIGH READY TO STRIKE (Dynamic Silhouette) -->
+  <g id="rightArmRaised" filter="url(#shadow)">
+    <!-- Arm raised high and flexing with the beat -->
+    <path d="M 600,470 C 670,470 760,420 740,300"
+          fill="none" stroke="url(#furGrad)" stroke-width="64" stroke-linecap="round"/>
+    <path d="M 600,470 C 670,470 760,420 740,300"
+          fill="none" stroke="#111111" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Neon Cyan Sweatband on Right Wrist -->
+    <ellipse cx="740" cy="295" rx="36" ry="18" transform="rotate(-20, 740, 295)" fill="#00E5FF" stroke="#111111" stroke-width="7"/>
+    <line x1="715" y1="298" x2="765" y2="288" stroke="#FFE600" stroke-width="5"/>
+
+    <!-- Raised Paw / Hand Cocked & Ready to Jam -->
+    <g transform="translate(730, 220)">
+      <!-- Main Palm -->
+      <ellipse cx="30" cy="45" rx="38" ry="32" transform="rotate(-15, 30, 45)" fill="url(#skinGrad)" stroke="#111111" stroke-width="7"/>
+      <!-- Expressive Drumming Fingers reaching high -->
+      <path d="M 8,30 C 5,10 18,-5 32,8 L 30,30 Z" fill="url(#skinGrad)" stroke="#111111" stroke-width="6"/>
+      <path d="M 28,25 C 28,0 45,-12 55,5 L 48,25 Z" fill="url(#skinGrad)" stroke="#111111" stroke-width="6"/>
+      <path d="M 48,25 C 52,5 70,-2 75,18 L 60,35 Z" fill="url(#skinGrad)" stroke="#111111" stroke-width="6"/>
+      <!-- Thumb curled outward -->
+      <ellipse cx="0" cy="55" rx="15" ry="20" transform="rotate(-35, 0, 55)" fill="url(#skinGrad)" stroke="#111111" stroke-width="6"/>
+      <!-- Palm crease -->
+      <path d="M 20,40 C 35,50 45,45 50,35" fill="none" stroke="#D4773B" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- ================= 90s RETRO MUSICAL ACCENTS & GRAPHICS ================= -->
+  <!-- Floating 3D Musical Notes -->
+  <!-- Note 1: Magenta Eighth Note (Left) -->
+  <g transform="translate(180, 230) rotate(-18)" filter="url(#popShadow)">
+    <ellipse cx="30" cy="60" rx="20" ry="15" fill="#FF007F" stroke="#111111" stroke-width="7"/>
+    <ellipse cx="26" cy="57" rx="9" ry="6" fill="#FFA5D2"/>
+    <rect x="42" y="10" width="10" height="50" fill="#FF007F" stroke="#111111" stroke-width="6"/>
+    <path d="M 48,12 C 75,10 85,35 75,50 C 70,35 60,25 48,25 Z" fill="#FF007F" stroke="#111111" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Note 2: Electric Yellow Beamed Notes (Right) -->
+  <g transform="translate(770, 500) rotate(15)" filter="url(#popShadow)">
+    <ellipse cx="20" cy="70" rx="19" ry="14" fill="#FFE600" stroke="#111111" stroke-width="7"/>
+    <ellipse cx="16" cy="67" rx="8" ry="5" fill="#FFFBE6"/>
+    <ellipse cx="85" cy="55" rx="19" ry="14" fill="#FFE600" stroke="#111111" stroke-width="7"/>
+    <ellipse cx="81" cy="52" rx="8" ry="5" fill="#FFFBE6"/>
+    <rect x="32" y="15" width="9" height="55" fill="#FFE600" stroke="#111111" stroke-width="6"/>
+    <rect x="97" y="0" width="9" height="55" fill="#FFE600" stroke="#111111" stroke-width="6"/>
+    <polygon points="32,15 106,0 106,18 32,33" fill="#FFE600" stroke="#111111" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Note 3: Lime Green Quarter Note (Top Right) -->
+  <g transform="translate(850, 110) rotate(22)" filter="url(#popShadow)">
+    <ellipse cx="25" cy="50" rx="18" ry="13" fill="#39FF14" stroke="#111111" stroke-width="6"/>
+    <ellipse cx="22" cy="48" rx="8" ry="5" fill="#D4FFC2"/>
+    <rect x="37" y="8" width="8" height="42" fill="#39FF14" stroke="#111111" stroke-width="6"/>
+  </g>
+
+  <!-- Comic Action Sound Bubble: "BAM!" -->
+  <g transform="translate(180, 670) rotate(-12)" filter="url(#popShadow)">
+    <polygon points="10,25 35,5 65,15 95,-5 110,20 145,15 130,45 155,70 125,80 135,110 100,95 80,120 60,95 25,105 35,75 5,60 25,40"
+             fill="#FFE600" stroke="#111111" stroke-width="7" stroke-linejoin="round"/>
+    <text x="32" y="70" font-family="'Impact', 'Arial Black', sans-serif" font-size="44" font-weight="900" fill="#FF007F" stroke="#111111" stroke-width="3" font-style="italic">BAM!</text>
+  </g>
+
+  <!-- Comic Action Sound Bubble: "BOP!" -->
+  <g transform="translate(760, 680) rotate(14)" filter="url(#popShadow)">
+    <polygon points="10,20 40,0 70,12 105,-8 115,22 150,18 135,50 160,75 130,85 140,115 105,100 85,125 65,100 30,110 38,78 8,62 28,42"
+             fill="#00E5FF" stroke="#111111" stroke-width="7" stroke-linejoin="round"/>
+    <text x="32" y="72" font-family="'Impact', 'Arial Black', sans-serif" font-size="44" font-weight="900" fill="#FFF000" stroke="#111111" stroke-width="3" font-style="italic">BOP!</text>
+  </g>
+
+  <!-- Sonic Vibration shockwaves from the beats -->
+  <path d="M 460,600 Q 500,570 540,600" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 440,580 Q 500,540 560,580" fill="none" stroke="#FFE600" stroke-width="6" stroke-linecap="round"/>
+</svg>

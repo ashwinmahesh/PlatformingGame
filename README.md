@@ -37,16 +37,27 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 
 ### Moves and magic
 
-You have a triple jump, a downward Plunge (bounce off enemies and Springcaps), a sword combo that swings toward where the camera faces, wall slides and **wall jumps** (kick off a wall and keep whatever air jumps you had left; the same wall won't kick you twice in a row), climbable **ladders**, gliding and swimming. Pickups have a generous reach and drift to you when you're close.
+You have a triple jump, a downward Plunge (bounce off enemies and Springcaps), a sword combo that swings toward where the camera faces, wall slides and **wall jumps** (kick off a wall and keep whatever air jumps you had left; the same wall won't kick you twice in a row), climbable **ladders** and swimming. Pickups have a generous reach and drift to you when you're close.
 
-Clearing a world for the first time teaches a magic ability:
+Every world teaches a magic ability once its three Star Shards are in and the world is finished:
 
-| Ability | Learned from | Does |
-|---|---|---|
-| Fireball | Glimmerbrook | A ranged shot. It lights lanterns, burns brambles and melts ice. |
-| Glide | Cloudtop | Hold jump while falling to float under a blossom and ride the wind. |
-| Thunderclap | Sunscorch | Hits every enemy around you, even shielded ones. |
-| Air Dash | Bubbleton | A quick dash, once per jump. |
+| Key | Ability | Learned from | Does |
+|---|---|---|---|
+| 1 / R | Fireball | Glimmerbrook | A ranged shot: lights torches, burns brambles, melts ice. |
+| 2 / G | Vinelash | Cloudtop | Zip up to a glowing hook flower; with none near, lash a monster. |
+| 3 / C | Thunderclap | Sunscorch | Hits every monster around you, even shielded ones. |
+| 4 / V | Air Dash | Bubbleton | A quick dash, once per jump. |
+| 5 | Frost Burst | Frostfang | Freezes monsters solid and water into floes you can stand on. |
+| 6 | Spring Boots | Lanternwick | A huge spring onto rooftops (once more in the air). |
+| 7 | Gravity Orb | World 7 | Drags monsters into a vortex, then pops. |
+| 8 | Star Rush | World 8 | An untouchable sprint that bowls monsters over. |
+| 9 | Mighty Roar | World 9 | Stuns every monster far around and knocks shields away. |
+
+On a gamepad, pick an ability with D-pad left/right and cast it with RT (LB and RB stay Thunderclap and Air Dash).
+
+### The Glimmer Seed shop
+
+Clover runs Bramble & Bloom in Mossbrook. Spend the Glimmer Seeds you've found on sharper blades, extra hearts, a bigger Fireball, a longer Air Dash, a quicker Vinelash, a seed magnet, hats, and one bonus magic: **Seed Sense** (key 0 / L3), which points a beam at the nearest seed you haven't found.
 
 ![Casting a Fireball](docs/screenshots/fireball.jpg)
 
@@ -68,12 +79,13 @@ There are six basic monsters, and each one flashes before it attacks. Every abil
 | Action | Keyboard | Gamepad |
 |---|---|---|
 | Move / camera | WASD / arrow keys (swap them in Pause or under Controls on the title) | Left / right stick |
-| Jump (hold to glide) | Space | A |
+| Jump | Space | A |
 | Attack | F or J | X |
 | Plunge | Shift or K | B |
 | Talk / interact | E | Y |
 | Lock on / switch target | Q / Tab | LT / R3 |
-| Fireball, Thunderclap, Air Dash | R, C, V | RT, LB, RB |
+| Magic (slots 1-9) | 1-9 (R, G, C, V shortcuts) | D-pad left/right to pick, RT to cast; LB, RB |
+| Seed Sense (shop) | 0 | L3 |
 | Camera zoom | + / − | D-pad up / down |
 | Pause | Esc | Start |
 

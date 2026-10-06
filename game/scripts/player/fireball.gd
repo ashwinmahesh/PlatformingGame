@@ -19,6 +19,10 @@ var _core: Node3D
 func _ready() -> void:
 	add_to_group(&"player_projectile")
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
+	# Build 7 shop: the Blaze Charm makes Fireballs bigger and stronger.
+	if Progress.has_upgrade(&"fireball_big"):
+		radius *= 1.6
+		scale = Vector3.ONE * 1.5
 	shape = SphereShape3D.new()
 	shape.radius = radius
 	_core = Node3D.new()
@@ -65,7 +69,7 @@ func _ready() -> void:
 
 
 func attack_dict() -> Dictionary:
-	return {"id": attack_id, "damage": 1, "kind": &"fireball", "from": global_position - dir * 1.5, "hitstop": 3, "knockback": 1.2}
+	return {"id": attack_id, "damage": 2 if Progress.has_upgrade(&"fireball_big") else 1, "kind": &"fireball", "from": global_position - dir * 1.5, "hitstop": 3, "knockback": 1.2}
 
 
 func _physics_process(delta: float) -> void:

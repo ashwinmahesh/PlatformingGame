@@ -116,7 +116,13 @@ func _huts() -> void:
 	Props.spawn(self, &"home_a_blue", Vector3(-17.0, 0.0, -6.0), 0.9)
 	Props.spawn(self, &"home_a_green", Vector3(15.0, 0.0, -8.0), -0.8)
 	var shop := Props.spawn(self, &"market", Vector3(-18.0, 0.0, 15.0), 2.2)
-	Kit.label(shop, Vector3(0.0, 5.5, 0.0), "Shop\nOpening soon!", 40)
+	Kit.label(shop, Vector3(0.0, 5.5, 0.0), "Bramble & Bloom\nTrade Glimmer Seeds!", 40)
+	# Build 7: the Glimmer Seed shop's keeper.
+	var keeper := Shopkeeper.new()
+	keeper.npc_id = "clover"
+	keeper.display_name = "Clover (shop)"
+	keeper.position = Vector3(-14.5, 0.0, 18.5)
+	add_child(keeper)
 	Props.spawn(self, &"home_b_red", Vector3(17.0, 0.0, 15.0), -2.2)
 	Props.spawn(self, &"windmill", Vector3(-28.0, 0.0, -18.0), 0.6)
 	Props.spawn(self, &"well", Vector3(7.0, 0.0, 6.0), 0.3)

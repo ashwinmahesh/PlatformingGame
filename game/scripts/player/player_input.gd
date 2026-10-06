@@ -23,3 +23,5 @@ var vine_pressed: bool = false
 var cast_slot: int = -1
 var cast_selected_pressed: bool = false
 var select_step: int = 0
+## Shop bonus magic: Seed Sense (key 0).
+var sense_pressed: bool = false

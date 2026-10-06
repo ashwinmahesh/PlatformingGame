@@ -57,8 +57,9 @@ func _player_attacks() -> void:
 	if player.hitstop_ticks > 0:
 		return
 	if player.is_sword_active():
-		player.sword_shape.radius = player.attack.radius
-		player.sword_shape.height = player.attack.width + player.attack.radius * 2.0
+		var k := player.sword_scale()
+		player.sword_shape.radius = player.attack.radius * k
+		player.sword_shape.height = (player.attack.width + player.attack.radius * 2.0) * k
 		var atk := player.current_attack_dict()
 		for area in _query(player.sword_shape, player.sword_transform(), Layers.ENEMY_HURTBOX | Layers.REFLECTABLE):
 			var actor := actor_of(area)

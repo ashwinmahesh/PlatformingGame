@@ -45,6 +45,7 @@ func sample() -> PlayerInput:
 		if StringName("ability_%d" % (k + 1)) in _pressed:
 			i.cast_slot = k
 	i.cast_selected_pressed = &"cast_selected" in _pressed
+	i.sense_pressed = &"seed_sense" in _pressed
 	i.select_step = (1 if &"ability_next" in _pressed else 0) - (1 if &"ability_prev" in _pressed else 0)
 	_pressed.clear()
 	_released.clear()

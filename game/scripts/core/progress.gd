@@ -92,6 +92,7 @@ func fresh_data() -> Dictionary:
 		"flags": [],
 		"best_times": {},
 		"world_progress": {},
+		"purchases": [],
 		"resume": {"scene_id": String(HUB_SCENE), "spawn_id": "hub_arrival"},
 	}
 
@@ -130,7 +131,43 @@ func max_halves() -> int:
 		var w := world_def(StringName(str(w_id)))
 		if w != null:
 			halves += 2 * w.first_clear_heart_containers
+	for h: StringName in [&"heart_1", &"heart_2", &"heart_3"]:
+		if has_upgrade(h):
+			halves += 2
 	return halves
+
+
+# --- Build 7 Glimmer Seed shop ---------------------------------------------------------------------
+
+func has_upgrade(id: StringName) -> bool:
+	return String(id) in (data.get("purchases", []) as Array)
+
+
+## Seeds you can still spend: every seed found, less what the shop has had.
+func seeds_to_spend() -> int:
+	var spent := 0
+	for id: Variant in data.get("purchases", []):
+		spent += ShopItems.price(StringName(str(id)))
+	return seed_count() - spent
+
+
+func can_buy(id: StringName) -> bool:
+	if not ShopItems.ITEMS.has(id) or has_upgrade(id):
+		return false
+	var need := ShopItems.needs(id)
+	if need != &"" and not has_upgrade(need):
+		return false
+	return seeds_to_spend() >= ShopItems.price(id)
+
+
+func buy(id: StringName) -> bool:
+	if not can_buy(id):
+		return false
+	if not data.has("purchases"):
+		data["purchases"] = []
+	(data["purchases"] as Array).append(String(id))
+	save()
+	return true
 
 
 func has_seed(seed_id: StringName) -> bool:
@@ -374,6 +411,10 @@ func sanitize(d: Dictionary) -> Dictionary:
 		out["world_progress"] = wp
 	if d.get("resume") is Dictionary:
 		out["resume"] = d["resume"]
+	var known_items: Array[String] = []
+	for k: StringName in ShopItems.ITEMS:
+		known_items.append(String(k))
+	out["purchases"] = _filter_known(d.get("purchases", []), known_items, "purchase")
 	return out
 
 

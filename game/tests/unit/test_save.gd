@@ -93,3 +93,23 @@ func test_missing_spawn_falls_back_to_entrance() -> void:
 	Progress.new_game()
 	Progress.data["resume"] = {"scene_id": "world_01", "spawn_id": "w1_removed_checkpoint"}
 	check_eq(Progress.resume_target(), [&"world_01", &"w1_entrance"] as Array[StringName], "falls back to the entrance")
+
+
+## Build 7 Glimmer Seed shop: prices come out of the seeds you've found, upgrades need their
+## earlier tier, and a bought heart adds to max hearts.
+func test_shop_spends_seeds_and_respects_tiers() -> void:
+	Progress.new_game()
+	var seeds := Progress.all_seed_ids()
+	for i in 30:
+		Progress.collect_seed(seeds[i])
+	check_eq(Progress.seeds_to_spend(), 30, "30 seeds to spend")
+	check(not Progress.can_buy(&"blade_2"), "the second blade needs the first")
+	check(Progress.buy(&"blade_1"), "buy the Thornedge Blade")
+	check_eq(Progress.seeds_to_spend(), 15, "15 seeds spent")
+	var halves := Progress.max_halves()
+	check(not Progress.buy(&"heart_2"), "can't skip a heart tier")
+	check(Progress.buy(&"heart_1"), "buy a heart")
+	check_eq(Progress.max_halves(), halves + 2, "one more heart")
+	check(not Progress.buy(&"hat_crown"), "not enough seeds left for the crown")
+	check(Progress.load_save(), "purchases survive a save and load")
+	check(Progress.has_upgrade(&"blade_1") and Progress.has_upgrade(&"heart_1"), "both still owned")

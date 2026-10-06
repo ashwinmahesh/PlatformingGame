@@ -39,6 +39,7 @@ static func register() -> void:
 	for k in 9:
 		_action(StringName("ability_%d" % (k + 1)), [_key((KEY_1 + k) as Key)])
 	_action(&"cast_selected", [_axis(JOY_AXIS_TRIGGER_RIGHT, 1.0)])
+	_action(&"seed_sense", [_key(KEY_0), _joy(JOY_BUTTON_LEFT_STICK)])
 	_action(&"ability_prev", [_joy(JOY_BUTTON_DPAD_LEFT)])
 	_action(&"ability_next", [_joy(JOY_BUTTON_DPAD_RIGHT)])
 	_action(&"thunderclap", [_key(KEY_C), _joy(JOY_BUTTON_LEFT_SHOULDER)])
