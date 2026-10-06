@@ -1,0 +1,24 @@
+{
+  "id": "skipper",
+  "name": "skipper",
+  "conversations": [
+    {
+      "when": "w2_found_compass",
+      "lines": [
+        {
+          "speaker": "Skipper",
+          "text": "North is north again! Here, you've earned a Star Shard."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Skipper",
+          "text": "My compass went bouncing off the Bounce Gardens, right up to the top cloud. Without it I'll sail into a rainbow again."
+        }
+      ]
+    }
+  ]
+}

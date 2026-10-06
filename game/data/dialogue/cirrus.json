@@ -1,0 +1,19 @@
+{
+  "id": "cirrus",
+  "name": "cirrus",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Old Cirrus",
+          "text": "A riddle for you, little sprout: where the first sail turns, at the island's southern lip, the ground hums with something bright."
+        },
+        {
+          "speaker": "Old Cirrus",
+          "text": "Dig there and see. (Talk to the glitter.)"
+        }
+      ]
+    }
+  ]
+}

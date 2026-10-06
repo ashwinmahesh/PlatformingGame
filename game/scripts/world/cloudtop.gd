@@ -49,6 +49,7 @@ func build() -> void:
 	_build6()
 	_kingdom()
 	_vine_routes()
+	_more_stars()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life()
@@ -374,8 +375,15 @@ func _ring_secret(q: int, pts: Array[Vector4]) -> void:
 
 func _build6() -> void:
 	region(Vector3.ZERO)
-	# Plaza bells open the Sky Vault, a big room on its own island beside the Bounce Gardens.
-	var bells := bell_puzzle(Vector3(16.0, 0.0, -10.0), 3.5, "Ring pink, gold, blue:\nthe Sky Vault opens (south-west).")
+	# Build 7 puzzle variety: the Sky Vault's colour lock. Light the crystals that mix to the orb's
+	# colour (orange: red and yellow).
+	var lock_sky := ColourLock.new()
+	lock_sky.want = [true, true, false]
+	lock_sky.position = Vector3(16.0, 0.0, -14.0)
+	add_child(lock_sky)
+	for i in 3:
+		lock_sky.add_crystal(Vector3(-4.0 + i * 4.0, 0.0, 4.0), i)
+	sign_post(Vector3(20.0, 0.0, -6.0), "Mix the orb's colour to open\nthe Sky Vault (south-west).", -PI * 0.5)
 	island(Vector3(-30.0, 0.0, 52.0), 12.0)
 	cloud(Vector3(-15.0, 0.0, 48.0), Vector2(6.0, 6.0))
 	var vault: Array = secret_cave(Vector3(-30.0, 0.0, 52.0), PI * 0.5, Vector3(14.0, 9.0, 12.0), &"stone_light", &"gate")
@@ -386,14 +394,13 @@ func _build6() -> void:
 	seed_at(&"w2_seed_vault", Vector3(0.0, 7.6, 4.0))
 	_frame = vault[0]
 	var vault_door := vault[1] as VineGate
-	bells.solved.connect(func() -> void:
+	lock_sky.solved.connect(func() -> void:
 		vault_door.set_closed(false)
 		if hud != null:
 			hud.show_banner("The Sky Vault opens!", 2.0))
-	# A cage by the spire: shove the crate onto the plate.
-	var cage := alcove(Vector3(-20.0, 0.0, 8.0), PI * 0.5, &"stone_light", &"gate") as VineGate
+	# A cracked cage by the spire: three good slashes (or a Plunge) break it.
+	alcove(Vector3(-20.0, 0.0, 8.0), PI * 0.5, &"stone_light", &"break")
 	seed_at(&"w2_seed_cage", Vector3(-20.0, 0.0, 8.0))
-	crate_puzzle(Vector3(-12.0, 0.0, 14.0), Vector3(-12.0, 0.0, 8.0), cage)
 	villager("nimbus", "Captain Nimbus", Vector3(8.0, 0.0, 16.0))
 	villager("stella", "Stella", Vector3(-6.0, 0.0, 16.0))
 	villager("puffy", "Puffy", Vector3(4.0, 0.0, -18.0), &"w2_found_kite", &"w2_seed_errand", Vector3(-146.0, 8.3, 3.0), "Puffy's kite")
@@ -475,7 +482,13 @@ func _kingdom() -> void:
 	_frame = vault[0]
 	region(Vector3.ZERO)
 	var vault_door := vault[1] as VineGate
-	var bells := bell_puzzle(court + Vector3(0.0, 0.0, -8.0), 3.5, "Ring pink, gold, blue:\nthe palace vault opens.")
+	var bells := ColourLock.new()
+	bells.want = [false, true, true]
+	bells.position = court + Vector3(0.0, 0.0, -9.0)
+	add_child(bells)
+	for i in 3:
+		bells.add_crystal(Vector3(-4.0 + i * 4.0, 0.0, 3.5), i)
+	sign_post(court + Vector3(6.0, 0.0, -4.0), "The palace orb wants green:\nwhich colours make it?", 0.0)
 	bells.solved.connect(func() -> void:
 		vault_door.set_closed(false)
 		if hud != null:
@@ -504,3 +517,30 @@ func _vine_routes() -> void:
 	for b: Vector3 in [Vector3(54.0, 10.0, -34.0), Vector3(63.0, 19.0, -30.0), Vector3(72.0, 28.0, -27.0), Vector3(77.0, KINGDOM_Y + 4.0, -24.0)]:
 		hook(b)
 	sign_post(Vector3(46.0, 0.0, -32.0), "Sky Hooks: Vinelash (2 / G)\nfrom flower to flower!", -PI * 0.5)
+
+
+# --- Build 7: six stars per world -----------------------------------------------------------------
+
+func _more_stars() -> void:
+	region(Vector3.ZERO)
+	# Puzzle: the Weathervane Bridge. Two new isles off the plaza; turn the bridge to reach the star.
+	island_at(Vector3(40.0, 0.0, 40.0), 8.0)
+	island_at(Vector3(76.0, 0.0, 40.0), 6.0)
+	bridge(Vector3(17.5, 0.0, 17.5), Vector3(34.0, 0.0, 34.0), 3.6, &"foam", true, &"candy_pink")
+	var tb := TurnBridge.new()
+	tb.position = Vector3(59.0, 0.0, 40.0)
+	tb.length = 24.0
+	tb.stops = [0.0, PI * 0.5]
+	add_child(tb)
+	tb.add_lever(Vector3(-15.0, 0.0, 4.0))
+	shard_at(&"w2_shard_weathervane", Vector3(77.0, 0.0, 40.0))
+	sign_post(Vector3(36.0, 0.0, 36.0), "The Weathervane Bridge turns\nwith a whack of its wheel.", PI * 0.75)
+	# Hidden: Old Cirrus's riddle points to a spot on the first Windmill isle.
+	villager("cirrus", "Old Cirrus", Vector3(-12.0, 0.0, -6.0))
+	var dig := DigSpot.new()
+	dig.position = Vector3(-52.0, 0.2, 5.0)
+	dig.reward_shard = &"w2_shard_riddle"
+	add_child(dig)
+	# Errand: Skipper's compass rolled off to the Bounce Gardens' top cloud.
+	errand_star("skipper", "Skipper", Vector3(10.0, 0.0, 6.0), &"w2_found_compass", &"w2_shard_errand", Vector3(-1.0, 17.3, 73.0), "Compass")
+
