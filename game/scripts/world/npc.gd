@@ -66,6 +66,8 @@ const MODELS: Dictionary[String, Array] = {
 	"mags": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.5, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 	"tom": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.6, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
 	"clover": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"tansy": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.48, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"bramblewick": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.58, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
 }
 
 ## Room for future services (plan §8.8); empty in Release 1.

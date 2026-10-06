@@ -1,0 +1,19 @@
+{
+  "id": "tansy",
+  "name": "tansy",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Tansy",
+          "text": "See the firefly by the stump? It always knows where something shiny's hidden."
+        },
+        {
+          "speaker": "Tansy",
+          "text": "Follow it, but don't scare it off. It waits for you."
+        }
+      ]
+    }
+  ]
+}

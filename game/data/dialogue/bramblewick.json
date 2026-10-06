@@ -1,0 +1,24 @@
+{
+  "id": "bramblewick",
+  "name": "bramblewick",
+  "conversations": [
+    {
+      "when": "w1_found_musicbox",
+      "lines": [
+        {
+          "speaker": "Bramblewick",
+          "text": "It still plays! I could hug you. Here, this Star Shard has been in my pocket for years. It's yours."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Bramblewick",
+          "text": "My grandmother's music box! A gust took it right up into the canopy, onto the Spore Lookout north of the mushroom village. Would you fetch it?"
+        }
+      ]
+    }
+  ]
+}

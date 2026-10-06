@@ -55,6 +55,7 @@ func build() -> void:
 	_lake_depths()
 	_canopy()
 	_vine_routes()
+	_more_stars()
 	_sky()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
@@ -565,8 +566,17 @@ func _build6() -> void:
 	ledge(Vector3(3.5, 5.4, 0.0), Vector3(2.4, 0.5, 3.0), &"bark_light")
 	seed_at(&"w1_seed_vault", Vector3(3.5, 5.4, 0.0))
 	_frame = vault[0]
-	crate_puzzle(Vector3(6.0, 0.0, 74.0), Vector3(6.0, 0.0, 65.0), vault[1] as VineGate)
-	sign_post(Vector3(10.0, 0.0, 70.0), "Weigh down the plate and\nthe vines hold open.", -PI * 0.5)
+	# Build 7 puzzle variety: light the three braziers (Fireball) and the vines draw back.
+	var torches := BrazierSet.new()
+	add_child(torches)
+	for spec: Vector3 in [Vector3(2.0, 0.0, 64.0), Vector3(2.0, 0.0, 76.0), Vector3(10.0, 0.0, 70.0)]:
+		torches.add(spec)
+	var vault_gate := vault[1] as VineGate
+	torches.solved.connect(func() -> void:
+		vault_gate.set_closed(false)
+		if hud != null:
+			hud.show_banner("The Glade Vault opens!", 2.0))
+	sign_post(Vector3(8.0, 0.0, 62.0), "Three cold braziers guard\nthe vault. Fire wakes them.", -PI * 0.5)
 	# Villagers, one with an errand up the mushroom stair.
 	villager("mossy", "Mossy", Vector3(6.0, 0.0, 14.0), &"w1_found_charm", &"w1_seed_errand", Vector3(26.0, CLIFF + 0.3, -82.0), "Acorn charm")
 	villager("reed", "Ranger Reed", Vector3(6.0, 0.0, -30.0))
@@ -794,3 +804,28 @@ func _vine_routes() -> void:
 	region(Vector3.ZERO)
 	hook(Vector3(-56.0, CANOPY_Y, 36.2))
 	hook(Vector3(-40.0, CANOPY_Y + 2.0, 74.2))
+
+
+# --- Build 7: six stars per world (Ashwin: "some given by NPCs for retrieving their item, some in
+# hidden areas, some locked behind puzzles") ----------------------------------------------------
+
+func _more_stars() -> void:
+	region(Vector3.ZERO)
+	# Puzzle: follow the firefly from the meadow, up the Fernway, to a hidden mossy dell.
+	var trail := CritterTrail.new()
+	trail.points = [Vector3(8.0, 1.4, -18.0), Vector3(4.0, 1.4, -40.0), Vector3(-8.0, 1.4, -58.0), Vector3(-10.0, 1.4, -78.0)]
+	trail.reward_shard = &"w1_shard_firefly"
+	add_child(trail)
+	villager("tansy", "Tansy", Vector3(12.0, 0.0, -14.0))
+	# Errand: Bramblewick's music box blew up onto the Spore Lookout in the canopy.
+	errand_star("bramblewick", "Bramblewick", Vector3(-12.0, 0.0, 12.0), &"w1_found_musicbox", &"w1_shard_errand", Vector3(-60.0, CANOPY_Y + 4.3, -14.0), "Music box")
+	# Hidden: a cracked wall at the back of the Cliff Garden hides a root cellar with a climb.
+	var cellar: Array = secret_cave(Vector3(-15.0, CLIFF, -110.0), PI * 0.5, Vector3(12.0, 9.0, 10.0), &"bark_mid", &"break")
+	stone(Vector3(-3.5, 1.4, -1.5), 1.6, 1.4, &"bark_light", &"moss")
+	ledge(Vector3(-0.5, 3.6, -3.0), Vector3(2.8, 0.5, 2.4), &"bark_light")
+	ledge(Vector3(3.0, 5.8, -1.0), Vector3(2.4, 0.5, 2.8), &"bark_light")
+	ledge(Vector3(0.5, 7.8, 2.0), Vector3(2.6, 0.5, 2.6), &"bark_light")
+	shard_at(&"w1_shard_cellar", Vector3(0.5, 7.8, 2.0))
+	_frame = cellar[0]
+	region(Vector3.ZERO)
+
