@@ -118,7 +118,8 @@ func test_critter_trail_leads_to_a_reward() -> void:
 	await ticks(20)
 	p.respawn_at(Vector3(0.0, 0.05, -9.0))
 	await ticks(100)
-	check(not get_tree().get_nodes_in_group(&"pickup").is_empty(), "following it to the end turns up the seed")
+	# The seed drifts straight to the hero (pickup magnet), so it's already collected.
+	check(Progress.has_seed(&"w1_seed_fernway") or not get_tree().get_nodes_in_group(&"pickup").is_empty(), "following it to the end turns up the seed")
 
 
 func test_dig_spot_and_turn_bridge() -> void:
