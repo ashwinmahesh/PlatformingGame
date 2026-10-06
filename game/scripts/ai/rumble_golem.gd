@@ -10,6 +10,7 @@ const WALK_SPEED := 3.2
 
 var _arms: Array[Node3D] = []
 var _gem: MeshInstance3D
+const GEM_AT := Vector3(0.0, 4.8, 1.4)
 var _body: Node3D
 var _throws_left: int = 0
 
@@ -61,9 +62,11 @@ func build_body() -> void:
 	b.radius = 2.3
 	b.height = 5.0
 	_body_area = area(Layers.ENEMY_HURTBOX, b, Vector3(0.0, 2.6, 0.0))
+	# Build 7 fix (Ashwin: "the hitbox for the golem gem is off"): a generous sphere that follows
+	# the gem itself as the Golem kneels and tilts.
 	var w := SphereShape3D.new()
-	w.radius = 1.6
-	_weak_area = area(Layers.ENEMY_HURTBOX | Layers.BOUNCE, w, Vector3(0.0, 5.2, 1.0))
+	w.radius = 2.1
+	_weak_area = area(Layers.ENEMY_HURTBOX, w, GEM_AT)
 
 
 ## Build 6 asset swap: the Quaternius model replaces the built body (hit areas unchanged).
@@ -120,6 +123,11 @@ func contact_halves() -> int:
 
 func on_wake() -> void:
 	set_state(S.INTRO)
+
+
+## Where the gem is right now (for tests and hints).
+func gem_position() -> Vector3:
+	return _body.global_transform * GEM_AT
 
 
 func on_weak_hit() -> void:
@@ -218,4 +226,4 @@ func tick_state() -> void:
 	var glow := 1.0 if weak_open else 0.0
 	(_gem.material_override as ShaderMaterial).set_shader_parameter(&"flash", glow * (0.6 + 0.4 * sin(state_ticks * 0.3)))
 	(_gem.material_override as ShaderMaterial).set_shader_parameter(&"flash_color", Palette.color(&"gold"))
-	_weak_area.position = Vector3(0.0, 5.2 + _body.position.y, 1.0)
+	_weak_area.position = _body.transform * GEM_AT

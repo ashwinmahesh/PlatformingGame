@@ -226,7 +226,7 @@ func _physics_process(_delta: float) -> void:
 		_debug.text = "%s t%d hp%d%s" % [state_name(), state_ticks, hp, " OPEN" if weak_open else ""]
 
 
-## Only a Plunge on the open weak spot hurts; one hit closes it (same rule as Mother Gloop).
+## Any hit on the open weak spot hurts (Plunge, sword or magic); one hit closes it.
 func apply_weak_hit() -> int:
 	if not weak_open or weak_invuln > 0 or hp <= 0:
 		return 0
@@ -261,7 +261,8 @@ func receive_player_attack(atk: Dictionary, a: Area3D) -> Dictionary:
 	if not awake or gone or _defeat_ticks >= 0:
 		return {}
 	var plunge := StringName(str(atk.get("kind", ""))) == &"plunge"
-	var bounce_h := float(atk.get("bounce", 2.2)) if plunge else 0.0
+	# Build 7 fix: a small, controlled hop off a boss, never a launch into the sky.
+	var bounce_h := minf(float(atk.get("bounce", 2.2)), 2.0) if plunge else 0.0
 	var id := int(atk.get("id", -1))
 	var is_weak := a == _weak_area
 	if id == (_last_weak_id if is_weak else _last_body_id):
@@ -270,7 +271,8 @@ func receive_player_attack(atk: Dictionary, a: Area3D) -> Dictionary:
 		_last_weak_id = id
 	else:
 		_last_body_id = id
-	if is_weak and plunge:
+	# Build 7 fix: the open weak spot takes the Plunge, the sword and magic alike.
+	if is_weak:
 		apply_weak_hit()
 	else:
 		AudioDirector.play(&"hit", -2.0, 0.7)

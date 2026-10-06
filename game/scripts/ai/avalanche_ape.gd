@@ -89,8 +89,8 @@ func build_body() -> void:
 	b.height = 4.4
 	_body_area = area(Layers.ENEMY_HURTBOX, b, Vector3(0.0, 2.4, 0.0))
 	var w := SphereShape3D.new()
-	w.radius = 1.5
-	_weak_area = area(Layers.ENEMY_HURTBOX | Layers.BOUNCE, w, Vector3(0.0, 5.2, -0.6))
+	w.radius = 1.9
+	_weak_area = area(Layers.ENEMY_HURTBOX, w, Vector3(0.0, 5.2, -0.6))
 	_marker = MeshInstance3D.new()
 	var disc := CylinderMesh.new()
 	disc.top_radius = 2.2
@@ -291,4 +291,4 @@ func tick_state() -> void:
 			_body.scale = _body.scale.lerp(Vector3.ONE, 0.12)
 			if state_ticks >= 70:
 				set_state(S.CHOOSE)
-	_weak_area.position = Vector3(0.0, 5.2, -0.6)
+	_weak_area.position = _body.transform * Vector3(0.0, 5.2, -0.6)

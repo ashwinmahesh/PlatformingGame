@@ -214,3 +214,55 @@ func test_every_ladder_leads_somewhere() -> void:
 			check(count >= 20, "Lanternwick: a ladder in every alley (%d)" % count)
 		lvl.queue_free()
 		await ticks(3)
+
+
+## Regression (Ashwin: "the hitbox for the golem gem is off... when I do, I get transported way
+## up in the air"): with the Golem kneeling, a Plunge from just above the visible gem lands, a
+## sword slash at the gem lands too, and the hero only hops a little.
+func test_golem_gem_takes_hits_and_only_hops_you() -> void:
+	var w := Progress.world_def(&"world_03")
+	var lvl := await _load(w, w.entrance_spawn)
+	var bw := lvl as BossWorld
+	var p := lvl.player
+	var inp := ScriptedInput.new()
+	p.input_source = inp
+	p.respawn_at(bw.arena_center + Vector3(0.0, 0.05, -6.0))
+	p.invuln_left = 9999.0
+	await ticks(3)
+	var golem := bw.boss as RumbleGolem
+	for i in 140:
+		await ticks(1)
+		p.invuln_left = 9999.0
+	golem.hit_by_boulder()
+	await ticks(40)
+	check(golem.weak_open, "the Golem kneels and the gem opens")
+	var gem := golem.gem_position()
+	var hp := golem.hp
+	p.respawn_at(gem + Vector3(0.0, 3.0, 0.0))
+	p.invuln_left = 9999.0
+	await ticks(2)
+	inp.tap(&"plunge")
+	var peak := -INF
+	for i in 90:
+		await ticks(1)
+		p.invuln_left = 9999.0
+		peak = maxf(peak, p.global_position.y)
+	check_eq(golem.hp, hp - 1, "a Plunge onto the visible gem hurts the Golem")
+	check(peak < gem.y + 6.0, "and the hop off is small (peak %.1f m, gem at %.1f m)" % [peak, gem.y])
+	# Open it again and slash it from the ground beside the gem.
+	golem.weak_invuln = 0
+	golem.hit_by_boulder()
+	await ticks(40)
+	gem = golem.gem_position()
+	var flat := Vector3(gem.x, golem.global_position.y, gem.z)
+	var away := (flat - golem.global_position).normalized()
+	p.respawn_at(flat + away * 1.6 + Vector3.UP * maxf(gem.y - golem.global_position.y - 1.2, 0.05))
+	p.facing = -away
+	hp = golem.hp
+	inp.tap(&"jump")
+	await ticks(8)
+	inp.tap(&"attack")
+	await ticks(30)
+	check(golem.hp < hp, "a sword slash at the open gem hurts it too")
+	lvl.queue_free()
+	await ticks(3)
