@@ -109,6 +109,7 @@ func test_colour_lock_mixes() -> void:
 
 func test_critter_trail_leads_to_a_reward() -> void:
 	Progress.new_game()
+	floor_block(Vector3(0.0, 0.0, 0.0), Vector3(40.0, 2.0, 40.0))
 	var p := spawn_player(Vector3(0.0, 0.05, 0.0))
 	var ct := CritterTrail.new()
 	ct.points = [Vector3(0.0, 1.0, -2.0), Vector3(0.0, 1.0, -10.0)]
