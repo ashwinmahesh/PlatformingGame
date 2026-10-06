@@ -39,7 +39,7 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 
 ### Level design
 - Every world is a small open world: non-linear, never a corridor, about 10-15 minutes to clear.
-  Several routes, loops and side spots; shards in any order.
+  Several routes, loops and side spots; stars in any order.
 - Never reuse a layout between worlds. Each world gets its own shape (meadow ring, sky islands,
   winding gorge, town grid, valley, walled town...).
 - Dense, lively sandbox, never sparse: talkable villagers in every level (some with errands that
@@ -75,9 +75,12 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 ### Combat and movement
 - Never shorten the sword's reach or width; the slash swings toward the camera's facing.
 - Hitboxes match visuals, especially bosses. Every enemy shows a tell before it attacks.
-- Every world teaches one magic ability when its 3 Star Shards are collected and the world is
-  finished (abilities come from world completion, so they apply to old saves automatically),
-  alternating combat and movement. Each ability counters at least two enemy types
+- Every world has 6 Star Shards ("stars"). The boss gate or finale still opens at 3. Each world's
+  six mix: at least one from a villager errand (return a lost item hidden somewhere you have to
+  explore for), at least one in a hidden area, at least one behind a puzzle; the rest from the
+  goal, upper-world platforming and ability routes. No two stars in a world feel alike.
+- Every world teaches one magic ability once it is finished AND all 6 stars are in (stored in
+  the save; saves from before keep what they earned), alternating combat and movement. Each ability counters at least two enemy types
   (docs/bestiary.md) and has routes in the worlds that use it. Keyboard casts abilities with
   number keys 1-9 (plus R, G, C, V shortcuts); gamepad picks one with D-pad left/right and casts
   with RT (LB/RB stay Thunderclap/Air Dash).

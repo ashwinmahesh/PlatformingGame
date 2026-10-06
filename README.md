@@ -6,7 +6,7 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 
 ## The game
 
-- **Small open worlds.** Every world is a sandbox you can tackle in any order. Each one has three Star Shards that open its goal: a boss fight or a Grand Star.
+- **Small open worlds.** Every world is a sandbox you can tackle in any order. Each one has six Star Shards: three open its goal (a boss fight or a Grand Star), and the rest hide behind villagers' errands, secret rooms and puzzles.
 - **A second world up high.** Every world has a large upper tier of its own: treetop villages, cloud kingdoms, rooftop towns and cliff ledges. You get up there by ladders, spiral ramps, lifts, bounce pads and wind.
 - **Secrets and puzzles.** Bell sequences, crates to push onto pressure plates, crystal switches, breakable walls and bramble doors guard secret rooms. Villagers send you on errands.
 - **Water you can swim in.** Lakes, rivers and pools are 8–12 m deep. They have grottos and seeds at the bottom, and you can use the sword while swimming.
@@ -39,7 +39,7 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 
 You have a triple jump, a downward Plunge (bounce off enemies and Springcaps), a sword combo that swings toward where the camera faces, wall slides and **wall jumps** (kick off a wall and keep whatever air jumps you had left; the same wall won't kick you twice in a row), climbable **ladders** and swimming. Pickups have a generous reach and drift to you when you're close.
 
-Every world teaches a magic ability once its three Star Shards are in and the world is finished:
+Every world teaches a magic ability once it's finished with all six Star Shards in:
 
 | Key | Ability | Learned from | Does |
 |---|---|---|---|
