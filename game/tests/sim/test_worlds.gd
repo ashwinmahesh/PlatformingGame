@@ -35,6 +35,12 @@ func test_every_world_is_complete_and_consistent() -> void:
 				seeds.append((n as TreasureChest).seed_id)
 			elif n is Npc and (n as Npc).reward_seed != &"":
 				seeds.append((n as Npc).reward_seed)
+			if n is Npc and (n as Npc).reward_shard != &"":
+				shards.append((n as Npc).reward_shard)
+			if (n is CritterTrail or n is DigSpot) and str(n.get("reward_shard")) != "":
+				shards.append(StringName(str(n.get("reward_shard"))))
+			if (n is CritterTrail or n is DigSpot) and str(n.get("reward_seed")) != "":
+				seeds.append(StringName(str(n.get("reward_seed"))))
 		for s in w.seed_ids:
 			check(s in seeds, "%s: seed %s is placed" % [w.id, s])
 		check_eq(seeds.size(), w.seed_ids.size(), "%s: no extra seeds" % w.id)

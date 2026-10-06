@@ -13,6 +13,8 @@ var body_scale: float = 1.0
 ## `reward_seed` (a Glimmer Seed of this world).
 var errand_flag: StringName = &""
 var reward_seed: StringName = &""
+## Build 7: an errand can pay a Star Shard instead of a seed.
+var reward_shard: StringName = &""
 ## Build 5 (Bubbleton Reef): a glass diving bubble round the head.
 var bubble_helmet: bool = false
 ## Villagers share one rig (KayKit Adventurers, CC0) and differ by outfit and scale (plan §11.4).
@@ -127,6 +129,15 @@ func _process(delta: float) -> void:
 
 
 func interact(p: Player) -> void:
+	if errand_flag != &"" and reward_shard != &"" and Progress.has_flag(errand_flag) and not Progress.has_shard(reward_shard):
+		Progress.collect_shard(reward_shard)
+		AudioDirector.play(&"seed")
+		emote_joy()
+		Fx.burst(get_parent(), global_position + Vector3.UP * 2.0, Palette.color(&"portal_teal"), 28, 5.0, 0.12, -3.0, 1.0)
+		var hs := get_tree().get_first_node_in_group(&"hud") as Hud
+		if hs != null:
+			hs.open_dialogue([{"speaker": display_name, "text": "You found it! You're a star. No, really: take this Star Shard!"}], p)
+		return
 	if errand_flag != &"" and reward_seed != &"" and Progress.has_flag(errand_flag) and not Progress.has_seed(reward_seed):
 		Progress.collect_seed(reward_seed)
 		AudioDirector.play(&"seed")

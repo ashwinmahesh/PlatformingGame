@@ -300,6 +300,14 @@ func crate_puzzle(crate_local: Vector3, plate_local: Vector3, door: VineGate) ->
 	plate.changed.connect(func(on: bool) -> void: door.set_closed(not on))
 
 
+## Build 7: a villager whose errand pays a Star Shard (the lost thing goes somewhere you have to
+## explore for).
+func errand_star(id: String, display: String, base_local: Vector3, errand: StringName, shard: StringName, item_local: Vector3, item_name: String) -> Npc:
+	var n := villager(id, display, base_local, errand, &"", item_local, item_name)
+	n.reward_shard = shard
+	return n
+
+
 ## A villager; with an errand, `item_local` places the lost thing and talking hands over `reward`.
 func villager(id: String, display: String, base_local: Vector3, errand: StringName = &"", reward: StringName = &"", item_local: Vector3 = Vector3.ZERO, item_name: String = "") -> Npc:
 	var n := Npc.new()
