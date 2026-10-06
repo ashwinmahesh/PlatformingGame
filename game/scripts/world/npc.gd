@@ -71,6 +71,7 @@ const MODELS: Dictionary[String, Array] = {
 	"cirrus": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 	"skipper": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"juniper": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"marina": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.52, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 }
 
 ## Room for future services (plan §8.8); empty in Release 1.

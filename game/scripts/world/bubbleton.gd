@@ -61,6 +61,7 @@ func build() -> void:
 	_landmarks()
 	_coral_heights()
 	_vine_routes()
+	_more_stars()
 	make_lock()
 	lock.unlocked.connect(_on_shards_complete)
 	finish_life(&"kelp")
@@ -245,20 +246,13 @@ func _main_street() -> void:
 	ledge(Vector3(0.0, 11.0, 5.0), Vector3(22.0, 0.4, 1.6), &"kelp")
 	Kit.pillar(self, Vector3(16.0, 11.0, 5.0), 3.0, 11.0, &"coral_orange", &"sand_light")
 	heart_at(Vector3(16.0, 11.0, 5.0))
-	# Plaza bells: ring them in the order on the sign to open the Old Cannery.
-	var bells := BellSequence.new()
-	bells.order = [0, 1, 2]
-	add_child(bells)
-	var bell_cols: Array[StringName] = [&"candy_pink", &"gold", &"slime_blue"]
-	for i in 3:
-		var a := PI * 0.75 + i * PI * 0.25
-		var post := LIFT + Vector3(cos(a) * 11.0, 0.0, sin(a) * 11.0)
-		var b := CrystalSwitch.new()
-		b.position = post
-		add_child(b)
-		Kit.blob(self, post + Vector3(0.0, 2.6, 0.0), 0.35, bell_cols[i])
-		bells.add(b)
-	sign_post(LIFT + Vector3(-14.0, 0.0, 6.0), "Ring the bells: pink, then gold, then blue.", PI * 0.5)
+	# Build 7 puzzle variety: a little glowing seahorse waits by the bubble lift. Follow it round
+	# town and it shows you the way into the Old Cannery.
+	var seahorse := CritterTrail.new()
+	seahorse.color_name = &"candy_pink"
+	seahorse.points = [LIFT + Vector3(5.0, 1.6, 2.0), Vector3(6.0, 1.6, -22.0), Vector3(-8.0, 1.6, -16.0), Vector3(-14.0, 1.6, 4.0), Vector3(-22.0, 1.6, -2.0)]
+	add_child(seahorse)
+	sign_post(LIFT + Vector3(-14.0, 0.0, 6.0), "Old Barnacle says the seahorse\nknows the Cannery's secret door.", PI * 0.5)
 	var cannery: Array = secret_cave(Vector3(-32.0, 0.0, -2.0), PI * 0.5, Vector3(16.0, 9.0, 14.0), &"stone_dark", &"gate")
 	ledge(Vector3(-4.0, 1.5, 3.0), Vector3(3.0, 1.5, 3.0), &"wood_warm")
 	ledge(Vector3(-5.0, 3.6, -1.0), Vector3(3.0, 0.5, 3.0), &"wood_plank")
@@ -270,7 +264,7 @@ func _main_street() -> void:
 	sign_post(Vector3(-3.0, 0.3, 5.5), "The Old Cannery")
 	_frame = cannery[0]
 	var cannery_door := cannery[1] as VineGate
-	bells.solved.connect(func() -> void:
+	seahorse.found.connect(func(_at: Vector3) -> void:
 		cannery_door.set_closed(false)
 		if hud != null:
 			hud.show_banner("The Old Cannery creaks open!", 2.2))
@@ -283,14 +277,18 @@ func _main_street() -> void:
 	heart_at(Vector3(-3.0, 1.0, -2.0))
 	_frame = vault[0]
 	var vault_door := vault[1] as VineGate
-	var crate := PushBlock.new()
-	crate.position = Vector3(14.0, 0.0, 11.0)
-	add_child(crate)
-	var plate := PressurePlate.new()
-	plate.position = Vector3(14.0, 0.0, 2.0)
-	add_child(plate)
-	plate.changed.connect(func(on: bool) -> void: vault_door.set_closed(not on))
-	sign_post(Vector3(18.0, 0.0, 12.0), "Push the crate onto the plate\nto hold the vault open.", -PI * 0.5)
+	# The vault's colour lock: the orb wants green (yellow and blue).
+	var vlock := ColourLock.new()
+	vlock.want = [false, true, true]
+	vlock.position = Vector3(14.0, 0.0, 2.0)
+	add_child(vlock)
+	for i in 3:
+		vlock.add_crystal(Vector3(-3.5 + i * 3.5, 0.0, 6.0), i)
+	vlock.solved.connect(func() -> void:
+		vault_door.set_closed(false)
+		if hud != null:
+			hud.show_banner("The Treasure Vault opens!", 2.0))
+	sign_post(Vector3(18.0, 0.0, 12.0), "Mix the orb's colour to\nopen the Treasure Vault.", -PI * 0.5)
 	# Errand: Mrs. Puffle's spotted hat blew away up the Jellyfish Fields.
 	var puffle := Npc.new()
 	puffle.npc_id = "puffle"
@@ -843,7 +841,13 @@ func _coral_heights() -> void:
 	_frame = vault[0]
 	region(Vector3.ZERO)
 	var vault_door := vault[1] as VineGate
-	var bells := bell_puzzle(plaza + Vector3(0.0, 0.0, -6.0), 3.5, "Ring pink, gold, blue:\nthe Clam Vault opens (east).")
+	var bells := ColourLock.new()
+	bells.want = [true, false, true]
+	bells.position = plaza + Vector3(0.0, 0.0, -7.0)
+	add_child(bells)
+	for i in 3:
+		bells.add_crystal(Vector3(-4.0 + i * 4.0, 0.0, 3.5), i)
+	sign_post(plaza + Vector3(5.0, 0.0, -2.0), "The Clam Vault (east) wants\nthe orb's purple.", 0.0)
 	bells.solved.connect(func() -> void:
 		vault_door.set_closed(false)
 		if hud != null:
@@ -873,3 +877,38 @@ func _vine_routes() -> void:
 	hook(Vector3(12.0, 18.0, 97.0))
 	hook(Vector3(-78.0, 24.0, 117.2))
 	hook(Vector3(78.0, 28.0, 118.2))
+
+
+# --- Build 7: six stars per world -----------------------------------------------------------------
+
+func _more_stars() -> void:
+	region(Vector3.ZERO)
+	# Puzzle: the Pearl Tank. Climb in, turn the sluice wheel, and swim up as the water rises.
+	var c := Vector3(124.0, 0.0, -10.0)
+	for spec: Array in [[Vector3(0.0, 11.0, -6.6), Vector3(14.4, 11.0, 1.2)], [Vector3(0.0, 11.0, 6.6), Vector3(14.4, 11.0, 1.2)], [Vector3(-7.5, 11.0, 0.0), Vector3(3.0, 11.0, 14.4)], [Vector3(6.6, 11.0, 0.0), Vector3(1.2, 11.0, 12.0)]]:
+		Kit.block(self, c + (spec[0] as Vector3), spec[1] as Vector3, &"coral_pink", Layers.WORLD | Layers.CAMERA_BLOCKER, &"sand_light")
+	ladder(c + Vector3(-9.0, 0.0, 0.0), 11.0, -PI * 0.5)
+	ladder(c + Vector3(-6.0, 0.0, 2.0), 11.0, PI * 0.5)
+	var tank := WaterLock.new()
+	tank.size = Vector2(12.0, 12.0)
+	tank.depth = 11.0
+	tank.levels = [-10.6, -1.5]
+	tank.position = c + Vector3(0.0, 11.0, 0.0)
+	add_child(tank)
+	tank.add_wheel(Vector3(3.5, -11.0, 3.5))
+	ledge(c + Vector3(4.0, 9.8, -4.0), Vector3(2.6, 0.5, 2.6), &"wood_plank")
+	shard_at(&"w4_shard_tank", c + Vector3(4.0, 9.8, -4.0))
+	sign_post(c + Vector3(-9.0, 0.0, 4.0), "The Pearl Tank: turn the wheel\nand ride the water up.", PI * 0.5)
+	# Errand: Marina's pearl necklace fell into a giant clam out on the Clam Beds.
+	errand_star("marina", "Marina", Vector3(-6.0, 0.0, 30.0), &"w4_found_necklace", &"w4_shard_errand", Vector3(96.0, 0.3, -104.0), "Pearl necklace")
+	# Hidden: a cracked rock past the Tar Pits hides a kelp grotto with a climb.
+	var grotto: Array = secret_cave(Vector3(-96.0, 0.0, -78.0), 0.0, Vector3(12.0, 9.0, 10.0), &"stone_dark", &"break")
+	Whimsy.kelp(self, Vector3(-3.5, 0.0, -2.5), 5.0)
+	stone(Vector3(-3.0, 1.4, 1.5), 1.6, 1.4, &"coral_orange", &"sand_light")
+	ledge(Vector3(0.0, 3.6, -3.0), Vector3(2.6, 0.5, 2.4), &"wood_plank")
+	ledge(Vector3(3.5, 5.8, -0.5), Vector3(2.4, 0.5, 2.8), &"wood_plank")
+	ledge(Vector3(0.5, 7.8, 2.5), Vector3(2.6, 0.5, 2.4), &"wood_plank")
+	shard_at(&"w4_shard_grotto", Vector3(0.5, 7.8, 2.5))
+	_frame = grotto[0]
+	region(Vector3.ZERO)
+

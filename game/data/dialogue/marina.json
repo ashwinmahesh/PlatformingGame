@@ -1,0 +1,24 @@
+{
+  "id": "marina",
+  "name": "marina",
+  "conversations": [
+    {
+      "when": "w4_found_necklace",
+      "lines": [
+        {
+          "speaker": "Marina",
+          "text": "Oh, it's even shinier for the scare! Take this Star Shard, I insist."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Marina",
+          "text": "My pearl necklace! I leaned over a giant clam out on the Clam Beds (far north-east) and it snapped shut. Can you get it back?"
+        }
+      ]
+    }
+  ]
+}
