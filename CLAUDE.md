@@ -4,7 +4,7 @@ Source of truth: docs/contracts/*.md · Board: docs/board.md · Decisions: docs/
 Build notes for the human live in the vault: Zelda-like game/OpusPlatformer/
 
 ## Commands (use these; add new ones to the Makefile, don't improvise)
-make play | run | test | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets | fetch-assets
+make play | run | test | bench | bench | loop | import | capture SCENE=… | clip NAME=… | palette | sfx | music | source-audio | assets | fetch-assets
 make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 
 ## Godot
@@ -61,6 +61,14 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
   - every ladder must stand on ground and lead onto something solid (tests/sim/test_worlds.gd).
 - Platforms are generous for the hero's mobility (OpenWorld.grown); individual jumps are low and
   forgiving (rises of about 3 m or less); slopes you walk stay under about 22 degrees (HighTier).
+- Dense worlds must still hold 60 fps on the Mac Mini at 1920x1080: `make bench` checks every
+  world and the hub. Build scenery through Kit (primitive meshes get sensible segment counts),
+  let StaticMerge combine static scenery, chunk repeated kit pieces (ModuleBatch) with distance
+  fades, and keep lights unshadowed with distance fade.
+- Dense worlds must still hold 60 fps on the Mac Mini at 1920x1080: `make bench` checks every
+  world and the hub. Build scenery through Kit (primitive meshes get sensible segment counts),
+  let StaticMerge combine static scenery, chunk repeated kit pieces (ModuleBatch) with distance
+  fades, and keep lights unshadowed with distance fade.
 - Water is deep (8-12 m) in a walled basin with a bed, with things to find underwater; the sword
   works while swimming.
 

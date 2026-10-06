@@ -6,7 +6,7 @@ BLENDER ?= /Applications/Blender.app/Contents/MacOS/Blender
 G       := $(GODOT) --path game
 LOGCHK  := tools/logcheck.sh
 
-.PHONY: fetch-assets play run import test loop lint check capture clip palette sfx music source-audio assets export-mac
+.PHONY: bench fetch-assets play run import test loop lint check capture clip palette sfx music source-audio assets export-mac
 
 ## Play a snapshot of the last commit from builds/play/, so edits, imports and test runs in game/
 ## can't change files under a running game (Build 6: a re-import mid-session crashed World 2).
@@ -37,6 +37,9 @@ check: lint test
 # Window flashes on screen for a few seconds (rendering needs a real window).
 capture:
 	$(G) --resolution 1600x900 res://tools/capture/capture.tscn -- --scene=$(SCENE) --out=$(CURDIR)/captures/$(notdir $(basename $(SCENE)))
+
+bench:
+	EXTRA="" tools/bench_all.sh
 
 fetch-assets:
 	tools/fetch_assets.sh
