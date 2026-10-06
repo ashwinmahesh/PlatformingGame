@@ -63,6 +63,7 @@ func build() -> void:
 	_build6()
 	_rimwalk()
 	_vine_routes()
+	_more_stars()
 	finish_boss_world()
 	finish_life(&"bubble")
 
@@ -397,13 +398,19 @@ func _side_spots() -> void:
 
 func _build6() -> void:
 	region(Vector3.ZERO)
-	# Village bells open the Toy Workshop.
-	var bells := bell_puzzle(Vector3(26.0, 0.0, 14.0), 3.5, "Ring pink, gold, blue:\nthe Toy Workshop opens.")
+	# Build 7 puzzle variety: warm the three frozen braziers (Fireball) and the Toy Workshop opens.
+	var bells := BrazierSet.new()
+	add_child(bells)
+	for spec: Vector3 in [Vector3(22.0, 0.0, 10.0), Vector3(30.0, 0.0, 10.0), Vector3(26.0, 0.0, 17.0)]:
+		bells.add(spec)
+	sign_post(Vector3(26.0, 0.0, 21.0), "Toymaker's note: warm the three\nbraziers and the workshop opens.", PI)
 	var shop: Array = secret_cave(Vector3(30.0, 0.0, -36.0), -PI * 0.5, Vector3(14.0, 9.0, 12.0), &"roof_red", &"gate")
 	var gift_cols: Array[StringName] = [&"slime_blue", &"candy_pink", &"gold", &"lime_pop"]
 	for i in 4:
 		ledge(Vector3(-4.5 + i * 3.0, 1.5 + i * 2.0, 2.0 - i * 1.8), Vector3(2.6, 0.8, 2.6), gift_cols[i])
 	seed_at(&"w5_seed_workshop", Vector3(4.5, 7.5, -3.4))
+	ledge(Vector3(1.0, 8.6, 2.5), Vector3(2.4, 0.5, 2.4), &"lime_pop")
+	shard_at(&"w5_shard_workshop", Vector3(1.0, 8.6, 2.5))
 	Whimsy.snowman(self, P(Vector3(-4.0, 0.3, -3.0)), 0.8, &"gold")
 	_frame = shop[0]
 	var shop_door := shop[1] as VineGate
@@ -424,7 +431,19 @@ func _build6() -> void:
 	# An ice cage: shove the crate onto the plate.
 	var cage := alcove(Vector3(48.0, 0.0, 84.0), PI, &"water_light", &"gate") as VineGate
 	seed_at(&"w5_seed_cage", Vector3(48.0, 0.0, 84.0))
-	crate_puzzle(Vector3(48.0, 0.0, 66.0), Vector3(48.0, 0.0, 75.0), cage)
+	# Timed run: light all three ice crystals within ten seconds and the cage opens.
+	var run := SwitchGroup.new()
+	add_child(run)
+	for spec: Vector3 in [Vector3(40.0, 0.0, 70.0), Vector3(56.0, 0.0, 70.0), Vector3(48.0, 3.0, 60.0)]:
+		if spec.y > 0.0:
+			stone(spec, 2.2, spec.y, &"water_light", &"mush_spot")
+		var sw := CrystalSwitch.new()
+		sw.hold = 10.0
+		sw.position = spec
+		add_child(sw)
+		run.add(sw)
+	run.solved.connect(func() -> void: cage.set_closed(false))
+	sign_post(Vector3(44.0, 0.0, 76.0), "Light all three crystals\nbefore the frost creeps back!", PI)
 	villager("frost", "Frost", Vector3(4.0, 0.0, 2.0), &"w5_found_carrot", &"w5_seed_errand", Vector3(3.0, 12.3, -128.0), "Carrot nose")
 	villager("penny", "Penny", Vector3(-4.0, 0.0, 10.0))
 
@@ -523,8 +542,14 @@ func _rimwalk() -> void:
 	_frame = cave[0]
 	region(Vector3.ZERO)
 	var cave_door := cave[1] as VineGate
-	var bells := bell_puzzle(terrace + Vector3(0.0, 0.0, 2.0), 3.5, "Ring pink, gold, blue:\nFrost Hall opens (west).")
-	bells.solved.connect(func() -> void:
+	# A thunder dynamo: a Thunderclap powers it and Frost Hall's door rolls open.
+	var bells := ThunderDynamo.new()
+	bells.position = terrace + Vector3(0.0, 0.0, 3.0)
+	add_child(bells)
+	sign_post(terrace + Vector3(4.0, 0.0, 5.0), "Frost Hall's door runs on\nthunder. Give the coil a jolt!", 0.0)
+	bells.powered_changed.connect(func(on: bool) -> void:
+		if not on:
+			return
 		cave_door.set_closed(false)
 		if hud != null:
 			hud.show_banner("Frost Hall opens!", 2.0))
@@ -549,3 +574,20 @@ func _vine_routes() -> void:
 	hook(Vector3(-100.0, 18.0, -137.0))
 	hook(Vector3(15.0, 22.0, -133.0))
 	hook(Vector3(80.0, 26.0, -129.0))
+
+
+# --- Build 7: six stars per world -----------------------------------------------------------------
+
+func _more_stars() -> void:
+	region(Vector3.ZERO)
+	# Errand: Pepper dropped her mittens down the ice-fishing hole (dive for them).
+	errand_star("pepper", "Pepper", Vector3(-52.0, 0.0, 56.0), &"w5_found_mittens", &"w5_shard_errand", Vector3(-60.0, -10.1, 61.0), "Mittens")
+	# Hidden: a cracked ice wall at the back of Lantern Ledge, up on the Rimwalk.
+	var den: Array = secret_cave(Vector3(-104.0, 18.0, -144.0), 0.0, Vector3(10.0, 8.0, 8.0), &"water_light", &"break")
+	slippery(ledge(Vector3(-2.5, 1.4, -1.5), Vector3(2.6, 1.4, 2.6), &"bubble"))
+	ledge(Vector3(0.5, 3.6, -2.4), Vector3(2.4, 0.5, 2.4), &"bubble")
+	ledge(Vector3(3.0, 5.6, 0.0), Vector3(2.4, 0.5, 2.4), &"bubble")
+	shard_at(&"w5_shard_den", Vector3(3.0, 5.6, 0.0))
+	_frame = den[0]
+	region(Vector3.ZERO)
+

@@ -1,0 +1,24 @@
+{
+  "id": "pepper",
+  "name": "pepper",
+  "conversations": [
+    {
+      "when": "w5_found_mittens",
+      "lines": [
+        {
+          "speaker": "Pepper",
+          "text": "Warm hands again! Here, I found this Star Shard frozen in the ice last winter."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Pepper",
+          "text": "My mittens fell down the ice-fishing hole! The water's ever so deep. Could you dive for them?"
+        }
+      ]
+    }
+  ]
+}
