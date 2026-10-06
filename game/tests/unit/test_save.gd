@@ -113,3 +113,21 @@ func test_shop_spends_seeds_and_respects_tiers() -> void:
 	check(not Progress.buy(&"hat_crown"), "not enough seeds left for the crown")
 	check(Progress.load_save(), "purchases survive a save and load")
 	check(Progress.has_upgrade(&"blade_1") and Progress.has_upgrade(&"heart_1"), "both still owned")
+
+
+## Build 7: a world's ability needs the world finished AND all its Star Shards, in either order;
+## saves from before keep what they earned by finishing.
+func test_abilities_need_finish_and_every_star() -> void:
+	Progress.new_game()
+	var w := Progress.world_def(&"world_03")
+	Progress.collect_shard(w.shard_ids[0])
+	Progress.commit_victory(&"world_03")
+	check(not Progress.has_ability(w.ability), "finished with stars missing: not yet")
+	for sid in w.shard_ids:
+		Progress.collect_shard(sid)
+	check(Progress.has_ability(w.ability), "the last star teaches it")
+	var old := Progress.fresh_data()
+	old.erase("abilities")
+	(old["completed_worlds"] as Array).append("world_01")
+	var migrated := Progress.sanitize(old)
+	check("fireball" in (migrated["abilities"] as Array), "an old save keeps the ability it earned by finishing")

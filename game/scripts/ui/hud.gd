@@ -151,7 +151,7 @@ func _refresh_seeds() -> void:
 		return
 	var text := "Glimmer Seeds  %d / %d" % [Progress.world_seed_count(world_id), w.seed_ids.size()]
 	if not w.shard_ids.is_empty():
-		text += "\nStar Shards  %d / %d" % [Progress.world_shard_count(world_id), w.shards_required]
+		text += "\nStar Shards  %d / %d" % [Progress.world_shard_count(world_id), w.shard_ids.size()]
 	_seeds.text = text
 
 

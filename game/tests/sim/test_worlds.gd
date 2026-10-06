@@ -63,6 +63,9 @@ func test_boss_worlds_play_to_victory() -> void:
 		var on_learn := func(a: StringName) -> void: learned.append(a)
 		Events.ability_learned.connect(on_learn)
 		var p := lvl.player
+		# Build 7: a world teaches its ability once it's finished with every Star Shard in.
+		for sid in w.shard_ids:
+			Progress.collect_shard(sid)
 		p.respawn_at(bw.arena_center + Vector3(0.0, 0.05, -6.0))
 		p.invuln_left = 9999.0
 		await ticks(3)

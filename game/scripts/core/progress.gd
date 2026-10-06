@@ -93,6 +93,7 @@ func fresh_data() -> Dictionary:
 		"best_times": {},
 		"world_progress": {},
 		"purchases": [],
+		"abilities": [],
 		"resume": {"scene_id": String(HUB_SCENE), "spawn_id": "hub_arrival"},
 	}
 
@@ -111,13 +112,26 @@ func is_world_complete(world_id: StringName) -> bool:
 var dev_all_abilities: bool = false
 
 
+## Build 7 (Ashwin: 6 stars per world; "each level should give some kind of ability after
+## collecting all the stars and finishing"): learned abilities are stored. A world teaches its
+## ability once it is finished AND all its Star Shards are in, whichever comes last.
 func has_ability(ability: StringName) -> bool:
 	if dev_all_abilities:
 		return true
-	for w in WORLD_DEFS:
-		if w.ability == ability and is_world_complete(w.id):
-			return true
-	return false
+	return String(ability) in (data.get("abilities", []) as Array)
+
+
+func _try_learn(world_id: StringName) -> void:
+	var w := world_def(world_id)
+	if w == null or w.ability == &"" or has_ability(w.ability):
+		return
+	if not is_world_complete(world_id) or world_shard_count(world_id) < w.shard_ids.size():
+		return
+	if not data.has("abilities"):
+		data["abilities"] = []
+	(data["abilities"] as Array).append(String(w.ability))
+	save()
+	Events.ability_learned.emit(w.ability)
 
 
 func completed_count() -> int:
@@ -205,6 +219,9 @@ func collect_shard(shard_id: StringName) -> void:
 	(data["shards"] as Array).append(String(shard_id))
 	Events.shard_collected.emit(shard_id)
 	save()
+	for w in WORLD_DEFS:
+		if shard_id in w.shard_ids:
+			_try_learn(w.id)
 
 
 func world_shard_count(world_id: StringName) -> int:
@@ -298,8 +315,7 @@ func commit_victory(world_id: StringName) -> bool:
 	data = next
 	save()
 	_debug_kill(3)
-	if first_clear and w != null and w.ability != &"":
-		Events.ability_learned.emit(w.ability)
+	_try_learn(world_id)
 	return first_clear
 
 
@@ -415,6 +431,19 @@ func sanitize(d: Dictionary) -> Dictionary:
 	for k: StringName in ShopItems.ITEMS:
 		known_items.append(String(k))
 	out["purchases"] = _filter_known(d.get("purchases", []), known_items, "purchase")
+	# Abilities: saves from before Build 7 earned them by finishing a world, so they keep those.
+	var known_abilities: Array[String] = []
+	for w in WORLD_DEFS:
+		if w.ability != &"":
+			known_abilities.append(String(w.ability))
+	if d.has("abilities"):
+		out["abilities"] = _filter_known(d["abilities"], known_abilities, "ability")
+	else:
+		var legacy: Array = []
+		for w in WORLD_DEFS:
+			if w.ability != &"" and String(w.id) in (out["completed_worlds"] as Array):
+				legacy.append(String(w.ability))
+		out["abilities"] = legacy
 	return out
 
 
