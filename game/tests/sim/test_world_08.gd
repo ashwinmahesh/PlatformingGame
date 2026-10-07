@@ -535,3 +535,41 @@ func test_sky_rows_and_bonus_room_climbs() -> void:
 	await _climb(p, inp, "bonus room top", [b + Vector3(12.0, 12.0, 4.0), b + Vector3(4.0, 15.0, 8.0), b + Vector3(-6.0, 18.0, 6.0), b + Vector3(-13.0, 20.5, -3.0)] as Array[Vector3])
 	check(Progress.has_shard(&"w8_shard_bonus"), "the Bonus Room's climb reaches its star")
 	await _free(lvl)
+
+
+## Ability route: with Vinelash, zip from the meadow to the low balloon cloud, then from it to the
+## high one and its seed.
+func test_balloon_clouds_carry_a_vinelash_to_the_seed() -> void:
+	var lvl := await _load()
+	var p := lvl.player
+	var inp := _scripted(p)
+	p.abilities_override = [&"vine"]
+	var low := Brickbloom.HOOK_CLOUD_LOW
+	var high := Brickbloom.HOOK_CLOUD_HIGH
+	var start := Vector3(-4.0, 0.05, 84.0)
+	p.respawn_at(start, low - start)
+	await ticks(6)
+	for cloud: Vector3 in [low, high]:
+		inp.tap(&"vine")
+		await ticks(2)
+		check(p.vine_target != null, "a hook flower catches the vine toward the cloud at %.0f m" % cloud.y)
+		for i in 120:
+			await ticks(1)
+			if p.vine_target == null:
+				break
+		# Off the hook, steer onto the cloud as you'd hold the stick toward it.
+		for i in 120:
+			inp.move = _toward(p, cloud - p.global_position)
+			await ticks(1)
+			if i > 5 and p.is_on_floor():
+				break
+		inp.move = Vector2.ZERO
+		await ticks(10)
+		check(p.is_on_floor() and absf(p.global_position.y - cloud.y) < 0.6, "the pop lands you on the cloud at %.0f m (hero at %s)" % [cloud.y, str(p.global_position.snapped(Vector3.ONE * 0.1))])
+		if cloud == low:
+			# Walk to the far corner and face the high cloud, away from the flower you came up on.
+			await _walk_to(p, inp, low + Vector3(-3.5, 0.0, -3.5))
+			p.facing = (high - p.global_position).normalized()
+	await ticks(30)
+	check(Progress.has_seed(&"w8_seed_hook"), "the high cloud's seed is yours")
+	await _free(lvl)

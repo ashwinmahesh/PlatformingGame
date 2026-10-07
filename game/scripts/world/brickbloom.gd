@@ -47,6 +47,9 @@ const MOAT_PIPE := Vector3(-30.0, MOAT_BED, -30.0)
 const TOY_BOX := Vector3(78.0, 0.0, -96.0)
 const TOY_RIM := 6.6
 const PIPE_GARDEN := Vector3(-100.0, 0.0, 100.0)
+## The Vinelash route over the meadow: a low cloud you could just about jump to, a high one you can't.
+const HOOK_CLOUD_LOW := Vector3(-8.0, 11.0, 70.0)
+const HOOK_CLOUD_HIGH := Vector3(-20.0, 22.0, 58.0)
 const KK := "res://assets/models/kk_platformer/"
 const TOY: Array[StringName] = [&"roof_red", &"thatch", &"roof_blue", &"slime_green", &"mush_purple", &"sunset_orange", &"candy_pink"]
 
@@ -872,17 +875,20 @@ func _pipes() -> void:
 	Ambient.bubbles(self, MOAT_PIPE + Vector3(0.0, 5.0, 0.0), Vector3(2.0, 8.0, 2.0), 16)
 
 
-## Vinelash: hook flowers on balloons rise from the meadow to a cloud with a seed.
+## Vinelash: two clouds tied to balloons over the meadow, each with a hook flower on its edge. Zip
+## from the meadow to the low cloud, then from it to the high cloud and its seed (too high to jump).
 func _hooks() -> void:
-	var cols: Array[StringName] = [&"candy_pink", &"slime_blue"]
-	var bases: Array[Vector3] = [Vector3(-6.0, 4.0, 74.0), Vector3(-12.0, 11.0, 68.0)]
-	for i in bases.size():
-		hook(bases[i])
-		_balloon(bases[i], cols[i])
-	_cloud(Vector3(-18.0, 18.0, 60.0), Vector2(7.0, 7.0))
-	hook(Vector3(-18.0, 18.0, 63.2))
-	seed_at(&"w8_seed_hook", Vector3(-18.5, 18.0, 59.0))
-	sign_post(Vector3(-2.0, 0.0, 76.0), "Balloon hooks: Vinelash (2 / G)\nup to the cloud!", PI * 0.75)
+	# The low cloud's flower is on its near (south-east) corner; the high cloud's hangs just off the
+	# corner facing the low one (in clear sight from below), so from the low cloud's far corner the
+	# high flower is the one ahead.
+	_cloud(HOOK_CLOUD_LOW, Vector2(10.0, 10.0))
+	hook(HOOK_CLOUD_LOW + Vector3(4.0, 0.0, 4.0))
+	_cloud(HOOK_CLOUD_HIGH, Vector2(7.0, 7.0))
+	hook(HOOK_CLOUD_HIGH + Vector3(4.0, 0.0, 4.0))
+	seed_at(&"w8_seed_hook", HOOK_CLOUD_HIGH + Vector3(-1.0, 0.0, -1.0))
+	for spec: Array in [[HOOK_CLOUD_LOW + Vector3(-4.5, 0.0, 4.5), &"candy_pink"], [HOOK_CLOUD_LOW + Vector3(4.5, 0.0, -4.5), &"slime_blue"], [HOOK_CLOUD_HIGH + Vector3(-3.0, 0.0, -3.0), &"gold"], [HOOK_CLOUD_HIGH + Vector3(3.0, 0.0, -3.0), &"candy_pink"]]:
+		_balloon(spec[0] as Vector3, spec[1] as StringName)
+	sign_post(Vector3(-2.0, 0.0, 78.0), "Balloon clouds: Vinelash (2 / G)\nfrom flower to flower!", PI * 0.75)
 
 
 # --- North-east: the Toy Box; south-west: the Pipe Garden; trees --------------------------------
