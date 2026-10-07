@@ -327,19 +327,59 @@ func carpet(bone: String, a: Vector3, b: Vector3, width: float, thick: float = 0
 
 ## Carpet strips along the skin's top ridge from local z0 to z1, one strip per `step` metres,
 ## each tied to the bone (of the `chain`, listed head to tail of the chain) it lies along.
+## Neighbouring strips share their end points, so the walk is one continuous surface with no
+## lips, and each joint is lifted until no skin pokes up through a strip.
 func ridge_carpets(z0: float, z1: float, step: float, width: float, chain: Array[String], look: StringName = &"moss", color: StringName = &"moss", thick: float = 0.35, skin: PackedVector3Array = PackedVector3Array()) -> Array[AnimatableBody3D]:
+	var zs: Array[float] = []
+	var n := maxi(int(ceil(absf(z1 - z0) / step)), 1)
+	for i in n + 1:
+		zs.append(lerpf(z0, z1, float(i) / n))
+	return ridge_carpets_at(zs, width, chain, look, color, thick, skin)
+
+
+## The same, through the ridge at the given local z positions (in walking order).
+func ridge_carpets_at(zs: Array[float], width: float, chain: Array[String], look: StringName = &"moss", color: StringName = &"moss", thick: float = 0.35, skin: PackedVector3Array = PackedVector3Array()) -> Array[AnimatableBody3D]:
 	if skin.is_empty():
 		skin = skin_points()
-	var pts := ridge_points(skin, z0, z1, step)
+	var tops: Array[Vector3] = []
+	for z in zs:
+		var pts := ridge_points(skin, z, z, 1.4)
+		if not pts.is_empty():
+			tops.append(pts[0] + Vector3.UP * thick)
+	for pass_i in 4:
+		for i in tops.size() - 1:
+			var poke := _poke(skin, tops[i], tops[i + 1], width, thick)
+			if poke > 0.001:
+				tops[i].y += poke
+				tops[i + 1].y += poke
 	var out: Array[AnimatableBody3D] = []
-	for i in pts.size() - 1:
-		var a := pts[i]
-		var b := pts[i + 1]
-		var d := (b - a).normalized()
-		a -= d * 0.3
-		b += d * 0.3
-		out.append(carpet(nearest_bone((a + b) * 0.5, chain), a, b, width, thick, look, color, skin))
+	for i in tops.size() - 1:
+		out.append(strip(nearest_bone((tops[i] + tops[i + 1]) * 0.5, chain), tops[i], tops[i + 1], width, thick, look, color))
 	return out
+
+
+## How far skin pokes up through the underside of a strip whose top runs from a to b.
+static func _poke(skin: PackedVector3Array, a: Vector3, b: Vector3, width: float, thick: float) -> float:
+	var dir := b - a
+	var basis := Basis.looking_at(dir.normalized(), Vector3.UP)
+	var inv := Transform3D(basis, a).affine_inverse()
+	var length := dir.length()
+	var worst := 0.0
+	for q in skin:
+		var l := inv * q
+		if absf(l.x) <= width * 0.5 and l.z <= 0.0 and -l.z <= length:
+			worst = maxf(worst, l.y + thick)
+	return worst
+
+
+## A strip whose top surface runs exactly from a to b (this node's frame), slightly overlapping
+## its neighbours at both ends.
+func strip(bone: String, a: Vector3, b: Vector3, width: float, thick: float = 0.35, look: StringName = &"moss", color: StringName = &"moss") -> AnimatableBody3D:
+	var dir := (b - a).normalized()
+	var basis := Basis.looking_at(dir, Vector3.UP)
+	var length := a.distance_to(b) + 0.2
+	var xf := Transform3D(basis, (a + b) * 0.5 - basis.y * thick * 0.5)
+	return add_piece(bone, xf, Vector3(width, thick, length), look, color)
 
 
 ## The skin's top ridge sampled every `step` metres along local z.

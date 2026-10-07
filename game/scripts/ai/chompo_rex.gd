@@ -90,7 +90,7 @@ func build_body() -> void:
 	_body_area = area(Layers.ENEMY_HURTBOX, b, Vector3.ZERO)
 	var w := SphereShape3D.new()
 	w.radius = 1.9
-	_weak_area = area(Layers.ENEMY_HURTBOX, w, WEAK_AT)
+	_weak_area = area(Layers.ENEMY_HURTBOX, w, Vector3.ZERO)
 	_stars = Node3D.new()
 	_stars.visible = false
 	add_child(_stars)

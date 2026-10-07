@@ -404,7 +404,12 @@ func _mossback() -> void:
 	for spec: Vector3 in [Vector3(-2.2, 6.0, 0.6), Vector3(-1.4, 6.4, 2.0), Vector3(0.8, 6.2, 1.8)]:
 		mossback.add_melon(MELON_TREE + spec)
 	# A mounting stone where her tail tip rests (over the river, on the south bank).
-	box(MOSSBACK + Vector3(-1.7, 0.6, 30.0), Vector3(4.0, 0.6, 4.0), &"stone_light", &"moss")
+	# Mossy steps up to where her tail tip rests (south bank).
+	var foot := mossback.to_global(mossback.tail_foot)
+	var steps := int(ceil((foot.y - 0.1) / 0.3))
+	for k in steps:
+		var top := (foot.y - 0.1) * float(steps - k) / steps
+		box(Vector3(foot.x, top, foot.z + 0.9 + k * 1.2), Vector3(3.6, top, 1.4), &"stone_light", &"moss")
 	npc("cycadia", "Cycadia", Vector3(-44.0, 0.0, -14.0))
 	sign_at(Vector3(-40.0, 0.0, -12.0), "Shh! Mossback is waiting for breakfast.", PI * 0.75)
 	add_capture_point("mossback", Vector3(-24.0, 22.0, 26.0), MOSSBACK + Vector3(0.0, 8.0, -8.0))
@@ -450,7 +455,7 @@ func _lake_and_trundle() -> void:
 	trundle.posed_bones = ["Tail1", "Tail2", "Tail3", "Tail4", "Tail5"]
 	trundle.speed = 2.4
 	trundle.path = _trundle_path()
-	trundle.stops = [Vector2(_trundle_stop_at(Vector3(-90.0, 0.0, 78.0)), 7.0), Vector2(_trundle_stop_at(Vector3(-82.0, CAUSEWAY_Y, 34.0)), 6.0)]
+	trundle.stops = [Vector2(_trundle_stop_at(Vector3(-90.0, 0.0, 78.0)), 7.0), Vector2(_trundle_stop_at(Vector3(-98.0, CAUSEWAY_Y, 37.0)), 6.0)]
 	add_child(trundle)
 	trundle.paused = true
 	var down := deg_to_rad(12.0)

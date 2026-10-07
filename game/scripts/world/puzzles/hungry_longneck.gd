@@ -15,8 +15,8 @@ enum S { HUNGRY, EATING, RESTING }
 const SCALE := 1.1
 const HUNGRY_PITCH := -32.0
 const EAT_PITCH := 26.0
-const REST_PITCH := 0.0
-const TAIL_DROP_DEG := 18.0
+const REST_PITCH := -4.0
+const TAIL_DROP_DEG := Vector2(12.0, 20.0)
 const NECK_CHAIN: Array[String] = ["Shoulders", "Neck", "Head"]
 const TAIL_CHAIN: Array[String] = ["Tail1", "Tail2", "Tail3", "Tail4", "Tail5"]
 
@@ -25,6 +25,8 @@ var dino: Dino
 ## The trough she eats from (this node's frame) and the head carpet (where a seed can ride).
 var trough_at: Vector3
 var head_piece: AnimatableBody3D
+## Where her tail tip's carpet ends (this node's frame): the mounting stone goes under it.
+var tail_foot: Vector3
 var _t: float = 0.0
 var _pitch: float = HUNGRY_PITCH
 var _melons: Array[Area3D] = []
@@ -42,16 +44,22 @@ func _ready() -> void:
 	posed.append_array(TAIL_CHAIN)
 	dino.posed_bones = posed
 	add_child(dino)
-	var down := deg_to_rad(TAIL_DROP_DEG)
-	dino.aim_chain(TAIL_CHAIN, Vector3(0.0, -sin(down), -cos(down)))
+	# The tail lies down behind her as a ramp: gently off her rump, then steadier to the ground.
+	var near := deg_to_rad(TAIL_DROP_DEG.x)
+	var far := deg_to_rad(TAIL_DROP_DEG.y)
+	dino.aim_chain(["Tail1", "Tail2"], Vector3(0.0, -sin(near), -cos(near)))
+	dino.aim_chain(["Tail3", "Tail4", "Tail5"], Vector3(0.0, -sin(far), -cos(far)))
 	# Carpets are laid at the resting pose, so the bridge she makes is exactly them.
 	dino.bend_pitch("Shoulders", REST_PITCH)
 	dino.tick(0.0)
 	var skin := dino.skin_points()
-	dino.ridge_carpets(3.5, -3.0, 2.2, 3.2, ["Hips", "Torso", "Shoulders"], &"moss", &"moss", 0.35, skin)
+	dino.ridge_carpets(3.5, -2.0, 2.2, 3.2, ["Hips", "Torso", "Shoulders"], &"moss", &"moss", 0.35, skin)
 	var tail: Array[String] = ["Back"]
 	tail.append_array(TAIL_CHAIN)
-	dino.ridge_carpets(-3.0, -29.0, 2.6, 2.0, tail, &"moss", &"moss", 0.35, skin)
+	var tail_pieces := dino.ridge_carpets_at([-2.0, -7.0, -9.5, -12.0, -14.5, -17.0, -19.5, -22.0, -24.5, -27.0, -29.0], 2.0, tail, &"moss", &"moss", 0.35, skin)
+	var last := tail_pieces[tail_pieces.size() - 1]
+	var half := ((last.get_child(0) as CollisionShape3D).shape as BoxShape3D).size * 0.5
+	tail_foot = to_local(last.global_transform * Vector3(0.0, half.y, -half.z))
 	var neck := dino.ridge_carpets(3.5, 24.0, 2.3, 2.4, NECK_CHAIN, &"moss", &"moss", 0.35, skin)
 	# A mossy brim off the end of her nose, to step across onto whatever her chin rests on.
 	var tip: Vector3 = Dino.ridge_points(skin, 24.0, 24.0, 1.0)[0]
