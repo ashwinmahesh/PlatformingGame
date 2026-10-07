@@ -400,8 +400,8 @@ func _fern_floor() -> void:
 	# A giant mushroom grove with a springcap up to a seed on the tallest cap.
 	var top := mushroom_platform(Vector3(30.0, 9.5, -8.0), 0.0, 5.0, &"red")
 	seed_at(&"w9_seed_capstool", top)
-	var pink := mushroom_platform(Vector3(22.0, 5.0, -12.0), 0.0, 4.0, &"pink")
-	var teal := mushroom_platform(Vector3(37.0, 6.5, -2.0), 0.0, 3.5, &"teal")
+	var pink := mushroom_platform(Vector3(15.0, 4.0, -15.0), 0.0, 4.0, &"pink")
+	var teal := mushroom_platform(Vector3(40.0, 6.5, 2.0), 0.0, 3.5, &"teal")
 	monkey([pink, teal])
 	bouncer(Vector3(24.0, 0.0, -2.0), Springcap.Look.MUSHROOM, 6.0, 12.0)
 	for spec: Array in [[-20.0, -10.0, 7.0, 4.5, &"purple"], [-30.0, 2.0, 5.0, 3.5, &"orange"], [50.0, -14.0, 8.0, 4.0, &"blue"]]:
@@ -1045,7 +1045,7 @@ func _busy(p: Vector3) -> bool:
 	var spots: Array[Array] = [
 		[Vector3(0.0, 0.0, 66.0), 28.0], [Vector3(0.0, 0.0, 100.0), 10.0], [MOSSBACK + Vector3(0.0, 0.0, 3.0), 30.0],
 		[Vector3(-90.0, 0.0, 80.0), 14.0], [SNOOZER, 16.0], [SNOOZER + Vector3(-8.0, 0.0, -14.0), 10.0],
-		[Vector3(14.0, 0.0, -14.0), 8.0], [Vector3(30.0, 0.0, -6.0), 12.0], [Vector3(-8.0, T1, -52.0), 14.0],
+		[Vector3(14.0, 0.0, -14.0), 8.0], [Vector3(30.0, 0.0, -6.0), 12.0], [Vector3(15.0, 0.0, -15.0), 6.0], [Vector3(40.0, 0.0, 2.0), 6.0], [Vector3(-8.0, T1, -52.0), 14.0],
 		[Vector3(68.0, 0.0, -46.0), 18.0], [Vector3(-84.0, T2, -48.0), 26.0], [VOLCANO, 26.0],
 		[Vector3(VOLCANO.x, T2, -144.0), 12.0], [TAR, 30.0], [SKYFERN, 16.0], [ARENA, 28.0], [Vector3(40.0, T2, -110.0), 12.0],
 		[Vector3(-104.0, 0.0, -12.0), 10.0], [Vector3(-30.0, T1, -58.0), 6.0], [Vector3(28.0, T1, -66.0), 6.0],

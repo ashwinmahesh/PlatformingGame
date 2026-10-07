@@ -65,9 +65,11 @@ func _ready() -> void:
 	var tip: Vector3 = Dino.ridge_points(skin, 24.0, 24.0, 1.0)[0]
 	head_piece = dino.carpet("Head", tip + Vector3(0.0, 0.0, -1.6), tip + Vector3(0.0, 0.0, 2.6), 2.2, 0.35, &"moss", &"moss", skin)
 	neck.append(head_piece)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 4242
 	for p in neck:
 		for k in 2:
-			Kit.blob(p, Vector3(randf_range(-0.6, 0.6), 0.22, randf_range(-0.8, 0.8)), 0.25, [&"candy_pink", &"gold", &"mush_spot"][k % 3] as StringName)
+			Kit.blob(p, Vector3(rng.randf_range(-0.6, 0.6), 0.22, rng.randf_range(-0.8, 0.8)), 0.25, [&"candy_pink", &"gold", &"mush_spot"][(k + neck.find(p)) % 3] as StringName)
 	# Where her mouth reaches when she bends down to eat: the trough goes there.
 	dino.bend_pitch("Shoulders", EAT_PITCH)
 	dino.tick(0.0)

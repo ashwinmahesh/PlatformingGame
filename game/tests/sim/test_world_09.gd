@@ -346,3 +346,22 @@ func test_mushroom_caps_stay_solid_after_merging() -> void:
 	var hit := get_world_3d().direct_space_state.intersect_ray(q)
 	check(not hit.is_empty() and (hit["position"] as Vector3).y > 9.0, "the giant mushroom cap under the seed is solid (%s)" % str(hit.get("position", "none")))
 	await _done()
+
+
+## Regression: a coconut monkey with no encounter zone never ticked its own attack director, so its
+## second throw waited forever (watchdog error). The one on the Fern Floor's caps keeps throwing.
+func test_cap_monkey_keeps_throwing() -> void:
+	await _load(&"w9_cp_fernfloor")
+	var monkey := lvl.find_children("*", "BonkMonkey", true, false)[0] as BonkMonkey
+	p.respawn_at(monkey.global_position + Vector3(6.0, -monkey.global_position.y + 0.05, 6.0))
+	var throws := 0
+	var last: Coconut = null
+	for i in 600:
+		await ticks(1)
+		p.invuln_left = 9999.0
+		if monkey.last_coconut != null and monkey.last_coconut != last:
+			last = monkey.last_coconut
+			throws += 1
+	check(throws >= 3, "it keeps throwing coconuts (%d)" % throws)
+	check_eq(monkey.watchdog_trips, 0, "no watchdog trips")
+	await _done()

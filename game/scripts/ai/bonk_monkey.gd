@@ -45,6 +45,9 @@ var _tail: Node3D
 var _hurtbox: Area3D
 var _debug: Label3D
 var _bob: float = 0.0
+## A monkey with no encounter zone keeps its own director, and has to tick it (or its second
+## throw waits forever for the gap between attacks to pass).
+var _own_director: bool = false
 
 
 func _ready() -> void:
@@ -52,6 +55,7 @@ func _ready() -> void:
 	add_to_group(&"lockable")
 	if director == null:
 		director = AttackDirector.new()
+		_own_director = true
 	if not perches.is_empty():
 		global_position = perches[perch_index]
 	_build()
@@ -94,6 +98,8 @@ func _max_ticks(s: S) -> int:
 
 
 func _physics_process(_delta: float) -> void:
+	if _own_director:
+		director.advance()
 	if hitstop_ticks > 0:
 		hitstop_ticks -= 1
 		return
