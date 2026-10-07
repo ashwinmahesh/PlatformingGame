@@ -508,7 +508,7 @@ func _lake_and_trundle() -> void:
 		box(deck + back.normalized() * (3.0 + k * 2.2) + Vector3(0.0, h - deck.y, 0.0), Vector3(3.2, h, 2.4), &"wood_plank", &"wood_plank")
 	var side := (trundle.global_basis * Vector3.RIGHT).normalized()
 	var stop_top := trundle.global_transform * sxf * Vector3(0.0, 0.175, 0.0)
-	var tower := stop_top + side * 4.2 + Vector3.DOWN * 0.15
+	var tower := stop_top + side * 5.0 + Vector3.DOWN * 0.15
 	box(tower, Vector3(3.4, tower.y, 3.4), &"wood_plank", &"wood_plank")
 	ladder(tower - Vector3(0.0, tower.y, 0.0) + side * 1.7, tower.y, atan2(side.x, side.z))
 	Whimsy.bunting(self, deck + Vector3(0.0, 2.6, 0.0), tower + Vector3(0.0, 2.6, 0.0), 0.8)
