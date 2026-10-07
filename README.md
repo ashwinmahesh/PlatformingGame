@@ -1,6 +1,6 @@
 # Sproutblade
 
-A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built in **Godot 4.7.2**. You play a little sprout with a sword. You set out from the village of Mossbrook through the Rootway's arches into six worlds. You collect Star Shards and Glimmer Seeds, and you learn a new magic ability each time you clear a world.
+A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built in **Godot 4.7.2**. You play a little sprout with a sword. You set out from the village of Mossbrook through the Rootway's arches into seven worlds. You collect Star Shards and Glimmer Seeds, and you learn a new magic ability each time you clear a world.
 
 ![Lanternwick, the old-English town](docs/screenshots/lanternwick_overview.jpg)
 
@@ -8,11 +8,11 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 
 - **Small open worlds.** Every world is a sandbox you can tackle in any order. Each one has six Star Shards: three open its goal (a boss fight or a Grand Star), and the rest hide behind villagers' errands, secret rooms and puzzles.
 - **A second world up high.** Every world has a large upper tier of its own: treetop villages, cloud kingdoms, rooftop towns and cliff ledges. You get up there by ladders, spiral ramps, lifts, bounce pads and wind.
-- **Secrets and puzzles.** Bell sequences, crates to push onto pressure plates, crystal switches, breakable walls and bramble doors guard secret rooms. Villagers send you on errands.
+- **Secrets and puzzles.** Every world has its own puzzles: mirrors and light beams, water levels, a turning bridge, braziers to light, colour locks, a critter to follow, a thunder dynamo, a villager's riddle, bloom-buds that open into steps. Breakable walls and bramble doors guard secret rooms, and villagers send you on errands.
 - **Water you can swim in.** Lakes, rivers and pools are 8–12 m deep. They have grottos and seeds at the bottom, and you can use the sword while swimming.
 - **A storybook look.** One toon shader is applied over CC0 models from Quaternius, KayKit and Kenney, with painted terrain, an ink outline and a bright palette.
 
-### Mossbrook and the six worlds
+### Mossbrook and the worlds
 
 | | World | Goal | Up high |
 |---|---|---|---|
@@ -23,6 +23,7 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 | 4 | **Bubbleton Reef**: an undersea town with Main Street, a walk-in grill and Pineapple Row | Grand Star | Coral Heights, terraces on top of coral towers |
 | 5 | **Frostfang Peak**: a snowy valley with an ice slide, crystal caverns and pine heights | Boss: Avalanche Ape | The Rimwalk along the north cliffs |
 | 6 | **Lanternwick**: a walled old-English riverside town of jettied timber houses, alleys and washing lines | Grand Star | The Sweep's Run rooftops, the Sky Bridge and the Clock Tower |
+| 7 | **Planet Glorbo**: a candy-coloured alien moon, a crater round a lake of glowing goo, with dome villages and weird plants | Boss: Queen Bloomzilla | The Orbit Walk, a ring of floating decks, and the Crown Asteroid |
 
 | | |
 |---|---|
@@ -34,6 +35,8 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 | Bubbleton Reef | Frostfang Peak |
 | ![A Lanternwick alley](docs/screenshots/lanternwick_alley.jpg) | ![The Glimmerbrook canopy](docs/screenshots/glimmerbrook_canopy_overview.jpg) |
 | A Lanternwick alley: a ladder, ledges and a crystal stair | The Glimmerbrook canopy from above |
+| ![Planet Glorbo](docs/screenshots/glorbo.jpg) | ![The Bloomstalk](docs/screenshots/glorbo_bloomstalk.jpg) |
+| Planet Glorbo and the Orbit Walk | The Bloomstalk: bop each bud to bloom the next step |
 
 ### Moves and magic
 
@@ -49,7 +52,7 @@ Every world teaches a magic ability once it's finished with all six Star Shards 
 | 4 / V | Air Dash | Bubbleton | A quick dash, once per jump. |
 | 5 | Frost Burst | Frostfang | Freezes monsters solid and water into floes you can stand on. |
 | 6 | Spring Boots | Lanternwick | A huge spring onto rooftops (once more in the air). |
-| 7 | Gravity Orb | World 7 | Drags monsters into a vortex, then pops. |
+| 7 | Gravity Orb | Planet Glorbo | Drags monsters into a vortex, then pops. |
 | 8 | Star Rush | World 8 | An untouchable sprint that bowls monsters over. |
 | 9 | Mighty Roar | World 9 | Stuns every monster far around and knocks shields away. |
 
@@ -107,7 +110,7 @@ The tests drive the real movement loop in physics scenes. They cover movement, c
 
 ## Art, sound and licences
 
-All sourced assets are CC0, and each one is listed with its source in [docs/assets/LICENSES.md](docs/assets/LICENSES.md). The unpacked packs live in `art/sourced/<pack>/`, and what the game uses is copied into `game/assets/`. Both are committed, so a fresh clone builds and plays as is.
+The music is CC0 recordings by Komiku and Juhani Junkala: a tune for the title, Mossbrook, every world, the boss fights and Clover's shop. All sourced assets are CC0, and each one is listed with its source in [docs/assets/LICENSES.md](docs/assets/LICENSES.md). The unpacked packs live in `art/sourced/<pack>/`, and what the game uses is copied into `game/assets/`. Both are committed, so a fresh clone builds and plays as is.
 
 The original download archives (several are over GitHub's 100 MB limit) are **not** in the repo. To fetch them again, for example to re-extract or update a pack:
 
