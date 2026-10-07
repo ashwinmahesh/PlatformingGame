@@ -25,6 +25,12 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 - Sourced models are wrapped, never edited: Props (scripts/world/props.gd) for scenery,
   CharacterModel for rigged KayKit characters; Toon.apply gives them the one toon look.
 - Sounds: synthesised by audio/synth/*.py, then tools/source_audio.py overrides some with Kenney.
+- Music: one CC0 recording per cue in game/assets/audio/music/<cue>.(ogg|mp3|wav) (a world's cue
+  is its `music` id, e.g. world_07), levelled with an entry in AudioDirector.MUSIC_GAIN, logged in
+  docs/assets/LICENSES.md and re-fetchable through tools/fetch_assets.sh.
+- Music: one CC0 recording per cue in game/assets/audio/music/<cue>.(ogg|mp3|wav) (a world's cue
+  is its `music` id, e.g. world_07), levelled with an entry in AudioDirector.MUSIC_GAIN, logged in
+  docs/assets/LICENSES.md and re-fetchable through tools/fetch_assets.sh.
 
 ## Design principles (Ashwin's standing rules; apply to every world, the hub and every gameplay
 ## change; where they differ from game_plan_opus.md, these win)
