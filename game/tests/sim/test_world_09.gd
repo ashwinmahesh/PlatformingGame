@@ -245,6 +245,12 @@ func test_the_tar_crater_log_turns_with_the_hero_riding_it() -> void:
 	await _walk_to(Dinodew.TAR + Vector3(-2.0, 0.0, -Dinodew.TAR_HALF - 9.0), 120)
 	await ticks(10)
 	check(Progress.has_flag(&"w9_found_spectacles"), "the log leads to the spectacles in the pterosaur's nest")
+	# Back in the village, Grandpa Gingko trades them for a Star Shard.
+	for n in lvl.find_children("*", "Npc", true, false):
+		if (n as Npc).npc_id == "gingko":
+			(n as Npc).interact(p)
+	await ticks(2)
+	check(Progress.has_shard(&"w9_shard_errand"), "Grandpa Gingko's errand pays a Star Shard")
 	await _done()
 
 
@@ -364,4 +370,157 @@ func test_cap_monkey_keeps_throwing() -> void:
 			throws += 1
 	check(throws >= 3, "it keeps throwing coconuts (%d)" % throws)
 	check_eq(monkey.watchdog_trips, 0, "no watchdog trips")
+	await _done()
+
+
+## The hidden lava tube behind Ember Cone: crack the rock, ride the steam up, climb to the shard.
+func test_lava_tube_is_hidden_behind_a_crack_with_a_steam_climb() -> void:
+	await _load(&"w9_cp_crater")
+	var room := Transform3D(Basis(), Vector3(Dinodew.VOLCANO.x, Dinodew.T2, -144.0))
+	var wall: BreakableWall = null
+	for n in lvl.find_children("*", "BreakableWall", true, false):
+		if (n as Node3D).global_position.distance_to(room * Vector3(0.0, 0.0, 6.0)) < 1.0:
+			wall = n as BreakableWall
+	check(wall != null, "a cracked rock seals the lava tube")
+	p.respawn_at(room * Vector3(0.0, 0.1, 9.0))
+	await until_grounded(p)
+	await _walk_to(room * Vector3(0.0, 0.0, 6.2), 60, 0.4)
+	check(p.global_position.z > room.origin.z + 6.4, "the crack blocks the way in")
+	for k in 3:
+		wall.receive_player_attack({"id": 800 + k, "kind": &"slash_1", "damage": 1}, null)
+	await ticks(10)
+	await _walk_to(room * Vector3(-0.5, 0.0, -1.0), 120, 0.5)
+	check(p.global_position.z < room.origin.z + 4.0, "three whacks open it (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
+	# Jump into the steam, ride it up, and drift onto the first high ledge.
+	await _walk_to(room * Vector3(-0.5, 0.0, -2.0), 60, 0.3)
+	await ticks(20)
+	inp.tap(&"jump")
+	var ledge := room * Vector3(3.5, 7.0, -3.5)
+	var column := room * Vector3(-0.5, 0.0, -2.0)
+	for i in 200:
+		await ticks(1)
+		var target := ledge if p.global_position.y > ledge.y + 0.8 else column
+		var d := target - p.global_position
+		d.y = 0.0
+		if d.length() > 0.3:
+			var local := Basis(Vector3.UP, -p.camera_yaw) * d.normalized()
+			inp.move = Vector2(local.x, -local.z) * (1.0 if target == ledge else 0.4)
+		else:
+			inp.move = Vector2.ZERO
+		if i > 30 and p.is_on_floor():
+			break
+	inp.move = Vector2.ZERO
+	check(p.global_position.y > ledge.y - 0.3, "the steam lifts the hero to the first ledge (y %.1f)" % p.global_position.y)
+	for spot: Vector3 in [Vector3(4.0, 9.6, 1.0), Vector3(0.0, 12.0, 3.0), Vector3(-4.0, 14.4, 0.0)]:
+		await _jump_to(room * spot, 2, 120)
+	await ticks(20)
+	check(Progress.has_shard(&"w9_shard_lavatube"), "the climb ends at the lava tube shard (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
+	await _done()
+
+
+## The Mighty Roar (this world's prize) has a route here too: a roar from the haystack wakes
+## Snoozer without ringing his gong.
+func test_a_mighty_roar_wakes_snoozer() -> void:
+	await _load(&"w9_cp_village")
+	var s := lvl.snoozer
+	p.abilities_override = [&"roar"]
+	p.respawn_at(s.to_global(Vector3(0.0, SleepyDino.BALE_TOP + 0.1, -9.0)))
+	await until_grounded(p)
+	inp.tap(&"ability_9")
+	for i in 30:
+		await ticks(1)
+	check(s.state == SleepyDino.S.WAKING or s.is_awake(), "the roar reaches his gong and he gets up")
+	await _done()
+
+
+## The Skyfern: shelf fungi spiral up the trunk to the crown shard, no Vinelash needed.
+func test_skyfern_shelves_climb_to_the_crown() -> void:
+	await _load(&"w9_cp_crater")
+	var c := Dinodew.SKYFERN
+	p.respawn_at(c + Vector3(13.0, 0.1, 0.0))
+	await until_grounded(p)
+	var mover: MovingPlatform = null
+	for n in lvl.find_children("*", "MovingPlatform", true, false):
+		if (n as Node3D).global_position.distance_to(c + Vector3(Dinodew.SKYFERN_SHELF, 15.0, 0.0)) < 3.0:
+			mover = n as MovingPlatform
+	for i in 6:
+		var a := i * PI * 0.5
+		var r := Dinodew.SKYFERN_LAST_SHELF if i == 5 else Dinodew.SKYFERN_SHELF
+		var spot := c + Vector3(cos(a) * (r + 1.0), 3.0 * (i + 1), sin(a) * (r + 1.0))
+		if i == 4 and mover != null:
+			spot = mover.global_position + Vector3(1.0, 0.3, 0.0)
+		await _jump_to(spot, 3 if i == 5 else 2, 150)
+		await _walk_to(spot, 30, 0.5)
+	await _jump_to(c + Vector3(2.4, 21.0, 0.0), 2, 120)
+	await _walk_to(c + Vector3(2.4, 21.0, 0.0), 40, 0.5)
+	await ticks(20)
+	check(Progress.has_shard(&"w9_shard_crown"), "the shelves lead to the Skyfern's crown shard (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
+	await _done()
+
+
+## Ember Cone is a walk: ramps wind up round every tier to the crater rim and the summit seed.
+func test_ember_cone_ramps_walk_to_the_summit() -> void:
+	await _load(&"w9_cp_crater")
+	var radii: Array[float] = [26.0, 21.0, 16.5, 12.5, 8.5]
+	var v := Dinodew.VOLCANO
+	var first := true
+	for i in range(-1, radii.size() - 1):
+		var top := 3.0 * (i + 1)
+		var lane := radii[i + 1] + Dinodew.VOLCANO_LANE
+		var a0 := i * PI * 0.5 + 0.4
+		var da := 9.4 / lane
+		var a := v + Vector3(cos(a0), 0.0, sin(a0)) * lane + Vector3(0.0, top, 0.0)
+		var b := v + Vector3(cos(a0 + da), 0.0, sin(a0 + da)) * lane + Vector3(0.0, top + 3.0, 0.0)
+		if first:
+			p.respawn_at(a + (a - b).normalized() * 2.0 + Vector3.UP * 0.2)
+			await until_grounded(p)
+			first = false
+		await _walk_to(a, 200, 0.6)
+		await _walk_to(b, 200, 0.6)
+		await ticks(15)
+		# Step in off the ramp's top onto the tier.
+		var inward := (v - b) * Vector3(1.0, 0.0, 1.0)
+		await _walk_to(b + inward.normalized() * 3.0, 60, 0.5)
+		check(p.global_position.y > v.y + top + 2.6, "ramp %d climbs onto tier %d (y %.1f)" % [i, i + 1, p.global_position.y])
+	await _jump_to(v + Vector3(5.4, 16.6, 0.0), 1, 90)
+	await ticks(20)
+	check(Progress.has_seed(&"w9_seed_summit"), "the summit seed sits on the crater rim (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
+	await _done()
+
+
+## The log starts east-west: from the west landing it runs straight to the east nook's seed.
+func test_the_log_from_the_west_reaches_the_east_nook_seed() -> void:
+	await _load(&"w9_cp_crater")
+	var t := Dinodew.TAR
+	p.respawn_at(t + Vector3(-Dinodew.TAR_HALF - 3.0, 0.1, 0.0))
+	await until_grounded(p)
+	# Round the wheel post in the middle of the log.
+	for wp: Vector3 in [Vector3(-3.0, 0.0, 1.1), Vector3(3.0, 0.0, 1.1), Vector3(Dinodew.TAR_HALF + 10.0, 0.0, 0.0)]:
+		await _walk_to(t + wp, 300, 0.5)
+	await ticks(20)
+	check(Progress.has_seed(&"w9_seed_tar_nook"), "walked the log across the tar to the east nook seed (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
+	check(p.global_position.y > Dinodew.T2 - 0.3, "and never fell in")
+	await _done()
+
+
+## The Roost's last treehouse: up its ladder, then shelf fungi round the trunk to the crow's nest.
+func test_roost_ladder_and_fungus_steps_reach_the_crows_nest() -> void:
+	await _load(&"w9_cp_roost")
+	var h := Vector3(-96.0, Dinodew.T2, -62.0)
+	p.respawn_at(h + Vector3(0.0, 0.1, 7.5))
+	await until_grounded(p)
+	await _walk_to(h + Vector3(0.0, 0.0, 5.5), 120, 0.3)
+	inp.move = Vector2(0.0, 1.0)
+	for i in 240:
+		await ticks(1)
+		if p.global_position.y > h.y + 9.0 and p.is_on_floor():
+			break
+	inp.move = Vector2.ZERO
+	await _walk_to(h + Vector3(2.5, 0.0, 3.0), 60, 0.5)
+	check(p.global_position.y > h.y + 8.8, "climbed the ladder onto the treehouse deck (y %.1f)" % p.global_position.y)
+	for spot: Vector3 in [Vector3(3.4, 11.4, 0.0), Vector3(0.0, 13.8, 3.4), Vector3(-3.4, 16.2, 0.0)]:
+		await _jump_to(h + spot, 2, 120)
+		await _walk_to(h + spot, 20, 0.5)
+	await ticks(20)
+	check(Progress.has_seed(&"w9_seed_roost_top"), "the crow's nest seed (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
 	await _done()

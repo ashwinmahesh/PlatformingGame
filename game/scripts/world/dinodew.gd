@@ -42,6 +42,10 @@ const TAR_Y := 8.6
 const VOLCANO := Vector3(-80.0, T2, -110.0)
 const SKYFERN := Vector3(20.0, T2, -84.0)
 const MELON_TREE := Vector3(-40.5, T1, -27.0)
+const SKYFERN_SHELF := 6.4
+## Ember Cone's ramps run this far outside the tier they climb onto (their inner edge overlaps it).
+const VOLCANO_LANE := 1.75
+const SKYFERN_LAST_SHELF := 7.4
 
 var mossback: HungryLongneck
 var snoozer: SleepyDino
@@ -770,12 +774,16 @@ func _ember_cone() -> void:
 	# on the heights' ground). Its top end lies right beside the next tier's rim.
 	for i in range(-1, radii.size() - 1):
 		var top := 3.0 * (i + 1)
-		var lane := radii[i + 1] + 1.9
+		var lane := radii[i + 1] + VOLCANO_LANE
 		var a0 := i * PI * 0.5 + 0.4
 		var da := 9.4 / lane
 		var a := VOLCANO + Vector3(cos(a0), 0.0, sin(a0)) * lane + Vector3(0.0, top, 0.0)
 		var b := VOLCANO + Vector3(cos(a0 + da), 0.0, sin(a0 + da)) * lane + Vector3(0.0, top + 3.0, 0.0)
-		bridge(a, b, 3.4, &"sand_mid", false)
+		bridge(a, b, 3.8, &"sand_mid", false)
+		# A flat landing past the top, so running off the end still finds the tier.
+		var along := (b - a) * Vector3(1.0, 0.0, 1.0)
+		var land := box(b + along.normalized() * 2.2, Vector3(3.8, 0.6, 4.4), &"sand_mid", &"sand_light")
+		land.rotation.y = atan2(along.x, along.z)
 	# The crater: a glowing pool (too hot to touch) inside a ring of rocks.
 	var crater := VOLCANO + Vector3(0.0, 15.0, 0.0)
 	var lava := CylinderMesh.new()
@@ -813,7 +821,7 @@ func _ember_cone() -> void:
 	# The lava tube: a cracked rock behind the cone, steam rising inside, a climb to a shard.
 	var tube: Array = secret_cave(Vector3(VOLCANO.x, T2, -144.0), 0.0, Vector3(14.0, 18.0, 12.0), &"stone_dark", &"break")
 	ledge(Vector3(-4.5, 1.4, -3.0), Vector3(3.0, 1.4, 3.0), &"sunset_orange")
-	updraft(Vector3(-0.5, 0.3, -2.0), Vector3(3.0, 9.0, 3.0), 9.0, &"wind")
+	updraft(Vector3(-0.5, 0.3, -2.0), Vector3(4.0, 9.0, 4.0), 9.0, &"wind")
 	ledge(Vector3(3.5, 7.0, -3.5), Vector3(3.0, 0.5, 2.6), &"stone_dark")
 	crumble(Vector3(4.0, 9.6, 1.0), Vector3(2.6, 0.5, 2.6), CrumblePlatform.Look.ROCK)
 	ledge(Vector3(0.0, 12.0, 3.0), Vector3(2.8, 0.5, 2.6), &"stone_dark")
@@ -892,29 +900,29 @@ func _tar_crater() -> void:
 func _skyfern() -> void:
 	region(Vector3.ZERO)
 	var c := SKYFERN
-	Kit.pillar(self, c + Vector3(0.0, 21.0, 0.0), 2.4, 21.0, &"bark_mid", &"bark_light")
+	Kit.pillar(self, c + Vector3(0.0, 21.0, 0.0), 3.6, 21.0, &"bark_mid", &"bark_light")
 	# Shelf fungi spiral up the trunk to the crown: a climb, with one that crumbles and one that
 	# drifts. Hook flowers off to the side are the Vinelash shortcut.
 	var cols: Array[StringName] = [&"mush_red", &"sunset_orange", &"gold", &"mush_purple", &"mush_teal", &"candy_pink"]
 	for i in 6:
 		var a := i * PI * 0.5
-		var r := 6.0 if i == 5 else 4.4
+		var r := SKYFERN_LAST_SHELF if i == 5 else SKYFERN_SHELF
 		var s := Vector3(cos(a) * r, 3.0 * (i + 1), sin(a) * r)
 		if i == 3:
-			crumble(c + s, Vector3(3.0, 0.6, 3.0), CrumblePlatform.Look.ROCK)
+			crumble(c + s, Vector3(3.8, 0.6, 3.8), CrumblePlatform.Look.ROCK)
 		elif i == 4:
-			mover(c + s + Vector3(0.0, 0.0, 0.0), Vector3(3.0, 0.6, 3.0), Vector3(0.0, 0.0, 3.0), 5.0, cols[i])
+			mover(c + s, Vector3(3.8, 0.6, 3.8), Vector3(0.0, 0.0, 3.0), 5.0, cols[i])
 		else:
-			Kit.pillar(self, c + s, 2.4, 0.6, cols[i], &"mush_spot")
-	hook(c + Vector3(-9.0, 8.0, 6.0))
-	hook(c + Vector3(-7.0, 18.0, -2.0))
+			Kit.pillar(self, c + s, 2.9, 0.6, cols[i], &"mush_spot")
+	hook(c + Vector3(-11.0, 8.0, 6.0))
+	hook(c + Vector3(-9.0, 18.0, -3.0))
 	# The crown: a mossy deck round the trunk top, ringed with giant fronds.
 	var crown := c + Vector3(0.0, 21.0, 0.0)
-	Kit.pillar(self, crown, 4.8, 0.8, &"bark_mid", &"moss")
+	Kit.pillar(self, crown, 4.4, 0.8, &"bark_mid", &"moss")
 	shard_at(&"w9_shard_crown", crown + Vector3(2.4, 0.0, 0.0))
 	for i in 8:
 		var a := float(i) / 8.0 * TAU
-		fern(crown + Vector3(cos(a) * 3.8, 0.0, sin(a) * 3.8), 6.0, a)
+		fern(crown + Vector3(cos(a) * 4.0, 0.0, sin(a) * 4.0), 6.0, a)
 	sign_at(c + Vector3(4.0, 0.0, 6.0), "The Skyfern. Climb the shelf fungi to the crown!\n(Vinelash, 2 / G: catch the flowers.)", PI)
 	critter(Batling, c + Vector3(6.0, 14.0, 4.0))
 	add_capture_point("skyfern", c + Vector3(26.0, 30.0, 20.0), c + Vector3(-2.0, 14.0, 0.0))
