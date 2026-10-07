@@ -1,0 +1,19 @@
+{
+  "id": "bixby",
+  "name": "bixby",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Ranger Bixby",
+          "text": "Chomposaurus Rex lives past this gate. Three Star Shards open it."
+        },
+        {
+          "speaker": "Ranger Bixby",
+          "text": "Every stomp and charge leaves him puffed out. When the crest on his tail glows, PLUNGE it!"
+        }
+      ]
+    }
+  ]
+}

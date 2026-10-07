@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WorldDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_09"
+display_name = "Dinodew Jungle"
+scene_path = "res://scenes/levels/w9/dinodew.tscn"
+entrance_spawn = &"w9_entrance"
+arena_exit_spawn = &"w9_arena_exit"
+spawn_ids = Array[StringName]([&"w9_entrance", &"w9_cp_village", &"w9_cp_fernfloor", &"w9_cp_lake", &"w9_cp_shelf", &"w9_cp_locks", &"w9_cp_roost", &"w9_cp_crater", &"w9_cp_gate", &"w9_arena_exit"])
+seed_ids = Array[StringName]([&"w9_seed_lakebed", &"w9_seed_mossback", &"w9_seed_summit", &"w9_seed_tar_nook", &"w9_seed_capstool", &"w9_seed_cliff", &"w9_seed_falls", &"w9_seed_roost_errand", &"w9_seed_hatchery", &"w9_seed_fossil", &"w9_seed_roost_top"])
+first_clear_heart_containers = 1
+shard_ids = Array[StringName]([&"w9_shard_hatchery", &"w9_shard_snoozer", &"w9_shard_errand", &"w9_shard_lavatube", &"w9_shard_lookout", &"w9_shard_crown"])
+shards_required = 3
+goal = &"boss"
+color = &"leaf_teal"
+ability = &"roar"

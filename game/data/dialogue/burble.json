@@ -1,0 +1,19 @@
+{
+  "id": "burble",
+  "name": "burble",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Burble",
+          "text": "I keep the Spring Locks. One spring feeds both: fill one lock and the other drains!"
+        },
+        {
+          "speaker": "Burble",
+          "text": "When the upper lock is full, its big float hauls the Hatchery gate open. That gate's at the bottom of the lower lock."
+        }
+      ]
+    }
+  ]
+}

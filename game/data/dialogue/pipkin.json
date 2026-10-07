@@ -1,0 +1,19 @@
+{
+  "id": "pipkin",
+  "name": "pipkin",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Pipkin",
+          "text": "Mossback has a whole garden growing on her back!"
+        },
+        {
+          "speaker": "Pipkin",
+          "text": "Trundle gives rides round the lake, if you can catch him."
+        }
+      ]
+    }
+  ]
+}
