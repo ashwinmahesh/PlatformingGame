@@ -397,7 +397,8 @@ func _update_prompt() -> void:
 	for n in get_tree().get_nodes_in_group(&"interactable"):
 		var t := n as Node3D
 		if t != null and t.global_position.distance_to(player.global_position) < Player.INTERACT_RANGE:
-			_prompt.text = ("Y" if Settings.last_device_gamepad else "E") + "  Talk"
+			# Build 7: things that aren't villagers name their own verb (a warp pipe says "Enter").
+			_prompt.text = ("Y" if Settings.last_device_gamepad else "E") + "  " + str(t.get_meta(&"prompt", "Talk"))
 			return
 
 

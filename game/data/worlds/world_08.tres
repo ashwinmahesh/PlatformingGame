@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WorldDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/world_def.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"world_08"
+display_name = "Brickbloom Heights"
+scene_path = "res://scenes/levels/w8/brickbloom.tscn"
+entrance_spawn = &"w8_entrance"
+arena_exit_spawn = &"w8_entrance"
+spawn_ids = Array[StringName]([&"w8_entrance", &"w8_cp_meadow", &"w8_cp_bailey", &"w8_cp_ramparts", &"w8_cp_ridge", &"w8_cp_terraces", &"w8_cp_green"])
+seed_ids = Array[StringName]([&"w8_seed_brick_meadow", &"w8_seed_brick_lane", &"w8_seed_hoop", &"w8_seed_moat", &"w8_seed_bonus", &"w8_seed_turret", &"w8_seed_sunmoon", &"w8_seed_spyglass", &"w8_seed_rush", &"w8_seed_hook", &"w8_seed_kiln", &"w8_seed_chest", &"w8_seed_toybox", &"w8_seed_pipes"])
+first_clear_heart_containers = 1
+shard_ids = Array[StringName]([&"w8_shard_counting", &"w8_shard_balance", &"w8_shard_errand", &"w8_shard_bonus", &"w8_shard_flagpole", &"w8_shard_riddle"])
+shards_required = 3
+goal = &"star"
+color = &"roof_red"
+ability = &"rush"

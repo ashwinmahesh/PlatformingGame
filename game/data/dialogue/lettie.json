@@ -1,0 +1,23 @@
+{
+  "id": "lettie",
+  "name": "lettie",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Lettie",
+          "text": "You can see the whole kingdom from Cannon Ridge! Mind the cannons: the barrel glows and puffs before it fires, so jump when it shakes."
+        },
+        {
+          "speaker": "Lettie",
+          "text": "Hop on the spring pad at the north edge to reach the Sky Rows. They lead all the way to the Flagpole Fort!"
+        },
+        {
+          "speaker": "Lettie",
+          "text": "Funny thing: from up here I can see bubbles coming up from the bottom of the moat, in the north-west corner."
+        }
+      ]
+    }
+  ]
+}

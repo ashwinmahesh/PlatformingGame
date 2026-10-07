@@ -7,7 +7,7 @@ const BASE_HALVES := 6
 const HUB_SCENE := &"hub"
 const HUB_SPAWNS: Array[StringName] = [&"hub_arrival", &"hub_rootway_exit"]
 const HUB_PATH := "res://scenes/hub/mossbrook.tscn"
-const KNOWN_FLAGS: Array[StringName] = [&"w7_found_socks", &"w7_found_antenna", &"w6_found_locket", &"w5_found_mittens", &"w4_found_necklace", &"w3_found_goggles", &"w2_found_compass", &"w1_found_musicbox", &"w6_found_hook", &"w6_found_pin", &"w5_found_globe", &"w4_found_comb", &"w3_found_sundial", &"w2_found_chime", &"w1_found_lantern", &"seeds_quest_started", &"met_fern", &"met_pip", &"met_bramble", &"w4_found_hat", &"w3_found_book", &"w1_found_charm", &"w2_found_kite", &"w5_found_carrot"]
+const KNOWN_FLAGS: Array[StringName] = [&"w8_found_spyglass", &"w8_found_trowel", &"w7_found_socks", &"w7_found_antenna", &"w6_found_locket", &"w5_found_mittens", &"w4_found_necklace", &"w3_found_goggles", &"w2_found_compass", &"w1_found_musicbox", &"w6_found_hook", &"w6_found_pin", &"w5_found_globe", &"w4_found_comb", &"w3_found_sundial", &"w2_found_chime", &"w1_found_lantern", &"seeds_quest_started", &"met_fern", &"met_pip", &"met_bramble", &"w4_found_hat", &"w3_found_book", &"w1_found_charm", &"w2_found_kite", &"w5_found_carrot"]
 const WORLD_DEFS: Array[WorldDef] = [
 	preload("res://data/worlds/world_01.tres"),
 	preload("res://data/worlds/world_02.tres"),
@@ -16,6 +16,7 @@ const WORLD_DEFS: Array[WorldDef] = [
 	preload("res://data/worlds/world_05.tres"),
 	preload("res://data/worlds/world_06.tres"),
 	preload("res://data/worlds/world_07.tres"),
+	preload("res://data/worlds/world_08.tres"),
 ]
 const RETRY_SECONDS := 30.0
 

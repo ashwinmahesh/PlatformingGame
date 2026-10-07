@@ -1,0 +1,24 @@
+{
+  "id": "corbel",
+  "name": "corbel",
+  "conversations": [
+    {
+      "when": "w8_found_spyglass",
+      "lines": [
+        {
+          "speaker": "Captain Corbel",
+          "text": "Ah, I can see the whole kingdom again! Even a green pipe winking at the bottom of the moat. Odd."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Captain Corbel",
+          "text": "A gust snatched my spyglass off the battlements and dropped it on the keep roof. Up the spiral, all the way to the top... my knees say no. Would you fetch it?"
+        }
+      ]
+    }
+  ]
+}

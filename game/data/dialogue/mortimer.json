@@ -1,0 +1,24 @@
+{
+  "id": "mortimer",
+  "name": "mortimer",
+  "conversations": [
+    {
+      "when": "w8_found_trowel",
+      "lines": [
+        {
+          "speaker": "Mortimer",
+          "text": "Back to bricklaying! That trowel and I go way back."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Mortimer",
+          "text": "A cannonball whizzed past and knocked my golden trowel clean over the castle! I saw it land on top of the Wobbly Tower, right up the Toybox Terraces in the east. Can't lay a brick without it."
+        }
+      ]
+    }
+  ]
+}

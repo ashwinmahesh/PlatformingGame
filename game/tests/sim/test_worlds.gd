@@ -147,7 +147,7 @@ func test_bubbleton_great_bubble_reaches_the_star() -> void:
 ## Build 6 upper tiers (Ashwin: "a whole other world at higher levels"): each world's high
 ## checkpoint stands on solid ground well above the valley floor.
 func test_every_world_has_a_high_tier() -> void:
-	var high: Dictionary[StringName, StringName] = {&"world_01": &"w1_cp_canopy", &"world_02": &"w2_cp_kingdom", &"world_03": &"w3_cp_town", &"world_04": &"w4_cp_heights", &"world_05": &"w5_cp_rim", &"world_06": &"w6_cp_rooftops", &"world_07": &"w7_cp_orbit"}
+	var high: Dictionary[StringName, StringName] = {&"world_01": &"w1_cp_canopy", &"world_02": &"w2_cp_kingdom", &"world_03": &"w3_cp_town", &"world_04": &"w4_cp_heights", &"world_05": &"w5_cp_rim", &"world_06": &"w6_cp_rooftops", &"world_07": &"w7_cp_orbit", &"world_08": &"w8_cp_ramparts"}
 	for w in Progress.WORLD_DEFS:
 		var sp: StringName = high.get(w.id, &"")
 		check(sp != &"", "%s: has a high tier" % w.id)

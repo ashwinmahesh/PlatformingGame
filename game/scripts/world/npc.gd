@@ -81,6 +81,13 @@ const MODELS: Dictionary[String, Array] = {
 	"gleep": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.5, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
 	"nebby": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.58, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
 	"orla": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"gable": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.6, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"mortimer": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.62, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	"brickbeard": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.6, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"tumbledot": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.44, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"brixie": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.52, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"lettie": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"corbel": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.58, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
 }
 
 ## Room for future services (plan §8.8); empty in Release 1.

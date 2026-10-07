@@ -1,0 +1,19 @@
+{
+  "id": "tumbledot",
+  "name": "tumbledot",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Tumbledot",
+          "text": "It's hopscotch! Hop onto the block with one dot, then two, then three, all the way up to five."
+        },
+        {
+          "speaker": "Tumbledot",
+          "text": "No touching the floor in between, and no landing on the wrong block, or they all forget. Get it right and they climb up to the star!"
+        }
+      ]
+    }
+  ]
+}

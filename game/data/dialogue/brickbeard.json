@@ -1,0 +1,19 @@
+{
+  "id": "brickbeard",
+  "name": "brickbeard",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Old Brickbeard",
+          "text": "A riddle for you, little sprout: the beach ball that never rolls sleeps between two red flags in the north fields."
+        },
+        {
+          "speaker": "Old Brickbeard",
+          "text": "From it, take three big steps toward the sunset, and dig where the clover rings the glitter. (Talk to the glitter.)"
+        }
+      ]
+    }
+  ]
+}
