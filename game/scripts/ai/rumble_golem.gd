@@ -226,4 +226,8 @@ func tick_state() -> void:
 	var glow := 1.0 if weak_open else 0.0
 	(_gem.material_override as ShaderMaterial).set_shader_parameter(&"flash", glow * (0.6 + 0.4 * sin(state_ticks * 0.3)))
 	(_gem.material_override as ShaderMaterial).set_shader_parameter(&"flash_color", Palette.color(&"gold"))
-	_weak_area.position = _body.transform * GEM_AT
+	# The hit zone rides the body; its shape already sits at the weak spot inside the area
+	# (setting the area's position to the weak spot as well put the zone twice as high). Jolt
+	# takes no squash on an area, so it gets the turn only and is moved onto the drawn spot.
+	var turn := _body.transform.basis.orthonormalized()
+	_weak_area.transform = Transform3D(turn, _body.transform * GEM_AT - turn * GEM_AT)

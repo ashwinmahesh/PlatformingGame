@@ -291,4 +291,8 @@ func tick_state() -> void:
 			_body.scale = _body.scale.lerp(Vector3.ONE, 0.12)
 			if state_ticks >= 70:
 				set_state(S.CHOOSE)
-	_weak_area.position = _body.transform * Vector3(0.0, 5.2, -0.6)
+	# The hit zone rides the body; its shape already sits at the weak spot inside the area
+	# (setting the area's position to the weak spot as well put the zone twice as high). Jolt
+	# takes no squash on an area, so it gets the turn only and is moved onto the drawn spot.
+	var turn := _body.transform.basis.orthonormalized()
+	_weak_area.transform = Transform3D(turn, _body.transform * Vector3(0.0, 5.2, -0.6) - turn * Vector3(0.0, 5.2, -0.6))

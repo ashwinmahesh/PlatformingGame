@@ -246,6 +246,8 @@ func test_golem_gem_takes_hits_and_only_hops_you() -> void:
 	await ticks(40)
 	check(golem.weak_open, "the Golem kneels and the gem opens")
 	var gem := golem.gem_position()
+	var zone := ((golem.get("_weak_area") as Area3D).get_child(0) as Node3D).global_position
+	check(zone.distance_to(gem) < 0.3, "the gem's hit zone sits on the drawn gem (off by %.1f m)" % zone.distance_to(gem))
 	var hp := golem.hp
 	p.respawn_at(gem + Vector3(0.0, 3.0, 0.0))
 	p.invuln_left = 9999.0
@@ -296,7 +298,9 @@ func test_ape_head_takes_a_plunge_and_only_hops_you() -> void:
 	ape.open_weak_spot()
 	ape.set_state(AvalancheApe.S.DIZZY)
 	await ticks(20)
-	var head := (ape.get("_weak_area") as Area3D).global_position
+	var head := ((ape.get("_weak_area") as Area3D).get_child(0) as Node3D).global_position
+	var drawn := (ape.get("_body") as Node3D).global_transform * Vector3(0.0, 5.2, -0.6)
+	check(head.distance_to(drawn) < 0.3, "the head's hit zone sits on the drawn head (off by %.1f m)" % head.distance_to(drawn))
 	var hp := ape.hp
 	p.respawn_at(head + Vector3(0.0, 3.0, 0.0))
 	p.invuln_left = 9999.0
