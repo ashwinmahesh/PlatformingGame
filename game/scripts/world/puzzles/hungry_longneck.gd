@@ -16,6 +16,9 @@ const SCALE := 1.1
 const HUNGRY_PITCH := -32.0
 const EAT_PITCH := 26.0
 const REST_PITCH := -4.0
+## A slight bend at the mid-neck joint evens out the S of her neck (no stretch steeper than ~24
+## degrees).
+const NECK_BEND := 8.0
 const TAIL_DROP_DEG := Vector2(12.0, 20.0)
 const NECK_CHAIN: Array[String] = ["Shoulders", "Neck", "Head"]
 const TAIL_CHAIN: Array[String] = ["Tail1", "Tail2", "Tail3", "Tail4", "Tail5"]
@@ -50,6 +53,7 @@ func _ready() -> void:
 	dino.aim_chain(["Tail1", "Tail2"], Vector3(0.0, -sin(near), -cos(near)))
 	dino.aim_chain(["Tail3", "Tail4", "Tail5"], Vector3(0.0, -sin(far), -cos(far)))
 	# Carpets are laid at the resting pose, so the bridge she makes is exactly them.
+	dino.bend_pitch("Neck", NECK_BEND)
 	dino.bend_pitch("Shoulders", REST_PITCH)
 	dino.tick(0.0)
 	var skin := dino.skin_points()
