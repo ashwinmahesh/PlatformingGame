@@ -1,17 +1,21 @@
 class_name SequenceBlocks
 extends Node3D
-## World 8 puzzle, "platforms set in sequence": the Counting Blocks. Toy blocks carry dice pips
-## (one to five) and float about a courtyard in a jumble. Bonk them from below (or land on them)
-## in counting order: each right one glows and chimes a step higher, a wrong one buzzes and they
-## all forget. Count all the way up and `solved` fires, and the blocks fly into a staircase
-## (`stair`, world positions of each block's top, in counting order).
+## World 8 puzzle, "platforms set in sequence": the Counting Blocks, played as hopscotch. Toy
+## blocks carry dice pips (one to five) and stand about a court in a jumble. Land on them (or bonk
+## them from below) in counting order: each right one glows and chimes a step higher; a wrong one
+## buzzes and they all forget, and so does touching the court's floor (`floor_body`) once you've
+## started. Count all the way up and `solved` fires, and the blocks fly into a staircase (`stair`,
+## world positions of each block's top, in counting order).
 
 signal solved
 signal counted(n: int)
+## The hero touched the floor mid-count and it all reset.
+signal slipped
 
 var done: bool = false
 var blocks: Array[PipBlock] = []
 var stair: Array[Vector3] = []
+var floor_body: CollisionObject3D
 var _next: int = 1
 
 
@@ -41,12 +45,31 @@ func _on_touched(b: PipBlock) -> void:
 			solved.emit()
 			raise()
 		return
+	b.wrong()
+	_forget()
+
+
+func _forget() -> void:
 	_next = 1
 	AudioDirector.play(&"hit", -2.0, 0.5)
-	b.wrong()
 	for o in blocks:
 		o.set_lit(false)
 	counted.emit(0)
+
+
+## Once the count has started, touching the floor resets it.
+func _physics_process(_delta: float) -> void:
+	if done or _next <= 1 or floor_body == null:
+		return
+	var p := get_tree().get_first_node_in_group(&"player") as Player
+	if p == null or not p.is_on_floor():
+		return
+	for i in p.get_slide_collision_count():
+		var c := p.get_slide_collision(i)
+		if c.get_collider() == floor_body and c.get_normal().y > 0.7:
+			_forget()
+			slipped.emit()
+			return
 
 
 ## Every block glides to its stair spot, one after another.

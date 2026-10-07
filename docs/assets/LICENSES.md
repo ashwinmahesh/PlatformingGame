@@ -17,7 +17,7 @@ are **CC0 1.0** (public domain). Credit is optional; we credit anyway.
 | Medieval Village MegaKit (Standard) | Quaternius | CC0 | https://quaternius.itch.io/medieval-village-megakit | 2026-10-05 | Imported for the town buildings (World 6 and Mossbrook) | Toon shader |
 | Fantasy Props MegaKit (Standard) | Quaternius | CC0 | https://quaternius.itch.io/fantasy-props-megakit | 2026-10-05 | Barrels, crates, carts, stalls, benches, banners, chests | Toon shader |
 | Universal Base Characters (Standard) | Quaternius | CC0 | https://quaternius.itch.io/universal-base-characters | 2026-10-05 | Not used yet: the free tier has no animations or fantasy outfits, so the KayKit hero stays | — |
-| Platformer Pack 1.0 (Free) | Kay Lousberg | CC0 | https://kaylousberg.itch.io/kaykit-platformer | 2026-10-05 | Jump platforms and moving platforms in per-world colours | Stretched to each platform's collision box; toon shader |
+| Platformer Pack 1.0 (Free) | Kay Lousberg | CC0 | https://kaylousberg.itch.io/kaykit-platformer | 2026-10-05 | Jump platforms and moving platforms in per-world colours; World 8 (Brickbloom Heights): warp pipes, spring pads, hoops, flags, the finish banner, arches, cones, beach balls, arrow signs and a star | Stretched to each platform's collision box (pipes to their height); toon shader |
 | Watercolor Terrain Textures | Jonas Voland / Voxel Core Lab | CC0 | https://voxelcorelab.itch.io/watercolor-terrain-textures | 2026-10-05 | Painted brush texture on all terrain tops and sides | Used as brightness only, so palette colours stay in charge |
 
 Synthesised in-house (`audio/synth/`): jumps, bounce, Springcap, Plunge, slime and boss sounds,

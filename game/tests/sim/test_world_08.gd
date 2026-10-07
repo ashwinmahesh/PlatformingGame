@@ -1,6 +1,6 @@
 extends TestCase
 ## World 8, Brickbloom Heights, on the real physics loop in the real level: the Counting Blocks
-## count up and climb into a stair to their star; the Great Brass Balance carries a hero up to
+## (hopscotch: one to five without touching the floor) climb into a stair to their star; the Great Brass Balance carries a hero up to
 ## its crown and resets; Old Brickbeard's riddle digs up a star; warp pipes carry you between the
 ## tiers and the moat pipe into the Bonus Room and out again; bricks give up their seeds; the sun
 ## and moon steps swap; star-bricks only fall to a Star Rush; cannons tell before they fire; no
@@ -99,30 +99,42 @@ func _hop_under(p: Player, inp: ScriptedInput, foot: Vector3) -> void:
 	await ticks(45)
 
 
-func test_counting_blocks_count_up_and_climb_to_the_star() -> void:
+func test_counting_blocks_hopscotch_up_to_the_star() -> void:
 	var lvl := await _load()
 	var p := lvl.player
 	var inp := _scripted(p)
 	var seq := lvl.counting
+	var c := Brickbloom.COURT
 	var by_number: Dictionary[int, PipBlock] = {}
 	for b in seq.blocks:
 		by_number[b.number] = b
 	check_eq(by_number.size(), 5, "five Counting Blocks")
-	var foot_of := func(b: PipBlock) -> Vector3:
-		return Vector3(b.global_position.x, b.global_position.y - b.size.y - 3.6, b.global_position.z)
-	# Wrong first: block two buzzes and nothing stays lit.
-	await _hop_under(p, inp, foot_of.call(by_number[2]) as Vector3)
-	check(not by_number[2].lit, "bonking two first is wrong: it stays dark")
-	# One to five, each bonked from below in turn.
+	var near_one := by_number[1].global_position * Vector3(1.0, 0.0, 1.0) + Vector3(3.2, 0.15, 0.0)
+	# Landing on two first is wrong: it stays dark.
+	p.respawn_at(by_number[2].global_position * Vector3(1.0, 0.0, 1.0) + Vector3(3.5, 0.15, -0.5))
+	await ticks(6)
+	await _hop_to(p, inp, by_number[2].global_position)
+	check(not by_number[2].lit, "hopping onto two first is wrong: it stays dark")
+	# One, then a step down onto the floor: they forget.
+	p.respawn_at(near_one)
+	await ticks(6)
+	await _hop_to(p, inp, by_number[1].global_position)
+	check(by_number[1].lit, "one lights when you land on it")
+	await _walk_to(p, inp, c + Vector3(12.0, 0.0, 3.0))
+	await ticks(10)
+	check(not by_number[1].lit, "touching the floor mid-count makes them forget")
+	# Hop one to five without touching the floor.
+	p.respawn_at(near_one)
+	await ticks(6)
 	for n in range(1, 6):
-		await _hop_under(p, inp, foot_of.call(by_number[n]) as Vector3)
-		check(by_number[n].lit, "block %d lights when bonked in turn" % n)
-	check(seq.done, "counting one to five solves it")
+		await _hop_to(p, inp, by_number[n].global_position)
+		check(by_number[n].lit, "block %d lights when landed on in turn" % n)
+	check(seq.done, "hopping one to five solves it")
 	await ticks(200)
 	for n in range(1, 6):
 		check(by_number[n].global_position.distance_to(seq.stair[n - 1]) < 0.2, "block %d flew into its stair spot" % n)
 	# Every step of the stair is a hop of under 3 m, ending a short hop under the plinth's top.
-	var prev := Brickbloom.COURT.y + 2.6
+	var prev := 2.6
 	for n in range(1, 6):
 		var rise := seq.stair[n - 1].y - prev
 		check(rise > 0.0 and rise <= 3.0, "stair step %d rises %.1f m" % [n, rise])
@@ -132,8 +144,8 @@ func test_counting_blocks_count_up_and_climb_to_the_star() -> void:
 	var top := seq.stair[4]
 	p.respawn_at(top + Vector3.UP * 0.1)
 	await ticks(6)
-	await _hop_to(p, inp, Brickbloom.COURT + Vector3(0.0, Brickbloom.COURT_TOP, 0.0))
-	check(Progress.has_shard(&"w8_shard_counting"), "the stair leads to the Counting Court's star")
+	await _hop_to(p, inp, c + Brickbloom.COURT_PLINTH + Vector3(0.0, Brickbloom.COURT_TOP, 0.0))
+	check(Progress.has_shard(&"w8_shard_counting"), "the stair leads to the Hopscotch Court's star")
 	await _free(lvl)
 
 
@@ -335,7 +347,7 @@ func test_gated_stars_cannot_be_triple_jumped() -> void:
 	for n in lvl.balance.find_children("*", "CollisionObject3D", true, false):
 		exclude.append((n as CollisionObject3D).get_rid())
 	var targets: Dictionary[String, Vector3] = {
-		"Counting Court plinth": Brickbloom.COURT + Vector3(0.0, Brickbloom.COURT_TOP, 0.0),
+		"Hopscotch Court plinth": Brickbloom.COURT + Brickbloom.COURT_PLINTH + Vector3(0.0, Brickbloom.COURT_TOP, 0.0),
 		"Brass Balance crown": Brickbloom.BALANCE + Vector3(0.0, Brickbloom.BALANCE_TRAVEL + 3.0, 0.0),
 		"Star Turret": Vector3(0.0, Brickbloom.STAR_TOP, 0.0),
 	}

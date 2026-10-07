@@ -1,6 +1,6 @@
 class_name Brickbloom
 extends OpenWorld
-## World 8, Brickbloom Heights (Build 8; Ashwin: "3 new whimsical levels (dont think realistic)...
+## World 8, Brickbloom Heights (Build 7; Ashwin: "3 new whimsical levels (dont think realistic)...
 ## One of them is Mario themed... densely packed small open-worlds with a lot of verticality").
 ## Our own homage to the classic side-scrolling platformers: a toy-box kingdom of chunky candy
 ## blocks stacked round a tall castle in a moat, with warp pipes between the tiers, bricks to bonk
@@ -12,11 +12,14 @@ extends OpenWorld
 ##   East    Toybox Terraces   - five stacked blocks climbing 3 m at a time to the Wobbly Tower
 ##   North   Cannon Ridge      - cannon lanes at 12 m; the Sky Rows climb from it to the Flagpole Fort
 ##   West    Weigh-House Green - the Great Brass Balance and Mortimer's brickworks
-##   Corners Counting Court (SW), Bonk Lane and the Sun-and-Moon Steps (SE), Brickbeard's Knoll (NW)
-## Six stars: the Counting Blocks (sequence puzzle), the Great Brass Balance (weight scale), Mortimer's
-## golden trowel (errand), the Bonus Room behind the pipe at the bottom of the moat (hidden), the
-## Flagpole Fort at the end of the Sky Rows (platforming) and Old Brickbeard's riddle. Three build a
-## stair of blocks up the Star Turret to the Grand Star; clearing it with all six teaches Star Rush.
+##   Corners Hopscotch Court (SW), Bonk Lane and the Sun-and-Moon Steps (SE), Brickbeard's Knoll
+##           (NW), the Toy Box (NE), the Pipe Garden (far SW)
+## Six stars: the Counting Blocks hopscotch (sequence puzzle), the Great Brass Balance (weight
+## scale), Mortimer's golden trowel (errand), the Bonus Room behind the pipe at the bottom of the
+## moat (hidden), the Flagpole Fort at the end of the Sky Rows (platforming) and Old Brickbeard's
+## riddle. Three build a stair of blocks up the Star Turret to the Grand Star; clearing it with
+## all six teaches Star Rush. Its new puzzle type is platforms set in sequence: the Counting Blocks
+## and the Sun-and-Moon Steps (flip bricks swap which steps are solid).
 
 const WORLD := &"world_08"
 const BAILEY := 3.0
@@ -32,6 +35,10 @@ const BALANCE := Vector3(-88.0, 0.0, -4.0)
 const BALANCE_TRAVEL := 17.0
 const COURT := Vector3(-56.0, 0.0, 84.0)
 const COURT_TOP := 18.0
+## The Star Plinth sits at the north end of the Hopscotch Court.
+const COURT_PLINTH := Vector3(0.0, 0.0, -10.0)
+## The Counting Blocks: [top centre (court-local), pips]. One to five crisscross the court.
+const HOPSCOTCH: Array[Array] = [[Vector3(6.5, 2.0, 7.0), 1], [Vector3(0.0, 3.8, 0.0), 2], [Vector3(-6.5, 5.4, 7.0), 3], [Vector3(0.0, 3.4, 7.0), 4], [Vector3(-6.5, 5.6, 0.0), 5]]
 const FORT := Vector3(24.0, 22.0, -126.0)
 const BONUS := Vector3(60.0, -50.0, 96.0)
 const SUNMOON := Vector3(100.0, 0.0, 90.0)
@@ -427,7 +434,7 @@ func _castle() -> void:
 	# Ramparts: the upper world's ring. Captain Corbel keeps watch; a cannon sweeps the north walk.
 	checkpoint(&"w8_cp_ramparts", Vector3(-12.0, RAMPART, it))
 	villager("corbel", "Captain Corbel", Vector3(8.0, RAMPART, it), &"w8_found_spyglass", &"w8_seed_spyglass", Vector3(5.0, KEEP_TOP + 0.3, 5.0), "Corbel's spyglass")
-	_cannon(Vector3(-17.0, RAMPART, -it), -PI * 0.5, 4.5, 0.0, 30.0)
+	_cannon(Vector3(-14.0, RAMPART, -it), -PI * 0.5, 4.5, 0.0, 26.0)
 	sign_post(Vector3(-4.0, RAMPART, -it + 1.5), "Cannon! It glows and puffs\nbefore it fires.", PI)
 	for x: float in [-10.0, 10.0]:
 		Whimsy.lamp(self, Vector3(x, BAILEY, 19.0 - 1.5), x < 0.0)
@@ -516,7 +523,7 @@ func _terraces() -> void:
 	_flag(TOWER_TOP + Vector3(1.6, 0.0, 1.6), "green", 1.6)
 	# A star-brick shed on the red block (Star Rush), a chest, and a Mimic pretending.
 	_rush_hut(Vector3(62.0, 3.0, 35.5), 0.0)
-	seed_at(&"w8_seed_rush", Vector3(62.0, 3.0, 35.5))
+	seed_at(&"w8_seed_rush", Vector3(62.0, 3.0, 34.2))
 	chest(Vector3(46.0, 3.0, 44.0), 0.3, &"w8_seed_chest")
 	critter(Mimic, Vector3(50.0, 3.5, 47.0))
 	# Toys and arrows up the route.
@@ -686,36 +693,37 @@ func _brickworks() -> void:
 	add_capture_point("brickworks", c + Vector3(24.0, 14.0, 22.0), c + Vector3(0.0, 4.0, 0.0))
 
 
-# --- South-west: the Counting Court -------------------------------------------------------------
+# --- South-west: the Hopscotch Court ------------------------------------------------------------
 
 func _counting_court() -> void:
 	var c := COURT
-	# The Star Plinth: 18 m of sheer stone with the Star Shard on top.
-	Kit.pillar(self, c + Vector3(0.0, COURT_TOP, 0.0), 2.6, COURT_TOP, &"stone_light", &"gold")
+	var pl := c + COURT_PLINTH
+	# The Star Plinth: 18 m of sheer stone at the north end, the Star Shard on top.
+	Kit.pillar(self, pl + Vector3(0.0, COURT_TOP, 0.0), 2.6, COURT_TOP, &"stone_light", &"gold")
 	for k in 3:
-		Kit.pillar(self, c + Vector3(0.0, 4.0 + k * 5.0, 0.0), 2.85, 0.5, TOY[k], TOY[k], 0)
-	shard_at(&"w8_shard_counting", c + Vector3(0.0, COURT_TOP, 0.0))
-	# The foot step the staircase starts from.
-	Kit.block(self, c + Vector3(5.4, 2.6, 0.0), Vector3(3.0, 2.6, 3.0), &"stone_light", _layers(), &"gold")
-	# The Counting Blocks, jumbled round the court (the four sits on a pedestal).
+		Kit.pillar(self, pl + Vector3(0.0, 4.0 + k * 5.0, 0.0), 2.85, 0.5, TOY[k], TOY[k], 0)
+	shard_at(&"w8_shard_counting", pl + Vector3(0.0, COURT_TOP, 0.0))
+	# The foot step the staircase will start from (south side of the plinth).
+	Kit.block(self, pl + Vector3(0.0, 2.6, 5.4), Vector3(3.0, 2.6, 3.0), &"stone_light", _layers(), &"gold")
+	# Hopscotch: a checkered floor, and five Counting Blocks jumbled over it. Hop them one to five
+	# without touching the floor; then they fly up round the plinth as a stair.
+	var hop_floor := _checker_floor(c + Vector3(0.0, 0.0, 1.0), Vector2(24.0, 22.0))
 	counting = SequenceBlocks.new()
+	counting.floor_body = hop_floor
 	add_child(counting)
-	var order: Array[int] = [3, 1, 5, 2, 4]
-	for slot in 5:
-		var a := deg_to_rad(36.0 + slot * 72.0)
-		var n := order[slot]
-		var foot := c + Vector3(cos(a) * 11.0, 0.0, sin(a) * 11.0)
-		var top := foot + Vector3(0.0, 5.6, 0.0)
-		if n == 4:
-			Kit.block(self, foot + Vector3(0.0, 1.4, 0.0), Vector3(3.4, 1.4, 3.4), &"stone_light", _layers(), &"gold")
-			top.y = 7.0
-		counting.add_block(top, n, TOY[n])
+	for spec: Array in HOPSCOTCH:
+		var at := spec[0] as Vector3
+		var n := int(spec[1])
+		counting.add_block(c + at, n, TOY[n])
 	for i in 5:
-		var a := deg_to_rad(55.0 * (i + 1))
-		counting.stair.append(c + Vector3(cos(a) * 5.4, 2.6 * (i + 2), sin(a) * 5.4))
+		var a := PI * 0.5 + deg_to_rad(55.0 * (i + 1))
+		counting.stair.append(pl + Vector3(cos(a) * 5.4, 2.6 * (i + 2), sin(a) * 5.4))
 	counting.solved.connect(func() -> void:
 		if hud != null:
 			hud.show_banner("The Counting Blocks climb the Star Plinth!", 2.2))
+	counting.slipped.connect(func() -> void:
+		if hud != null:
+			hud.show_notice("Oops, the floor! Start again from one."))
 	# A low wall round the court with its way in on the east, Tumbledot by the gap.
 	for k in 10:
 		if k == 0:
@@ -724,11 +732,35 @@ func _counting_court() -> void:
 		var w := Kit.block(self, c + Vector3(cos(a) * 18.0, 1.2, sin(a) * 18.0), Vector3(10.0, 1.2, 1.0), TOY[k % TOY.size()], Layers.WORLD, &"cloth_cream")
 		w.rotation.y = -a + PI * 0.5
 	villager("tumbledot", "Tumbledot", c + Vector3(19.0, 0.0, 5.0))
-	sign_post(c + Vector3(19.0, 0.0, -4.0), "The Counting Court", -PI * 0.5)
-	for i in 6:
-		var a := float(i) / 6.0 * TAU + 0.3
-		Whimsy.flower(self, c + Vector3(cos(a) * 15.0, 0.0, sin(a) * 15.0), 1.0, 0.8, [&"candy_pink", &"gold", &"slime_blue"][i % 3] as StringName, false)
-	add_capture_point("counting", c + Vector3(24.0, 14.0, 20.0), c + Vector3(0.0, 6.0, 0.0))
+	sign_post(c + Vector3(19.0, 0.0, -4.0), "Hopscotch Court: count the dots\nup, and don't touch the floor!", -PI * 0.5)
+	for i in 4:
+		var a := float(i) / 4.0 * TAU + 0.4
+		Whimsy.flower(self, c + Vector3(cos(a) * 15.5, 0.0, sin(a) * 15.5), 1.0, 0.8, [&"candy_pink", &"gold", &"slime_blue"][i % 3] as StringName, false)
+	add_capture_point("counting", c + Vector3(22.0, 16.0, 24.0), c + Vector3(0.0, 5.0, -2.0))
+
+
+## A hopscotch floor: one thin slab to stand on, drawn as checkered tiles in two colours.
+func _checker_floor(center: Vector3, size: Vector2) -> StaticBody3D:
+	var body := Kit.static_body(self, center + Vector3(0.0, 0.05, 0.0), Layers.WORLD)
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(size.x, 0.1, size.y)
+	Kit.add_shape(body, shape)
+	var tile := 2.0
+	var nx := int(size.x / tile)
+	var nz := int(size.y / tile)
+	var cols: Array[StringName] = [&"cloth_cream", &"candy_pink"]
+	for k in 2:
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for ix in nx:
+			for iz in nz:
+				if (ix + iz) % 2 != k:
+					continue
+				var bm := BoxMesh.new()
+				bm.size = Vector3(tile, 0.1, tile)
+				st.append_from(bm, 0, Transform3D(Basis(), Vector3(-size.x * 0.5 + (ix + 0.5) * tile, 0.0, -size.y * 0.5 + (iz + 0.5) * tile)))
+		Kit.mesh_instance(body, st.commit(), Kit.mat(cols[k]))
+	return body
 
 
 # --- South-east: Bonk Lane and the Sun-and-Moon Steps -------------------------------------------
