@@ -1,0 +1,19 @@
+{
+  "id": "tumbledot",
+  "name": "tumbledot",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Tumbledot",
+          "text": "Count the dots! Bonk the block with one dot, then the one with two, then three, all the way up to five."
+        },
+        {
+          "speaker": "Tumbledot",
+          "text": "Get one wrong and they all forget, so start again from one. Count them right and they climb up to the star!"
+        }
+      ]
+    }
+  ]
+}

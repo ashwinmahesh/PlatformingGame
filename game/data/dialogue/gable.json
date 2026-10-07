@@ -1,0 +1,23 @@
+{
+  "id": "gable",
+  "name": "gable",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Gable",
+          "text": "Welcome to Brickbloom Heights, traveller! Bring three Star Shards home and the castle's blocks will stack themselves into a stair up the Star Turret."
+        },
+        {
+          "speaker": "Gable",
+          "text": "Warp pipes join the high and low parts of the kingdom. Plunge into one, or stand on top and press E."
+        },
+        {
+          "speaker": "Gable",
+          "text": "Some bricks hide Glimmer Seeds; the ones that glint, mostly. Jump and bonk them from below!"
+        }
+      ]
+    }
+  ]
+}
