@@ -11,7 +11,7 @@ for spec in "hub/mossbrook.tscn hub_arrival" "levels/w1/glimmerbrook.tscn w1_ent
 	"levels/w3/sunscorch.tscn w3_cp_town" "levels/w4/bubbleton.tscn w4_entrance" "levels/w4/bubbleton.tscn w4_cp_heights" \
 	"levels/w5/frostfang.tscn w5_entrance" "levels/w5/frostfang.tscn w5_cp_rim" "levels/w6/lanternwick.tscn w6_cp_square" \
 	"levels/w6/lanternwick.tscn w6_cp_rooftops" "levels/w7/glorbo.tscn w7_entrance" "levels/w7/glorbo.tscn w7_cp_orbit" \
-	"levels/w7/glorbo.tscn w7_cp_village" $EXTRA; do
+	"levels/w7/glorbo.tscn w7_cp_village" "levels/w8/brickbloom.tscn w8_entrance" "levels/w8/brickbloom.tscn w8_cp_ramparts" $EXTRA; do
 	set -- $spec
 	line=$("$GODOT" --path . --resolution 1920x1080 --quit-after 3000 res://tools/dev/bench.tscn -- --scene=res://scenes/$1 --spawn=$2 --seconds=4 2>&1 | grep "^bench")
 	fps=$(echo "$line" | sed -E 's/.*: ([0-9.]+) fps.*/\1/')
