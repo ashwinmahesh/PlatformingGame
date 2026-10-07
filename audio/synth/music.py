@@ -144,7 +144,14 @@ def loop_tail(x, total_len):
     return head
 
 
+# Build 7: these cues are now CC0 recordings (docs/assets/LICENSES.md, `make fetch-assets`), so
+# the synth scores below are kept but no longer written over them.
+SOURCED = {"mossbrook", "glimmerbrook", "boss", "cloudtop", "canyon", "reef", "frostfang"}
+
+
 def make_cue(name, bpm, bars, **kw):
+    if name in SOURCED:
+        return
     raw = render(bpm, bars, **kw)
     total_len = len(raw)
     wet = reverb(raw, wet=0.22)

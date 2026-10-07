@@ -10,7 +10,7 @@ func _ready() -> void:
 	Progress.save_dir = Progress.PLAYER_SAVE_DIR
 	var had_save := Progress.has_save()
 	var loaded := Progress.load_save()
-	AudioDirector.play_music(&"mossbrook")
+	AudioDirector.play_music(&"title")
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	var bg := ColorRect.new()
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)

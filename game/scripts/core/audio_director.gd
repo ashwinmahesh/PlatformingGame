@@ -5,6 +5,13 @@ const SFX_DIR := "res://assets/audio/sfx/"
 const MUSIC_DIR := "res://assets/audio/music/"
 const POOL_SIZE := 14
 const ONE_SHOT_CUES: Array[StringName] = [&"victory"]
+## Build 7 music (CC0 recordings, docs/assets/LICENSES.md): per-track level trims in dB so every
+## track sits at about the loudness of the old synth loops (measured RMS, aimed at -22 dBFS).
+const MUSIC_GAIN: Dictionary[StringName, float] = {
+	&"boss": -13.5, &"mossbrook": -5.3, &"glimmerbrook": -5.4, &"cloudtop": -1.9, &"canyon": 0.0,
+	&"reef": 8.0, &"frostfang": -2.7, &"lanternwick": 0.0, &"world_07": -1.3, &"world_08": -9.0,
+	&"world_09": -6.1, &"shop": -4.8, &"title": -6.8,
+}
 
 var _sfx: Dictionary[StringName, AudioStream] = {}
 var _pool: Array[AudioStreamPlayer] = []
@@ -76,11 +83,18 @@ func play(sfx_name: StringName, volume_db: float = 0.0, pitch: float = 1.0) -> v
 	p.play()
 
 
+func current_music() -> StringName:
+	return _current_music
+
+
 func play_music(track: StringName, fade: float = 1.2) -> void:
 	if track == _current_music:
 		return
 	_current_music = track
+	# Sourced recordings (.ogg, .mp3) win over the old synth loops (.wav).
 	var path := MUSIC_DIR + String(track) + ".ogg"
+	if not ResourceLoader.exists(path):
+		path = MUSIC_DIR + String(track) + ".mp3"
 	if not ResourceLoader.exists(path):
 		path = MUSIC_DIR + String(track) + ".wav"
 	var incoming := _music_b if _music_a.playing else _music_a
@@ -95,11 +109,13 @@ func play_music(track: StringName, fade: float = 1.2) -> void:
 			wav.loop_end = int(wav.get_length() * wav.mix_rate)
 		elif stream is AudioStreamOggVorbis:
 			(stream as AudioStreamOggVorbis).loop = loop
+		elif stream is AudioStreamMP3:
+			(stream as AudioStreamMP3).loop = loop
 		if stream != null:
 			incoming.stream = stream
 			incoming.volume_db = -40.0
 			incoming.play()
-			create_tween().tween_property(incoming, "volume_db", 0.0, fade)
+			create_tween().tween_property(incoming, "volume_db", MUSIC_GAIN.get(track, 0.0), fade)
 	if outgoing.playing:
 		var t := create_tween()
 		t.tween_property(outgoing, "volume_db", -60.0, fade)

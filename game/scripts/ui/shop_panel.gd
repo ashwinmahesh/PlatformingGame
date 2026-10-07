@@ -12,6 +12,9 @@ var _index: int = 0
 var _ignore: int = 2
 
 
+var _level_music: StringName = &""
+
+
 static func open(p: Player) -> ShopPanel:
 	var panel := ShopPanel.new()
 	panel.player = p
@@ -22,7 +25,9 @@ static func open(p: Player) -> ShopPanel:
 func _ready() -> void:
 	layer = 20
 	player.set_talking(true)
-	AudioDirector.set_ducked(true)
+	# Build 7: the shop has its own tune while it's open.
+	_level_music = AudioDirector.current_music()
+	AudioDirector.play_music(&"shop", 0.6)
 	var box := PanelContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	box.offset_left = -520
@@ -108,7 +113,8 @@ func _process(_delta: float) -> void:
 
 
 func close() -> void:
-	AudioDirector.set_ducked(false)
+	if _level_music != &"":
+		AudioDirector.play_music(_level_music, 0.8)
 	if is_instance_valid(player):
 		player.set_talking(false)
 		player.buffer_age = -1

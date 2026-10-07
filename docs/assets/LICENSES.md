@@ -21,7 +21,13 @@ are **CC0 1.0** (public domain). Credit is optional; we credit anyway.
 | Watercolor Terrain Textures | Jonas Voland / Voxel Core Lab | CC0 | https://voxelcorelab.itch.io/watercolor-terrain-textures | 2026-10-05 | Painted brush texture on all terrain tops and sides | Used as brightness only, so palette colours stay in charge |
 | Space Kit 2.0 | Kenney | CC0 | https://kenney.nl/assets/space-kit | 2026-10-06 | World 7 (Planet Glorbo): the saucer hangars, satellite dishes, meteor, crystal rocks, generator | Scaled; toon shader |
 | Ultimate Space Kit | Quaternius | CC0 | https://poly.pizza/bundle/Ultimate-Space-Kit-YWh743lqGX | 2026-10-06 | World 7 (Planet Glorbo): alien trees and bushes, domes and pod houses, solar panels, antennas, rocks, the planets in the sky | Toon shader; texture atlas kept |
+| Le Grand Village (Mossbrook), Champ de tournesol (Glimmerbrook), La ville aux ponts suspendus (Cloudtop), Un désert (Sunscorch), Tale on the Late (title) | Komiku / Loyalty Freak Music | CC0 | https://opengameart.org/content/le-grand-village, /champ-de-tournesol, /la-ville-aux-ponts-suspendus, /un-desert, /tale-on-the-late-main-theme | 2026-10-06 | Music for the hub, Worlds 1-3 and the title screen | Renamed to the cue id; level trimmed in `AudioDirector.MUSIC_GAIN`; looped whole |
+| Swimming with the fish (Bubbleton), The weekly fair (Lanternwick) | Komiku | CC0 | https://opengameart.org/content/poupis-incredible-adventures-full-album | 2026-10-06 | Music for Worlds 4 and 6 | Same |
+| Frozen Jungle (Frostfang) | Komiku | CC0 | https://opengameart.org/content/frozen-jungle | 2026-10-06 | Music for World 5 | Same |
+| Xenobiological Forest (World 7), Big person, tiny cities (World 9), I got 99 broadswords but this one isn't one (the seed shop) | Komiku | CC0 | https://archive.org/details/Komiku-Its_Time_For_Adventure_Vol5, /Komiku01ChildhoodScene, /Komiku-Its_Time_For_Adventure_Vol4 | 2026-10-06 | Music for Worlds 7 and 9 and Clover's shop | Same |
+| Chiptune Adventures: Stage 1 (World 8) | Juhani Junkala (SubspaceAudio) | CC0 | https://opengameart.org/content/4-chiptunes-adventure | 2026-10-06 | Music for World 8 | Same (OGG from the pack zip) |
+| Epic Boss Battle [Seamlessly Looping] | Juhani Junkala (SubspaceAudio) | CC0 | https://opengameart.org/content/boss-battle-music | 2026-10-06 | Every boss fight | Same (loops seamlessly) |
 
 Synthesised in-house (`audio/synth/`): jumps, bounce, Springcap, Plunge, slime and boss sounds,
-splash, warp, and the three music loops. Built in-house: slimes, Mother Gloop, Bonk monkey,
+splash, warp, and the old music loops (now replaced by the CC0 recordings above). Built in-house: slimes, Mother Gloop, Bonk monkey,
 coconuts, Springcap, portals, checkpoints and level geometry.

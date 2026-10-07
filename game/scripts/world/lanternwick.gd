@@ -50,7 +50,7 @@ func configure() -> void:
 func build() -> void:
 	scene_id = WORLD
 	default_spawn = &"w6_entrance"
-	music = &"mossbrook"
+	music = &"lanternwick"
 	floor_y = 0.0
 	kill_y = -24.0
 	_rng.seed = 606
