@@ -1,0 +1,19 @@
+{
+  "id": "quasa",
+  "name": "quasa",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Quasa",
+          "text": "The bloom-buds on the Bloomstalk are ever so ticklish. Bop one and it opens wide, for a little while!"
+        },
+        {
+          "speaker": "Quasa",
+          "text": "From the very top, one more bud leads up to the Orbit Walk."
+        }
+      ]
+    }
+  ]
+}

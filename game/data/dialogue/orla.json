@@ -1,0 +1,19 @@
+{
+  "id": "orla",
+  "name": "orla",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Orla",
+          "text": "These moon flowers only grow in the Orbit Walk's starlight."
+        },
+        {
+          "speaker": "Orla",
+          "text": "The old vault behind me has a crack in it. I wonder what's inside?"
+        }
+      ]
+    }
+  ]
+}

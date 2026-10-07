@@ -7,6 +7,9 @@ const Q_NATURE := "res://assets/models/q_nature/"
 const Q_VILLAGE := "res://assets/models/q_village/"
 const Q_PROPS := "res://assets/models/q_props/"
 const Q_MONSTERS := "res://assets/models/q_monsters/"
+## Build 7 (World 7): Quaternius Ultimate Space Kit (alien plants, domes) and Kenney Space Kit.
+const Q_SPACE := "res://assets/models/q_space/"
+const KN_SPACE := "res://assets/models/kn_space/"
 const KK_PLATFORM := "res://assets/models/kk_platformer/"
 
 static var _scenes: Dictionary[String, PackedScene] = {}

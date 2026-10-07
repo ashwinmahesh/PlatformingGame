@@ -7,3 +7,6 @@ builds/
 
 # Downloaded pack archives (re-fetch with `make fetch-assets`; see README)
 art/sourced/_dl/
+
+# Per-clone settings for parallel helper copies (custom user dir); never committed
+game/override.cfg

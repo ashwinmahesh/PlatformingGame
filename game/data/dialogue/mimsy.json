@@ -1,0 +1,19 @@
+{
+  "id": "mimsy",
+  "name": "mimsy",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Mimsy",
+          "text": "Did you see the meteor that fell by the north cliff? Something glitters round the back of it."
+        },
+        {
+          "speaker": "Mimsy",
+          "text": "I'm far too scared to go and look."
+        }
+      ]
+    }
+  ]
+}

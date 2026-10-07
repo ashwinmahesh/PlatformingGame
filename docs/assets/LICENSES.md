@@ -19,6 +19,8 @@ are **CC0 1.0** (public domain). Credit is optional; we credit anyway.
 | Universal Base Characters (Standard) | Quaternius | CC0 | https://quaternius.itch.io/universal-base-characters | 2026-10-05 | Not used yet: the free tier has no animations or fantasy outfits, so the KayKit hero stays | — |
 | Platformer Pack 1.0 (Free) | Kay Lousberg | CC0 | https://kaylousberg.itch.io/kaykit-platformer | 2026-10-05 | Jump platforms and moving platforms in per-world colours | Stretched to each platform's collision box; toon shader |
 | Watercolor Terrain Textures | Jonas Voland / Voxel Core Lab | CC0 | https://voxelcorelab.itch.io/watercolor-terrain-textures | 2026-10-05 | Painted brush texture on all terrain tops and sides | Used as brightness only, so palette colours stay in charge |
+| Space Kit 2.0 | Kenney | CC0 | https://kenney.nl/assets/space-kit | 2026-10-06 | World 7 (Planet Glorbo): the saucer hangars, satellite dishes, meteor, crystal rocks, generator | Scaled; toon shader |
+| Ultimate Space Kit | Quaternius | CC0 | https://poly.pizza/bundle/Ultimate-Space-Kit-YWh743lqGX | 2026-10-06 | World 7 (Planet Glorbo): alien trees and bushes, domes and pod houses, solar panels, antennas, rocks, the planets in the sky | Toon shader; texture atlas kept |
 
 Synthesised in-house (`audio/synth/`): jumps, bounce, Springcap, Plunge, slime and boss sounds,
 splash, warp, and the three music loops. Built in-house: slimes, Mother Gloop, Bonk monkey,

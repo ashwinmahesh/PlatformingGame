@@ -92,7 +92,9 @@ func _great_oak() -> void:
 	var n := Progress.WORLD_DEFS.size()
 	for i in n:
 		var w := Progress.WORLD_DEFS[i]
-		var a := lerpf(-0.95, 0.95, float(i) / maxf(n - 1, 1)) if n > 1 else 0.0
+		# Build 7: the crescent widens past six worlds so the arches keep about 5.5 m apart.
+		var span := minf(0.95 + 0.17 * maxf(n - 6, 0), 1.5)
+		var a := lerpf(-span, span, float(i) / maxf(n - 1, 1)) if n > 1 else 0.0
 		var arch := Portal.new()
 		arch.target_scene = w.id
 		arch.target_spawn = w.entrance_spawn

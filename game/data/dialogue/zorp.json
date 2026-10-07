@@ -1,0 +1,24 @@
+{
+  "id": "zorp",
+  "name": "zorp",
+  "conversations": [
+    {
+      "when": "w7_found_socks",
+      "lines": [
+        {
+          "speaker": "Zorp",
+          "text": "Socks! Toasty toes for Zorp. Take this shiny Glimmer Seed, friend."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Zorp",
+          "text": "Zorp has lost his space socks! Zorp left them drying on the Comet Deck, way up on the Orbit Walk. Cold feet. Very sad."
+        }
+      ]
+    }
+  ]
+}

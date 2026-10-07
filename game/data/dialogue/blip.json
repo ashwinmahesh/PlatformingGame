@@ -1,0 +1,24 @@
+{
+  "id": "blip",
+  "name": "blip",
+  "conversations": [
+    {
+      "when": "w7_found_antenna",
+      "lines": [
+        {
+          "speaker": "Blip",
+          "text": "My antenna! I can hear the stars again. They say you should have this Star Shard!"
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Blip",
+          "text": "Bleep! My antenna popped off and sank to the bottom of Gloop Lake. Without it I can't hear the stars sing. Could you dive for it?"
+        }
+      ]
+    }
+  ]
+}

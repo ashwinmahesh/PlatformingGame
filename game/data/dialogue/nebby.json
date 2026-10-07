@@ -1,0 +1,23 @@
+{
+  "id": "nebby",
+  "name": "nebby",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Nebby",
+          "text": "Welcome to the Starport! See the Crown Asteroid floating over the lake? Hop the stones from the north stop."
+        },
+        {
+          "speaker": "Nebby",
+          "text": "Or, if you have a vine, swing up from the ferry stop on the south side."
+        },
+        {
+          "speaker": "Nebby",
+          "text": "The Antenna Tower on the west rim runs on thunder, by the way. Give its coil a good jolt."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+Ultimate Space Kit by Quaternius (quaternius.com)
+Licence: CC0 1.0 Universal (public domain)
+Source: https://poly.pizza/bundle/Ultimate-Space-Kit-YWh743lqGX (each model downloaded as .glb, 2026-10-06)
+Files are untouched; the ones the game uses are copied to game/assets/models/q_space/.

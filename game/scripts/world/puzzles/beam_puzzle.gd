@@ -11,6 +11,8 @@ var source_dir: Vector3 = Vector3.RIGHT
 var target: Vector3 = Vector3.ZERO
 var done: bool = false
 var mirrors: Array[BeamMirror] = []
+## How far the beam runs when it hits nothing.
+var max_length: float = 60.0
 var _segments: Node3D
 var _target_mesh: MeshInstance3D
 
@@ -52,7 +54,7 @@ func trace() -> void:
 	var d := source_dir
 	var hit_target := false
 	for bounce in 12:
-		var best := 60.0
+		var best := max_length
 		var best_m: BeamMirror = null
 		var t_along := (target - p).dot(d)
 		var t_off := (target - p - d * t_along)

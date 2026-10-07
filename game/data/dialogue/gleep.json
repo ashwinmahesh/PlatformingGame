@@ -1,0 +1,19 @@
+{
+  "id": "gleep",
+  "name": "gleep",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Gleep",
+          "text": "Starlight comes out of that lens and bounces off the mirrors. Bop a mirror and it turns."
+        },
+        {
+          "speaker": "Gleep",
+          "text": "Light up the crystal at the end and the Glass Lab wakes up. One of the mirrors is just for show!"
+        }
+      ]
+    }
+  ]
+}

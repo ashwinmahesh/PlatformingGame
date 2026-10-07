@@ -13,4 +13,7 @@ fetch props    https://quaternius.itch.io/fantasy-props-megakit Standard
 fetch ubc      https://quaternius.itch.io/universal-base-characters Standard
 fetch kaykit_platformer https://kaylousberg.itch.io/kaykit-platformer
 fetch watercolor https://voxelcorelab.itch.io/watercolor-terrain-textures
+# Direct downloads (not itch.io).
+fetch_url() { mkdir -p "$DL/$1"; echo "== $2"; curl -fL --retry 3 -o "$DL/$1/$(basename "$2")" "$2"; }
+fetch_url kenney_space https://kenney.nl/media/pages/assets/space-kit/20874c75ac-1677698978/kenney_space-kit.zip
 echo "Done. Unzip a pack over art/sourced/<pack>/ to refresh it, then re-copy what the game uses into game/assets/."
