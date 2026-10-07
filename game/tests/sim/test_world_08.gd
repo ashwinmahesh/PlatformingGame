@@ -40,15 +40,19 @@ func _free(lvl: Node) -> void:
 	await ticks(3)
 
 
-## Jump toward `target` (a top to land on): steer while still short of it, double-jump on the way
-## down if it's still ahead. Stops once landed.
+## Jump toward `target` (a top to land on) the way a player would: straight up while still
+## below the ledge if it's close, steering once level with it (or at once if it's far), with a
+## second jump near the top of the first. Stops once landed.
 func _hop_to(p: Player, inp: ScriptedInput, target: Vector3, max_ticks: int = 180) -> void:
 	inp.tap(&"jump")
 	var second := false
+	var start := Vector3(target.x - p.global_position.x, 0.0, target.z - p.global_position.z).length()
 	for i in max_ticks:
 		var flat := Vector3(target.x - p.global_position.x, 0.0, target.z - p.global_position.z)
-		inp.move = _toward(p, flat) if flat.length() > 0.8 else Vector2.ZERO
-		if not second and i > 8 and p.velocity.y < 0.0 and flat.length() > 1.2:
+		var below := p.global_position.y < target.y + 0.15
+		var steer := flat.length() > 0.8 and (not below or start > 5.0 or flat.length() > 3.5)
+		inp.move = _toward(p, flat) if steer else Vector2.ZERO
+		if not second and i > 8 and p.velocity.y < 1.5 and (below or flat.length() > 1.2):
 			inp.tap(&"jump")
 			second = true
 		await ticks(1)
@@ -56,6 +60,35 @@ func _hop_to(p: Player, inp: ScriptedInput, target: Vector3, max_ticks: int = 18
 			break
 	inp.move = Vector2.ZERO
 	await ticks(20)
+
+
+## Walk (no jumping) toward `target` until close.
+func _walk_to(p: Player, inp: ScriptedInput, target: Vector3, max_ticks: int = 300) -> void:
+	for i in max_ticks:
+		var flat := Vector3(target.x - p.global_position.x, 0.0, target.z - p.global_position.z)
+		if flat.length() < 0.6:
+			break
+		inp.move = _toward(p, flat) * clampf(flat.length() / 2.0, 0.3, 1.0)
+		await ticks(1)
+	inp.move = Vector2.ZERO
+	await ticks(10)
+
+
+## Hop from top to top (walking first toward a far one at the same height); checks each landing.
+## Returns how many tops were reached.
+func _climb(p: Player, inp: ScriptedInput, route: String, tops: Array[Vector3]) -> int:
+	var n := 0
+	for t in tops:
+		var flat := Vector3(t.x - p.global_position.x, 0.0, t.z - p.global_position.z)
+		if flat.length() > 7.0 and absf(t.y - p.global_position.y) < 0.5:
+			await _walk_to(p, inp, t - flat.normalized() * 5.0)
+		await _hop_to(p, inp, t)
+		var ok := p.is_on_floor() and absf(p.global_position.y - t.y) < 0.6 and Vector2(p.global_position.x - t.x, p.global_position.z - t.z).length() < 4.5
+		check(ok, "%s: landed on step %d at %s (hero at %s)" % [route, n + 1, str(t), str(p.global_position.snapped(Vector3.ONE * 0.1))])
+		if not ok:
+			return n
+		n += 1
+	return n
 
 
 ## Jump straight up from `foot` (a hero standing there) and give the bonk time to land.
@@ -359,4 +392,131 @@ func test_grand_star_clears_brickbloom_and_teaches_star_rush() -> void:
 	check(&"rush" in learned, "and with all six stars in, it teaches Star Rush")
 	check(p.has_ability(&"rush"), "the hero can now Star Rush")
 	Events.ability_learned.disconnect(on_learn)
+	await _free(lvl)
+
+
+## The fixed climbs round the world really climb: each hop of the Wobbly Tower, the kiln, the
+## Pipe Garden, Brickbeard's Knoll, the Toy Box rim, the Toybox Terraces and the ridge's east steps.
+func test_climbs_round_the_world_are_hops() -> void:
+	var lvl := await _load()
+	var p := lvl.player
+	var inp := _scripted(p)
+	var routes: Dictionary[String, Array] = {
+		"Wobbly Tower": [Vector3(96.0, 15.0, -32.0), Vector3(100.0, 18.0, -37.0), Vector3(98.0, 21.0, -41.0), Brickbloom.TOWER_TOP],
+		"kiln": [Vector3(-78.0, 0.0, 38.0), Vector3(-84.4, 1.5, 38.0), Vector3(-86.8, 3.0, 38.0), Vector3(-90.0, 6.0, 38.0), Vector3(-94.0, 9.0, 36.0)],
+		"Pipe Garden": [Vector3(-100.0, 0.0, 116.0), Vector3(-104.5, 0.0, 111.0), Vector3(-108.0, 2.2, 108.0), Vector3(-102.0, 4.6, 112.0), Vector3(-96.0, 7.0, 108.0), Vector3(-98.0, 9.4, 101.0), Vector3(-104.0, 11.8, 98.0)],
+		"Brickbeard's Knoll": [Vector3(-66.0, 0.0, -80.0), Vector3(-72.0, 1.5, -80.0), Vector3(-77.0, 3.0, -82.0), Vector3(-78.0, 4.5, -86.0), Vector3(-84.0, 6.0, -88.0)],
+		"Toy Box rim": [Vector3(70.0, 0.0, -82.0), Vector3(72.0, 2.2, -85.4), Vector3(75.6, 4.4, -85.4), Vector3(75.6, Brickbloom.TOY_RIM, -88.0)],
+		"Toybox Terraces": [Vector3(44.0, 0.0, 58.0), Vector3(44.0, 1.5, 54.0), Vector3(48.0, 3.0, 48.0), Vector3(64.5, 3.0, 41.0), Vector3(69.0, 4.5, 40.0), Vector3(76.0, 6.0, 40.0), Vector3(86.0, 6.0, 26.5), Vector3(88.0, 7.5, 22.0), Vector3(94.0, 9.0, 14.0)],
+		"ridge steps": [Vector3(36.0, 0.0, -34.0), Vector3(36.0, 3.0, -42.0), Vector3(36.0, 6.0, -47.0), Vector3(36.0, 9.0, -52.0), Vector3(28.0, Brickbloom.RAMPART, -52.0)],
+	}
+	for route: String in routes:
+		var tops: Array[Vector3] = []
+		tops.assign(routes[route])
+		p.respawn_at(tops[0] + Vector3.UP * 0.1)
+		await ticks(8)
+		var got := await _climb(p, inp, route, tops.slice(1))
+		check_eq(got, tops.size() - 1, "%s: every hop made" % route)
+	check(Progress.has_flag(&"w8_found_trowel"), "Mortimer's trowel is picked up on top of the Wobbly Tower")
+	check(Progress.has_seed(&"w8_seed_kiln"), "the kiln chimney's seed is collected")
+	check(Progress.has_seed(&"w8_seed_pipes"), "the Pipe Garden's seed is collected")
+	# Inside the Toy Box, the spring pad bounces you back out over the rim.
+	p.respawn_at(Brickbloom.TOY_BOX + Vector3(6.0, 3.0, 2.0))
+	for i in 150:
+		inp.move = _toward(p, Vector3(0.0, 0.0, 1.0)) if p.global_position.y > Brickbloom.TOY_RIM + 0.5 else Vector2.ZERO
+		await ticks(1)
+	inp.move = Vector2.ZERO
+	await ticks(60)
+	check(p.global_position.z > Brickbloom.TOY_BOX.z + 8.8, "the Toy Box's spring pad bounces you out (z %.1f)" % p.global_position.z)
+	await _free(lvl)
+
+
+## The Sun-and-Moon Steps: climb, bonking the flip brick over each post to swap the steps.
+func test_sun_and_moon_climb() -> void:
+	var lvl := await _load()
+	var p := lvl.player
+	var inp := _scripted(p)
+	var c := Brickbloom.SUNMOON
+	p.respawn_at(c + Vector3(0.0, 0.1, 10.0))
+	await ticks(8)
+	await _climb(p, inp, "sun steps", [c + Vector3(0.0, 3.0, 6.0), c + Vector3(5.0, 6.0, 2.0)] as Array[Vector3])
+	await _walk_to(p, inp, c + Vector3(7.6, 6.0, 2.0))
+	inp.tap(&"jump")
+	await ticks(50)
+	check(not lvl.flips.sun, "the flip brick over the first post swaps to moon")
+	await _climb(p, inp, "moon steps", [c + Vector3(0.0, 9.0, 0.0), c + Vector3(-5.0, 12.0, 0.0)] as Array[Vector3])
+	await _walk_to(p, inp, c + Vector3(-7.6, 12.0, 0.0))
+	inp.tap(&"jump")
+	await ticks(50)
+	check(lvl.flips.sun, "the flip brick over the second post swaps back to sun")
+	await _climb(p, inp, "sun steps again", [c + Vector3(0.0, 15.0, -2.0), c + Vector3(6.0, 18.0, -4.0)] as Array[Vector3])
+	check(Progress.has_seed(&"w8_seed_sunmoon"), "the seed on the top post is collected")
+	await _free(lvl)
+
+
+## The Sky Rows really lead from Cannon Ridge to the Flagpole Fort's star (riding the swinging
+## block and running the crumbly ones), and the Bonus Room's climb reaches its star.
+func test_sky_rows_and_bonus_room_climbs() -> void:
+	var lvl := await _load()
+	var p := lvl.player
+	var inp := _scripted(p)
+	p.invuln_left = 9999.0
+	# Bounce off the spring pad onto the first row.
+	p.respawn_at(Vector3(10.0, Brickbloom.RAMPART + 3.0, -59.0))
+	for i in 160:
+		var to := Vector3(10.0, 0.0, -70.0) - p.global_position
+		inp.move = _toward(p, to) if p.velocity.y > 2.0 or p.global_position.y > 15.0 else Vector2.ZERO
+		await ticks(1)
+		p.invuln_left = 9999.0
+		if i > 40 and p.is_on_floor():
+			break
+	inp.move = Vector2.ZERO
+	check(p.global_position.y > 15.5, "the spring pad bounces you up onto the first brick row (y %.1f)" % p.global_position.y)
+	# Wait for the swinging block to come close, then hop on and ride it across.
+	var mover: MovingPlatform = null
+	for n in lvl.find_children("*", "MovingPlatform", true, false):
+		var m := n as MovingPlatform
+		if absf(m.global_position.z + 80.0) < 2.0:
+			mover = m
+	check(mover != null, "the swinging block is there")
+	if mover != null:
+		for i in 400:
+			await ticks(1)
+			if mover.global_position.x > 6.0:
+				break
+		await _hop_to(p, inp, mover.global_position + Vector3.UP * 0.5)
+		check(p.is_on_floor() and absf(p.global_position.y - 17.0) < 0.6, "onto the swinging block (y %.1f)" % p.global_position.y)
+		for i in 400:
+			await ticks(1)
+			p.invuln_left = 9999.0
+			if mover.global_position.x < -6.0:
+				break
+	var rows: Array[Vector3] = [Vector3(-10.0, 18.0, -90.0), Vector3(-2.0, 19.0, -98.0), Vector3(6.0, 20.0, -103.0), Vector3(14.0, 21.0, -108.0), Vector3(23.0, 21.0, -112.0), Brickbloom.FORT + Vector3(2.0, 0.0, -1.5)]
+	for t in rows:
+		await _hop_to(p, inp, t)
+		p.invuln_left = 9999.0
+	check(Progress.has_shard(&"w8_shard_flagpole"), "the Sky Rows lead to the Flagpole Fort's star")
+	# The Bonus Room: from the arrival pipe up the rows (and the swinging block) to its star.
+	var b := Brickbloom.BONUS
+	p.respawn_at(b + Vector3(-8.0, 0.1, 6.0))
+	await ticks(8)
+	await _climb(p, inp, "bonus room", [b + Vector3(-11.0, 3.0, -5.0), b + Vector3(-4.0, 6.0, -8.0)] as Array[Vector3])
+	var bm: MovingPlatform = null
+	for n in lvl.find_children("*", "MovingPlatform", true, false):
+		var m := n as MovingPlatform
+		if m.global_position.y < -30.0:
+			bm = m
+	check(bm != null, "the Bonus Room's swinging block is there")
+	if bm != null:
+		for i in 400:
+			await ticks(1)
+			if bm.global_position.z < b.z - 9.0:
+				break
+		await _hop_to(p, inp, bm.global_position + Vector3.UP * 0.5)
+		for i in 400:
+			await ticks(1)
+			if bm.global_position.z > b.z - 3.0:
+				break
+	await _climb(p, inp, "bonus room top", [b + Vector3(12.0, 12.0, 4.0), b + Vector3(4.0, 15.0, 8.0), b + Vector3(-6.0, 18.0, 6.0), b + Vector3(-13.0, 20.5, -3.0)] as Array[Vector3])
+	check(Progress.has_shard(&"w8_shard_bonus"), "the Bonus Room's climb reaches its star")
 	await _free(lvl)

@@ -34,7 +34,7 @@ static func pip_spots(n: int) -> Array[Vector2]:
 
 ## The pips of `n` on the four sides and the top of a box of size `s` (its top centre at the
 ## origin), as one mesh.
-static func pip_mesh(s: Vector3, n: int, radius: float = 0.24) -> Mesh:
+static func pip_mesh(s: Vector3, n: int, radius: float = 0.24, top: bool = true) -> Mesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var disc := CylinderMesh.new()
@@ -50,8 +50,9 @@ static func pip_mesh(s: Vector3, n: int, radius: float = 0.24) -> Mesh:
 		for p in pip_spots(n):
 			var at := turn * Vector3(p.x * spread, -s.y * 0.5 + p.y * spread, d)
 			st.append_from(disc, 0, Transform3D(turn * Basis(Vector3.RIGHT, PI * 0.5), at))
-	for p in pip_spots(n):
-		st.append_from(disc, 0, Transform3D(Basis(), Vector3(p.x * spread, 0.02, p.y * spread)))
+	if top:
+		for p in pip_spots(n):
+			st.append_from(disc, 0, Transform3D(Basis(), Vector3(p.x * spread, 0.02, p.y * spread)))
 	return st.commit()
 
 

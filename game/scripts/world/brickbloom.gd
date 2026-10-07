@@ -37,6 +37,9 @@ const BONUS := Vector3(60.0, -50.0, 96.0)
 const SUNMOON := Vector3(100.0, 0.0, 90.0)
 const TOWER_TOP := Vector3(100.5, 24.0, -43.0)
 const MOAT_PIPE := Vector3(-30.0, MOAT_BED, -30.0)
+const TOY_BOX := Vector3(78.0, 0.0, -96.0)
+const TOY_RIM := 6.6
+const PIPE_GARDEN := Vector3(-100.0, 0.0, 100.0)
 const KK := "res://assets/models/kk_platformer/"
 const TOY: Array[StringName] = [&"roof_red", &"thatch", &"roof_blue", &"slime_green", &"mush_purple", &"sunset_orange", &"candy_pink"]
 
@@ -79,7 +82,7 @@ func build() -> void:
 	_rng.seed = 808
 	_batch = ModuleBatch.new()
 	region(Vector3.ZERO)
-	regions = {"meadow": Vector3(0.0, 0.0, 80.0), "castle": Vector3.ZERO, "terraces": Vector3(80.0, 0.0, 10.0), "ridge": Vector3(0.0, 0.0, -50.0), "sky_rows": Vector3(10.0, 0.0, -105.0),
+	regions = {"toy_box": TOY_BOX, "pipe_garden": PIPE_GARDEN, "meadow": Vector3(0.0, 0.0, 80.0), "castle": Vector3.ZERO, "terraces": Vector3(80.0, 0.0, 10.0), "ridge": Vector3(0.0, 0.0, -50.0), "sky_rows": Vector3(10.0, 0.0, -105.0),
 		"green": Vector3(-80.0, 0.0, 0.0), "brickworks": Vector3(-92.0, 0.0, 40.0), "court": COURT, "knoll": Vector3(-84.0, 0.0, -84.0), "lane": Vector3(80.0, 0.0, 80.0), "bonus": BONUS}
 	_ground_and_moat()
 	_border()
@@ -98,6 +101,9 @@ func build() -> void:
 	_bonus_room()
 	_pipes()
 	_hooks()
+	_toy_box()
+	_pipe_garden()
+	_trees()
 	_critters()
 	_batch.build(self)
 	make_lock()
@@ -173,6 +179,14 @@ func _toy_stack(base: Vector3, n: int, s: float = 2.2) -> void:
 		var b := Kit.block(self, top, Vector3(s, s, s), TOY[_rng.randi() % TOY.size()], Layers.WORLD, &"")
 		b.rotation.y = _rng.randf_range(-0.5, 0.5)
 		Kit.mesh_instance(b, PipBlock.pip_mesh(Vector3(s, s, s), _rng.randi_range(1, 6), s * 0.08), Kit.mat(&"cloth_cream"), Vector3(0.0, s * 0.5, 0.0))
+
+
+## One big die whose top centre is `top`.
+func _die(top: Vector3, s: float, n: int, color: StringName, yaw: float = 0.0) -> StaticBody3D:
+	var b := Kit.block(self, top, Vector3(s, s, s), color, _layers(), &"")
+	b.rotation.y = yaw
+	Kit.mesh_instance(b, PipBlock.pip_mesh(Vector3(s, s, s), n, s * 0.08), Kit.mat(&"cloth_cream"), Vector3(0.0, s * 0.5, 0.0))
+	return b
 
 
 ## A giant beach ball (solid).
@@ -433,10 +447,24 @@ func _keep() -> void:
 		Kit.block(self, Vector3(t, KEEP_TOP + 1.0, -7.5), Vector3(1.2, 1.0, 1.0), &"stone_light", Layers.WORLD, &"roof_red")
 		Kit.block(self, Vector3(-7.5, KEEP_TOP + 1.0, t), Vector3(1.0, 1.0, 1.2), &"stone_light", Layers.WORLD, &"roof_red")
 		Kit.block(self, Vector3(7.5, KEEP_TOP + 1.0, t), Vector3(1.0, 1.0, 1.2), &"stone_light", Layers.WORLD, &"roof_red")
+	# Round windows on the keep's faces, between the spiral's lanes.
+	var window := CylinderMesh.new()
+	window.top_radius = 0.9
+	window.bottom_radius = 0.9
+	window.height = 0.2
+	for k in 4:
+		var turn := Basis(Vector3.UP, k * PI * 0.5)
+		for spec: Vector2 in [Vector2(-4.0, 8.0), Vector2(4.0, 13.0), Vector2(0.0, 18.0)]:
+			var w := Kit.mesh_instance(self, window, Kit.mat(&"ink_navy", 0.03), turn * Vector3(spec.x, spec.y, 8.05))
+			w.basis = turn * Basis(Vector3.RIGHT, PI * 0.5)
 	# The Star Turret, 13 m of it, too tall to jump.
 	Kit.pillar(self, Vector3(0.0, STAR_TOP, 0.0), 2.6, STAR_TOP - KEEP_TOP, &"stone_light", &"gold")
 	for k in 3:
 		Kit.pillar(self, Vector3(0.0, KEEP_TOP + 3.5 + k * 4.0, 0.0), 2.85, 0.5, &"roof_red", &"roof_red", 0)
+	var emblem := GoalStar.star_mesh(1.1, 0.5, 0.2)
+	for k in 4:
+		var turn := Basis(Vector3.UP, k * PI * 0.5)
+		Kit.mesh_instance(self, emblem, Kit.mat(&"gold", 0.03), turn * Vector3(0.0, STAR_TOP - 2.0, 2.65)).basis = turn
 	var cols: Array[StringName] = [&"roof_red", &"sunset_orange", &"thatch", &"slime_green", &"roof_blue"]
 	for i in 5:
 		var a := -PI * 0.5 + i * 0.9
@@ -495,7 +523,7 @@ func _terraces() -> void:
 	_toy_stack(Vector3(76.0, 6.0, 44.0), 2)
 	_toy_stack(Vector3(102.0, 9.0, 16.0), 3)
 	_ball(Vector3(60.0, 12.0, -12.0), "red", 1.8)
-	_ball(Vector3(84.0, 6.0, 28.0), "green", 2.0)
+	_ball(Vector3(73.0, 6.0, 28.0), "green", 2.0)
 	for spec: Array in [[Vector3(66.0, 3.0, 44.0), -PI * 0.5], [Vector3(86.0, 6.0, 28.0), PI], [Vector3(88.0, 9.0, 0.0), PI * 0.5], [Vector3(96.0, 9.0, -2.0), PI]]:
 		Models.spawn(self, _kk("signage_arrow_stand", "yellow"), spec[0] as Vector3, spec[1] as float, 1.4)
 	_flag(Vector3(40.5, 3.0, 50.5), "yellow", 1.6)
@@ -733,8 +761,9 @@ func _sun_moon_steps() -> void:
 	flips.add_step(c + Vector3(0.0, 9.0, 0.0), Vector3(4.0, 0.8, 4.0), false)
 	flips.add_step(c + Vector3(0.0, 15.0, -2.0), Vector3(4.0, 0.8, 4.0), true)
 	flips.add_switch(c + Vector3(-6.0, 6.0, 8.0))
-	flips.add_switch(c + Vector3(6.0, 12.2, 2.0))
-	flips.add_switch(c + Vector3(-6.0, 18.2, 0.0))
+	# Each post's flip brick hangs over its far half, out of the way of a hop onto the post.
+	flips.add_switch(c + Vector3(8.0, 12.2, 2.0))
+	flips.add_switch(c + Vector3(-8.0, 18.2, 0.0))
 	seed_at(&"w8_seed_sunmoon", c + Vector3(6.0, 18.0, -4.0))
 	sign_post(c + Vector3(-10.0, 0.0, 10.0), "Sun & Moon Steps: bonk a flip\nbrick and the steps swap.", PI * 0.25)
 	_flag(c + Vector3(6.0, 18.0, -6.0), "yellow", 1.6)
@@ -821,6 +850,80 @@ func _hooks() -> void:
 	hook(Vector3(-18.0, 18.0, 63.2))
 	seed_at(&"w8_seed_hook", Vector3(-18.5, 18.0, 59.0))
 	sign_post(Vector3(-2.0, 0.0, 76.0), "Balloon hooks: Vinelash (2 / G)\nup to the cloud!", PI * 0.75)
+
+
+# --- North-east: the Toy Box; south-west: the Pipe Garden; trees --------------------------------
+
+## A giant open toy box, its lid thrown back, full of toys and a toy knight guarding a chest.
+func _toy_box() -> void:
+	var c := TOY_BOX
+	var r := TOY_RIM
+	var walls: Array[Array] = [[Vector3(0.0, r, -8.0), Vector3(22.0, r - floor_y, 1.6)], [Vector3(0.0, r, 8.0), Vector3(22.0, r - floor_y, 1.6)], [Vector3(-11.0, r, 0.0), Vector3(1.6, r - floor_y, 14.4)], [Vector3(11.0, r, 0.0), Vector3(1.6, r - floor_y, 14.4)]]
+	for w in walls:
+		Kit.block(self, c + (w[0] as Vector3), w[1] as Vector3, &"wood_warm", _layers(), &"thatch")
+	var star := GoalStar.star_mesh(2.2, 1.0, 0.3)
+	for spec: Array in [[Vector3(0.0, 3.4, 8.85), 0.0], [Vector3(0.0, 3.4, -8.85), PI], [Vector3(11.85, 3.4, 0.0), PI * 0.5], [Vector3(-11.85, 3.4, 0.0), -PI * 0.5]]:
+		Kit.mesh_instance(self, star, Kit.mat(TOY[_rng.randi() % TOY.size()], 0.04), c + (spec[0] as Vector3)).rotation.y = spec[1] as float
+	# The lid, thrown back past upright and leaning on a post.
+	var lid := Kit.static_body(self, c + Vector3(0.0, r, -8.8))
+	lid.rotation.x = PI * 0.5 - 0.3
+	var lid_size := Vector3(23.0, 0.8, 16.6)
+	var lid_shape := BoxShape3D.new()
+	lid_shape.size = lid_size
+	Kit.add_shape(lid, lid_shape, Vector3(0.0, 0.4, -lid_size.z * 0.5))
+	Kit.mesh_instance(lid, RoundMesh.box(lid_size, 0.3), Kit.mat(&"wood_warm", 0.0, &"thatch"), Vector3(0.0, 0.4, -lid_size.z * 0.5))
+	# Dice steps up to the rim outside; a spring pad and a ladder to get out again inside.
+	_die(c + Vector3(-6.0, 2.2, 10.6), 2.2, 2, &"roof_blue")
+	_die(c + Vector3(-2.4, 2.2, 10.6), 2.2, 5, &"candy_pink")
+	_die(c + Vector3(-2.4, 4.4, 10.6), 2.2, 3, &"slime_green", 0.2)
+	_spring(c + Vector3(6.0, 0.0, 2.0), 8.0, 12.0, "blue")
+	ladder(c + Vector3(-10.2, 0.0, -2.0), r, PI * 0.5)
+	# Inside: toys, and a chest the toy knight won't share.
+	chest(c + Vector3(-5.0, 0.0, -4.5), 0.5, &"w8_seed_toybox")
+	critter(Armorling, c + Vector3(1.0, 0.5, -3.0))
+	_ball(c + Vector3(5.0, 0.0, -4.0), "red", 1.6)
+	_die(c + Vector3(-7.0, 2.2, 4.0), 2.2, 6, &"thatch", 0.4)
+	_die(c + Vector3(-7.0, 4.4, 4.0), 2.2, 1, &"mush_purple", -0.3)
+	Models.spawn(self, _kk("star", "yellow"), c + Vector3(8.0, TOY_RIM + 1.0, -8.0), 0.0, 2.4)
+	sign_post(c + Vector3(-9.0, 0.0, 12.0), "The Toy Box")
+	add_capture_point("toy_box", c + Vector3(-22.0, 18.0, 24.0), c + Vector3(0.0, 3.0, 0.0))
+
+
+## Sealed pipes of rising heights to hop up, to a brick ledge with a seed.
+func _pipe_garden() -> void:
+	var c := PIPE_GARDEN
+	var steps: Array[Array] = [[Vector3(-8.0, 0.0, 8.0), 2.2, "green"], [Vector3(-2.0, 0.0, 12.0), 4.6, "yellow"], [Vector3(4.0, 0.0, 8.0), 7.0, "red"], [Vector3(2.0, 0.0, 1.0), 9.4, "blue"]]
+	for s in steps:
+		_pipe(c + (s[0] as Vector3), s[1] as float, str(s[2]), "", false)
+	_brick_row(c + Vector3(-4.0, 11.8, -2.0), Vector3(6.0, 1.2, 4.0))
+	seed_at(&"w8_seed_pipes", c + Vector3(-5.0, 11.8, -2.0))
+	sign_post(c + Vector3(-12.0, 0.0, 14.0), "The Pipe Garden:
+these ones are sealed. Hop up!", PI * 0.25)
+	for i in 5:
+		var a := float(i) / 5.0 * TAU
+		Whimsy.flower(self, c + Vector3(cos(a) * 12.0, 0.0, sin(a) * 9.0), 1.4, 1.0, [&"gold", &"candy_pink", &"slime_blue"][i % 3] as StringName, false)
+	heart_bush(c + Vector3(10.0, 0.0, 14.0))
+
+
+## Lollipop-bright puffball trees round the edges and in the open fields.
+func _trees() -> void:
+	var kinds: Array[StringName] = [&"lime", &"blossom", &"gold", &"teal", &"lime"]
+	var n := 0
+	var spots: Array[Vector3] = []
+	for i in 17:
+		var x := -112.0 + i * 14.0
+		if absf(x) > 14.0:
+			spots.append(Vector3(x, 0.0, 114.0))
+		spots.append(Vector3(x, 0.0, -130.0))
+	for i in 16:
+		var z := -116.0 + i * 15.0
+		spots.append(Vector3(-114.0, 0.0, z))
+		spots.append(Vector3(114.0, 0.0, z))
+	spots.append_array([Vector3(-40.0, 0.0, 60.0), Vector3(-34.0, 0.0, 104.0), Vector3(40.0, 0.0, 104.0), Vector3(50.0, 0.0, 96.0), Vector3(-70.0, 0.0, -30.0), Vector3(-60.0, 0.0, -50.0),
+		Vector3(-100.0, 0.0, 70.0), Vector3(-30.0, 0.0, -80.0), Vector3(50.0, 0.0, -70.0), Vector3(100.0, 0.0, -70.0), Vector3(60.0, 0.0, -120.0), Vector3(-70.0, 0.0, -120.0), Vector3(84.0, 0.0, 108.0)])
+	for p in spots:
+		Whimsy.tree(self, p + Vector3(_rng.randf_range(-2.0, 2.0), 0.0, _rng.randf_range(-2.0, 2.0)), kinds[n % kinds.size()], _rng.randf_range(0.9, 1.25), n % Whimsy.VARIANTS, _rng.randf() * TAU)
+		n += 1
 
 
 # --- Monsters -----------------------------------------------------------------------------------
