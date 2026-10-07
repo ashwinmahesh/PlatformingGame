@@ -722,22 +722,28 @@ func _roost() -> void:
 	sign_at(Vector3(-78.0, g, -36.0), "The Roost. Mind the edge!", PI)
 	# Treehouses: giant trunks with round decks, rope bridges between them.
 	var houses: Array[Vector3] = [Vector3(-104.0, g, -46.0), Vector3(-70.0, g, -58.0), Vector3(-62.0, g, -36.0), Vector3(-96.0, g, -62.0)]
-	var deck_h: Array[float] = [6.0, 9.0, 6.0, 12.0]
+	var deck_h: Array[float] = [6.0, 9.0, 6.0, 9.0]
 	for i in houses.size():
 		var h := houses[i]
 		var top := h + Vector3(0.0, deck_h[i], 0.0)
-		Kit.pillar(self, top + Vector3(0.0, 8.0, 0.0), 1.4, deck_h[i] + 8.0, &"bark_mid", &"bark_mid")
-		Whimsy.canopy(self, top + Vector3(0.0, 11.0, 0.0), 7.0, tree_kinds[i % tree_kinds.size()])
+		var crown := 12.0 if i == 3 else 8.0
+		Kit.pillar(self, top + Vector3(0.0, crown, 0.0), 1.4, deck_h[i] + crown, &"bark_mid", &"bark_mid")
+		Whimsy.canopy(self, top + Vector3(0.0, crown + 3.0 + (3.0 if i == 3 else 0.0), 0.0), 7.0, tree_kinds[i % tree_kinds.size()])
 		Kit.pillar(self, top, 5.5, 0.8, &"wood_plank", &"wood_plank")
 		var hut_a := 2.4 + i * 1.3
 		egg_hut(top + Vector3(cos(hut_a), 0.0, sin(hut_a)) * 3.4, hut_a + PI * 0.5, 1.5, &"mush_spot", [&"candy_pink", &"slime_blue", &"lime_pop", &"gold"][i] as StringName)
 		ladder(h + Vector3(0.0, 0.0, 5.5), deck_h[i], 0.0)
-	for pair: Array in [[0, 1], [1, 2], [0, 3]]:
+	for pair: Array in [[0, 1], [1, 2], [0, 3], [3, 1]]:
 		var a := houses[pair[0] as int] + Vector3(0.0, deck_h[pair[0] as int], 0.0)
 		var b := houses[pair[1] as int] + Vector3(0.0, deck_h[pair[1] as int], 0.0)
 		var d := Vector3(b.x - a.x, 0.0, b.z - a.z).normalized()
 		bridge(a + d * 4.9, b - d * 4.9, 2.8, &"wood_plank", true, &"bark_dark")
-	seed_at(&"w9_seed_roost_top", houses[3] + Vector3(-3.2, deck_h[3], 2.0))
+	# Shelf fungi up the last trunk to a crow's nest seed.
+	var t3 := houses[3] + Vector3(0.0, deck_h[3], 0.0)
+	Kit.pillar(self, t3 + Vector3(2.6, 2.4, 0.0), 1.6, 0.5, &"sunset_orange", &"mush_spot")
+	Kit.pillar(self, t3 + Vector3(0.0, 4.8, 2.6), 1.6, 0.5, &"gold", &"mush_spot")
+	Kit.pillar(self, t3 + Vector3(-2.6, 7.2, 0.0), 1.8, 0.5, &"mush_red", &"mush_spot")
+	seed_at(&"w9_seed_roost_top", t3 + Vector3(-3.0, 7.2, 0.0))
 	npc("ptilda", "Ptilda", Vector3(-88.0, g, -48.0), &"", Vector3.ZERO, "", &"", &"w9_seed_roost_errand").errand_flag = &"w9_found_fan"
 	npc("tuffy", "Tuffy", Vector3(-70.0, g + 9.0, -56.0))
 	for i in 10:
@@ -892,7 +898,8 @@ func _skyfern() -> void:
 	var cols: Array[StringName] = [&"mush_red", &"sunset_orange", &"gold", &"mush_purple", &"mush_teal", &"candy_pink"]
 	for i in 6:
 		var a := i * PI * 0.5
-		var s := Vector3(cos(a) * 4.4, 3.0 * (i + 1), sin(a) * 4.4)
+		var r := 6.0 if i == 5 else 4.4
+		var s := Vector3(cos(a) * r, 3.0 * (i + 1), sin(a) * r)
 		if i == 3:
 			crumble(c + s, Vector3(3.0, 0.6, 3.0), CrumblePlatform.Look.ROCK)
 		elif i == 4:
@@ -955,7 +962,7 @@ func _ways_up() -> void:
 	bouncer(Vector3(-12.0, 0.0, -20.0), Springcap.Look.GLOWCAP, 8.0)
 	hook(Vector3(4.0, T1, -26.0))
 	# Cycad Shelf -> Canopy Heights: the Cycad Ramp, ladders, a lift.
-	ramp(Vector3(-30.0, T1, -48.0), 20.0, T2 - T1, 6.0, &"wood_plank")
+	ramp(Vector3(-30.0, T1, -48.0), 22.0, T2 - T1, 6.0, &"wood_plank")
 	for x: float in [10.0, 46.0, 104.0]:
 		ladder(Vector3(x, T1, -69.4), T2 - T1, 0.0)
 	lift_at(Vector3(28.0, T1, -67.5), T2, 7.0)
