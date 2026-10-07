@@ -130,6 +130,9 @@ func test_counting_blocks_hopscotch_up_to_the_star() -> void:
 		await _hop_to(p, inp, by_number[n].global_position)
 		check(by_number[n].lit, "block %d lights when landed on in turn" % n)
 	check(seq.done, "hopping one to five solves it")
+	await ticks(90)
+	check(by_number[5].global_position.distance_to(Brickbloom.COURT + Vector3(-6.5, 5.6, 0.0)) < 0.1, "the block you're standing on waits for you to step off")
+	await _walk_to(p, inp, c + Vector3(-11.0, 0.0, 0.0))
 	await ticks(200)
 	for n in range(1, 6):
 		check(by_number[n].global_position.distance_to(seq.stair[n - 1]) < 0.2, "block %d flew into its stair spot" % n)

@@ -72,18 +72,27 @@ func _physics_process(_delta: float) -> void:
 			return
 
 
-## Every block glides to its stair spot, one after another.
+## Every block glides to its stair spot, one after another (a block waits for the hero to step
+## off it first, so nobody is flung off a flying block).
 func raise() -> void:
 	for b in blocks:
 		var i := b.number - 1
 		if i >= stair.size():
 			continue
 		b.set_lit(true)
-		var t := b.create_tween()
-		t.set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
-		t.tween_interval(0.25 * i)
-		t.tween_property(b, "global_position", stair[i], 1.1).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		t.tween_callback(func() -> void: AudioDirector.play(&"ui_blip", -4.0, 1.0 + i * 0.1))
+		_fly(b, stair[i], 0.25 * i)
+
+
+func _fly(b: PipBlock, to: Vector3, delay: float) -> void:
+	await get_tree().create_timer(delay, false, true).timeout
+	while is_instance_valid(b) and b.has_rider():
+		await get_tree().physics_frame
+	if not is_instance_valid(b):
+		return
+	var t := b.create_tween()
+	t.set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
+	t.tween_property(b, "global_position", to, 1.1).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	t.tween_callback(func() -> void: AudioDirector.play(&"ui_blip", -4.0, 1.0 + b.number * 0.1))
 
 
 ## Puts the blocks straight onto the stair (a save that already solved it, or tests).

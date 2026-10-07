@@ -111,6 +111,7 @@ func build() -> void:
 	_toy_box()
 	_pipe_garden()
 	_trees()
+	_toys_about()
 	_critters()
 	_batch.build(self)
 	make_lock()
@@ -956,6 +957,28 @@ func _trees() -> void:
 	for p in spots:
 		Whimsy.tree(self, p + Vector3(_rng.randf_range(-2.0, 2.0), 0.0, _rng.randf_range(-2.0, 2.0)), kinds[n % kinds.size()], _rng.randf_range(0.9, 1.25), n % Whimsy.VARIANTS, _rng.randf() * TAU)
 		n += 1
+
+
+## Giant dominoes in the south-east, flower steps to a heart in the north fields, and more toys.
+func _toys_about() -> void:
+	var c := Vector3(70.0, 0.0, 104.0)
+	for i in 11:
+		var a := deg_to_rad(200.0 + i * 13.0)
+		var at := c + Vector3(cos(a) * 14.0, 0.0, sin(a) * 10.0)
+		var d := Kit.block(self, at + Vector3(0.0, 4.4, 0.0), Vector3(1.0, 4.4, 2.4), &"cloth_cream", Layers.WORLD, &"")
+		d.rotation.y = -a + (0.25 if i % 2 == 0 else -0.1)
+		Kit.mesh_instance(d, RoundMesh.box(Vector3(1.06, 0.14, 2.0), 0.04), Kit.mat(&"ink_navy"), Vector3(0.0, 0.0, 0.0))
+		for k in 2:
+			Kit.mesh_instance(d, PipBlock.pip_mesh(Vector3(1.0, 2.2, 2.4), (i + k * 3) % 6 + 1, 0.16, false), Kit.mat(&"ink_navy"), Vector3(0.0, 1.1 - k * 2.2 + 1.1, 0.0))
+	sign_post(c + Vector3(0.0, 0.0, 3.0), "Mind the dominoes!", PI)
+	var steps: Array[Array] = [[Vector3(-36.0, 0.0, -118.0), 2.5, &"candy_pink"], [Vector3(-30.0, 0.0, -124.0), 5.0, &"gold"], [Vector3(-23.0, 0.0, -119.0), 7.5, &"slime_blue"]]
+	for f in steps:
+		Whimsy.flower(self, f[0] as Vector3, f[1] as float, 2.5, f[2] as StringName)
+	heart_at(Vector3(-23.0, 7.8, -119.0))
+	for spec: Array in [[Vector3(-104.0, 0.0, -112.0), 3], [Vector3(-44.0, 0.0, -66.0), 2], [Vector3(104.0, 0.0, -118.0), 3], [Vector3(112.0, 0.0, -60.0), 2], [Vector3(110.0, 0.0, 58.0), 2], [Vector3(-112.0, 0.0, 56.0), 2], [Vector3(-70.0, 0.0, -38.0), 2], [Vector3(54.0, 0.0, -40.0), 2]]:
+		_toy_stack(spec[0] as Vector3, int(spec[1]))
+	for spec: Array in [[Vector3(96.0, 0.0, -80.0), "blue", 2.4], [Vector3(-96.0, 0.0, -60.0), "yellow", 2.0], [Vector3(-80.0, 0.0, 112.0), "red", 2.2], [Vector3(100.0, 0.0, 40.0), "green", 2.0]]:
+		_ball(spec[0] as Vector3, str(spec[1]), spec[2] as float)
 
 
 # --- Monsters -----------------------------------------------------------------------------------

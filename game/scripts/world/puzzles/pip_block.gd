@@ -59,7 +59,8 @@ static func pip_mesh(s: Vector3, n: int, radius: float = 0.24, top: bool = true)
 func _ready() -> void:
 	collision_layer = Layers.WORLD | Layers.CAMERA_BLOCKER
 	collision_mask = 0
-	sync_to_physics = false
+	# Moved by physics-step tweens when it flies into the stair, so a hero standing on it rides.
+	sync_to_physics = true
 	var b := BoxShape3D.new()
 	b.size = size
 	Kit.add_shape(self, b, Vector3(0.0, -size.y * 0.5, 0.0))
@@ -68,6 +69,11 @@ func _ready() -> void:
 	_mat = Kit.unique_mat(color_name, 0.03)
 	Kit.mesh_instance(_visual, RoundMesh.box(size, 0.3), _mat, Vector3(0.0, -size.y * 0.5, 0.0))
 	Kit.mesh_instance(_visual, pip_mesh(size, number), Kit.mat(&"cloth_cream"))
+
+
+## Is the hero standing on it right now?
+func has_rider() -> bool:
+	return _on_top
 
 
 func set_lit(on: bool) -> void:
