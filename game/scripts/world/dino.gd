@@ -79,7 +79,7 @@ func _setup_model() -> void:
 				var m := (mi.get_surface_override_material(s) as ShaderMaterial).duplicate() as ShaderMaterial
 				m.set_shader_parameter(&"albedo_color", Palette.color(colours[key]))
 				mi.set_surface_override_material(s, m)
-		# Big and moving: always drawn, never merged.
+		# Big and moving: some slack so a swinging tail never pops out of view.
 		mi.extra_cull_margin = 4.0
 	skeleton = model.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
 	anim = model.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer

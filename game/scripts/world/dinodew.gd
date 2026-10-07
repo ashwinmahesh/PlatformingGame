@@ -90,6 +90,7 @@ func build() -> void:
 	_terrain()
 	_water()
 	_village()
+	_honkers()
 	_fern_floor()
 	_mossback()
 	_lake_and_trundle()
@@ -358,6 +359,26 @@ func _village() -> void:
 	butterflies(c, 20.0, 8)
 	sparkles(c + Vector3(0.0, 2.0, 0.0), Vector3(40.0, 4.0, 40.0), 30)
 	add_capture_point("village", Vector3(26.0, 16.0, 100.0), c)
+
+
+## Two parasaurolophus amble round the meadows south of the village and honk when you come by.
+func _honkers() -> void:
+	var schemes: Array[Dictionary] = [
+		{"Green": &"lime_pop", "LightGreen": &"grass_light", "LightYellow": &"cloth_cream", "Red": &"candy_pink"},
+		{"Green": &"slime_blue", "LightGreen": &"water_light", "LightYellow": &"cloth_cream", "Red": &"gold"},
+	]
+	var centres: Array[Vector3] = [Vector3(32.0, 0.0, 98.0), Vector3(-30.0, 0.0, 100.0)]
+	for i in 2:
+		var h := Honker.new()
+		h.model_scale = 1.0
+		var cols: Dictionary[String, StringName] = {}
+		for k: String in schemes[i]:
+			cols[k] = schemes[i][k] as StringName
+		h.colours = cols
+		h.clip = &"Walk"
+		h.path = loop_path(centres[i], 16.0, 10.0, 4.5, 1.0)
+		h.travelled = 7.0 * i
+		add_child(h)
 
 
 ## A fossil arch: two giant curving rib bones meeting overhead.
@@ -641,7 +662,7 @@ func _spring_locks() -> void:
 	locks.add_lock(lower, Vector3(62.0, 0.0, -30.5), Vector3(76.0, 6.0, -44.5))
 	locks.add_lock(upper, Vector3(61.0, 5.4, -52.0), Vector3(76.0, 12.0, -66.0))
 	var fl := locks.add_float(2.4)
-	fl.set_meta(&"offset", Vector3(4.0, 0.0, -2.0))
+	fl.set_meta(&"offset", Vector3(-4.0, 0.0, 2.0))
 	locks.float_lock = 1
 	locks.gate_open_above = upper.position.y + upper.levels[1] - 0.6
 	# The Hatchery: under the shelf, behind the lower lock's west wall, at its bed.
@@ -663,12 +684,20 @@ func _spring_locks() -> void:
 	hatch_gate = hatch[1] as VineGate
 	locks.gate = hatch_gate
 	locks.keep_open_box = AABB(Vector3(42.0, -5.0, -45.0), Vector3(16.0, 11.0, 18.0))
-	# A rope from the float over a pulley post down toward the gate.
-	Kit.pillar(self, Vector3(60.0, 9.5, -46.0), 0.35, 2.0, &"bark_dark", &"gold")
+	# A rope from the float over a tall pulley post and down to the gate.
+	var pulley_at := Vector3(60.0, 17.5, -46.0)
+	Kit.pillar(self, pulley_at + Vector3(0.0, -0.4, 0.0), 0.35, pulley_at.y - 0.4 - 7.5, &"bark_dark", &"gold")
 	var pulley := TorusMesh.new()
 	pulley.inner_radius = 0.4
 	pulley.outer_radius = 0.7
-	Kit.mesh_instance(self, pulley, Kit.mat(&"gold", 0.03), Vector3(60.0, 10.0, -46.0)).rotation.z = PI * 0.5
+	Kit.mesh_instance(self, pulley, Kit.mat(&"gold", 0.03), pulley_at).rotation.z = PI * 0.5
+	locks.rope_anchor = pulley_at
+	var gate_top := Vector3(57.2, 0.5, -36.0)
+	var span := gate_top - pulley_at
+	var up := span.normalized()
+	var side := up.cross(Vector3.FORWARD).normalized()
+	var rope := Kit.mesh_instance(self, RoundMesh.box(Vector3(0.12, 1.0, 0.12), 0.04), Kit.mat(&"wood_warm"))
+	rope.transform = Transform3D(Basis(side, up, side.cross(up)).scaled(Vector3(1.0, span.length(), 1.0)), pulley_at + span * 0.5)
 	npc("burble", "Burble", Vector3(52.0, T1, -48.0))
 	sign_at(Vector3(56.0, T1, -40.0), "The Spring Locks: one spring, two locks.\nFill one, and the other drains!", -PI * 0.5)
 	sign_at(Vector3(56.0, 0.0, -20.0), "Lower lock doorway", PI)

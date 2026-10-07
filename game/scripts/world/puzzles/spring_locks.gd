@@ -18,6 +18,9 @@ var gate_open_above: float = INF
 ## The gate won't drop on the hero: while they're inside this box (world) it stays up.
 var keep_open_box: AABB = AABB()
 var _float: Node3D
+## The float's rope runs up to this pulley (world) and on down to the gate.
+var rope_anchor: Vector3 = Vector3.INF
+var _rope: MeshInstance3D
 var _gate_open: bool = false
 var _spouts: Array[MeshInstance3D] = []
 
@@ -84,6 +87,9 @@ func add_float(size: float = 2.4) -> Node3D:
 	ring.inner_radius = 0.25
 	ring.outer_radius = 0.4
 	Kit.mesh_instance(_float, ring, Kit.mat(&"gold", 0.02), Vector3(0.0, size * 0.55, 0.0))
+	_rope = Kit.mesh_instance(self, RoundMesh.box(Vector3(0.12, 1.0, 0.12), 0.04), Kit.mat(&"wood_warm"))
+	_rope.top_level = true
+	_rope.visible = false
 	return _float
 
 
@@ -103,6 +109,14 @@ func _physics_process(_delta: float) -> void:
 		var p := lock.global_position
 		_float.global_position = Vector3(p.x, lock.surface() + 0.4, p.z) + (_float.get_meta(&"offset", Vector3.ZERO) as Vector3)
 		_float.rotation.z = sin(Time.get_ticks_msec() * 0.0015) * 0.05
+		if rope_anchor != Vector3.INF:
+			var from := _float.global_position + Vector3.UP * 1.4
+			var span := rope_anchor - from
+			_rope.visible = span.length() > 0.2
+			if _rope.visible:
+				var up := span.normalized()
+				var side := up.cross(Vector3.FORWARD if absf(up.z) < 0.9 else Vector3.RIGHT).normalized()
+				_rope.global_transform = Transform3D(Basis(side, up, side.cross(up)).scaled(Vector3(1.0, span.length(), 1.0)), from + span * 0.5)
 	if gate == null:
 		return
 	var want := lock.surface() >= gate_open_above
