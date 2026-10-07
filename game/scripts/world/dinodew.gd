@@ -352,7 +352,7 @@ func _village() -> void:
 	heart_bush(c + Vector3(-12.0, 0.0, -18.0))
 	for spec: Array in [[10.0, -16.0, &"q_barrel_apples"], [11.5, -17.0, &"q_barrel"], [-14.0, 16.0, &"q_farm_crate"], [14.0, 18.0, &"q_cart"], [-9.0, -2.0, &"q_bench"]]:
 		prop(spec[2] as StringName, c + Vector3(spec[0] as float, 0.0, spec[1] as float), _rng.randf() * TAU, 1.1)
-	npc("gingko", "Grandpa Gingko", c + Vector3(4.0, 0.0, -4.0), &"w9_found_spectacles", TAR + Vector3(-2.0, 0.6, -TAR_HALF - 9.0), "Grandpa's spectacles", &"w9_shard_errand")
+	npc("gingko", "Grandpa Gingko", c + Vector3(4.0, 0.0, -4.0), &"w9_found_spectacles", TAR + Vector3(-2.0, 0.0, -TAR_HALF - 9.0), "Grandpa's spectacles", &"w9_shard_errand")
 	npc("pipkin", "Pipkin", c + Vector3(-5.0, 0.0, 6.0))
 	animals(Bunny, c, 20.0, 4)
 	butterflies(c, 20.0, 8)
@@ -424,7 +424,7 @@ func _lake_and_trundle() -> void:
 	shard_at(&"w9_shard_lookout", ROCK + Vector3(0.0, ROCK_TOP, 0.0))
 	Whimsy.tree(self, ROCK + Vector3(1.6, ROCK_TOP, -1.6), &"teal", 0.7, -1, 0.0, false)
 	# Under the water: a giant ammonite shell holding a seed, and an old fossil ribcage.
-	var amm := ROCK + Vector3(-14.0, LAKE_Y - LAKE_DEPTH, -14.0)
+	var amm := ROCK + Vector3(-18.0, LAKE_Y - LAKE_DEPTH, 14.0)
 	var shell := TorusMesh.new()
 	shell.inner_radius = 0.8
 	shell.outer_radius = 2.6
@@ -467,15 +467,29 @@ func _lake_and_trundle() -> void:
 	for side: float in [-1.0, 1.0]:
 		var rail := trundle.add_piece("Torso", sxf * Transform3D(Basis(), Vector3(side * 1.75, 0.55, 0.0)), Vector3(0.2, 0.75, 5.0), &"saddle")
 		rail.name = "Rail"
-	trundle.ridge_carpets(-5.4, -14.5, 2.2, 1.8, ["Back", "Tail1", "Tail2", "Tail3", "Tail4", "Tail5"], &"moss", &"moss", 0.3, skin)
-	trundle.travelled = trundle.stops[0].x - 0.5
-	trundle.paused = false
-	# The Trundle Stop: steps up to a deck by his tail, and a tower deck level with his saddle.
-	var st := Vector3(-82.0, 0.0, 86.0)
-	box(st + Vector3(4.6, 2.0, -2.0), Vector3(4.0, 2.0, 4.0), &"wood_plank", &"wood_plank")
-	box(st + Vector3(4.6, 4.0, -7.0), Vector3(4.0, 0.6, 6.0), &"wood_plank", &"wood_plank")
+	var tail := trundle.ridge_carpets(-5.4, -14.5, 2.2, 1.8, ["Back", "Tail1", "Tail2", "Tail3", "Tail4", "Tail5"], &"moss", &"moss", 0.3, skin)
+	# The Trundle Stop, built round where he stands at the station: a deck where his tail tip
+	# rests, and a tower deck level with his saddle.
+	var last := tail[tail.size() - 1]
+	var half := ((last.get_child(0) as CollisionShape3D).shape as BoxShape3D).size * 0.5
+	var last_xf := trundle.global_transform.affine_inverse() * last.global_transform
+	trundle.place_at(trundle.stops[0].x)
+	var foot := trundle.global_transform * last_xf * Vector3(0.0, half.y, -half.z)
+	var back := (trundle.global_transform.basis * last_xf.basis * Vector3.FORWARD) * Vector3(1.0, 0.0, 1.0)
+	var deck := foot + back.normalized() * 1.6 + Vector3.DOWN * 0.2
+	box(deck, Vector3(3.6, deck.y, 3.6), &"wood_plank", &"wood_plank")
 	for k in 3:
-		box(st + Vector3(-4.6, 2.0 + k * 2.2, 2.0 - k * 4.0), Vector3(3.6, 0.6, 3.6), &"wood_plank", &"wood_plank")
+		var h := deck.y * float(2 - k) / 3.0
+		box(deck + back.normalized() * (3.0 + k * 2.2) + Vector3(0.0, h - deck.y, 0.0), Vector3(3.2, h, 2.4), &"wood_plank", &"wood_plank")
+	var side := (trundle.global_basis * Vector3.RIGHT).normalized()
+	var stop_top := trundle.global_transform * sxf * Vector3(0.0, 0.175, 0.0)
+	var tower := stop_top + side * 4.2 + Vector3.DOWN * 0.15
+	box(tower, Vector3(3.4, tower.y, 3.4), &"wood_plank", &"wood_plank")
+	ladder(tower - Vector3(0.0, tower.y, 0.0) + side * 1.7, tower.y, atan2(side.x, side.z))
+	Whimsy.bunting(self, deck + Vector3(0.0, 2.6, 0.0), tower + Vector3(0.0, 2.6, 0.0), 0.8)
+	var st := tower * Vector3(1.0, 0.0, 1.0) + side * 6.0
+	trundle.place_at(trundle.stops[0].x - 0.5)
+	trundle.paused = false
 	cp(&"w9_cp_lake", Vector3(-66.0, 0.0, 78.0))
 	npc("fernanda", "Fernanda", st + Vector3(9.0, 0.0, 2.0))
 	sign_at(st + Vector3(10.0, 0.0, -2.0), "Trundle Express: round the lake,\nstopping by Lookout Rock!", -PI * 0.5)
@@ -563,7 +577,7 @@ func _cycad_shelf() -> void:
 	fan.flag = &"w9_found_fan"
 	fan.label_text = "Ptilda's feather fan"
 	fan.color_name = &"candy_pink"
-	fan.position = dig + Vector3(5.0, 4.6, -3.0)
+	fan.position = dig + Vector3(5.0, 3.8, -3.0)
 	add_child(fan)
 	ledge(dig + Vector3(5.0, 3.8, -3.0), Vector3(3.0, 0.6, 3.0), &"cloth_cream")
 	ledge(dig + Vector3(1.0, 1.8, -1.0), Vector3(3.0, 0.6, 3.0), &"cloth_cream")
@@ -683,17 +697,18 @@ func _roost() -> void:
 	for i in houses.size():
 		var h := houses[i]
 		var top := h + Vector3(0.0, deck_h[i], 0.0)
-		Kit.pillar(self, top + Vector3(0.0, 8.0, 0.0), 1.6, deck_h[i] + 8.0, &"bark_mid", &"bark_mid")
+		Kit.pillar(self, top + Vector3(0.0, 8.0, 0.0), 1.4, deck_h[i] + 8.0, &"bark_mid", &"bark_mid")
 		Whimsy.canopy(self, top + Vector3(0.0, 11.0, 0.0), 7.0, tree_kinds[i % tree_kinds.size()])
-		Kit.pillar(self, top, 5.0, 0.8, &"wood_plank", &"wood_plank")
-		egg_hut(top + Vector3(-1.8, 0.0, -1.8), i * 1.3, 1.9, &"mush_spot", [&"candy_pink", &"slime_blue", &"lime_pop", &"gold"][i] as StringName)
-		ladder(h + Vector3(0.0, 0.0, 5.0), deck_h[i], 0.0)
+		Kit.pillar(self, top, 5.5, 0.8, &"wood_plank", &"wood_plank")
+		var hut_a := 2.4 + i * 1.3
+		egg_hut(top + Vector3(cos(hut_a), 0.0, sin(hut_a)) * 3.4, hut_a + PI * 0.5, 1.5, &"mush_spot", [&"candy_pink", &"slime_blue", &"lime_pop", &"gold"][i] as StringName)
+		ladder(h + Vector3(0.0, 0.0, 5.5), deck_h[i], 0.0)
 	for pair: Array in [[0, 1], [1, 2], [0, 3]]:
 		var a := houses[pair[0] as int] + Vector3(0.0, deck_h[pair[0] as int], 0.0)
 		var b := houses[pair[1] as int] + Vector3(0.0, deck_h[pair[1] as int], 0.0)
 		var d := Vector3(b.x - a.x, 0.0, b.z - a.z).normalized()
-		bridge(a + d * 4.4, b - d * 4.4, 2.8, &"wood_plank", true, &"bark_dark")
-	seed_at(&"w9_seed_roost_top", Vector3(-96.0, g + 12.0, -62.0))
+		bridge(a + d * 4.9, b - d * 4.9, 2.8, &"wood_plank", true, &"bark_dark")
+	seed_at(&"w9_seed_roost_top", houses[3] + Vector3(-3.2, deck_h[3], 2.0))
 	npc("ptilda", "Ptilda", Vector3(-88.0, g, -48.0), &"", Vector3.ZERO, "", &"", &"w9_seed_roost_errand").errand_flag = &"w9_found_fan"
 	npc("tuffy", "Tuffy", Vector3(-70.0, g + 9.0, -56.0))
 	for i in 10:
@@ -711,19 +726,21 @@ func _roost() -> void:
 
 func _ember_cone() -> void:
 	region(Vector3.ZERO)
-	var radii: Array[float] = [24.0, 19.0, 14.5, 10.5, 7.0]
+	var radii: Array[float] = [26.0, 21.0, 16.5, 12.5, 8.5]
 	var cols: Array[StringName] = [&"stone_dark", &"bark_dark", &"stone_dark", &"bark_dark", &"stone_dark"]
 	for i in radii.size():
 		var top := 3.0 * (i + 1)
 		Kit.pillar(self, VOLCANO + Vector3(0.0, top, 0.0), radii[i], top + 2.0, cols[i], &"moss" if i < 3 else &"sand_mid")
-		if i + 1 < radii.size():
-			# A ramp round the outside of the next tier, a quarter turn on from the last.
-			var lane := radii[i + 1] + 1.9
-			var a0 := i * PI * 0.5 + 0.4
-			var da := 9.4 / lane
-			var a := VOLCANO + Vector3(cos(a0), 0.0, sin(a0)) * lane + Vector3(0.0, top, 0.0)
-			var b := VOLCANO + Vector3(cos(a0 + da), 0.0, sin(a0 + da)) * lane + Vector3(0.0, top + 3.0, 0.0)
-			bridge(a, b, 3.4, &"sand_mid", false)
+	# A ramp up round the outside of each tier, a quarter turn on from the last (the first starts
+	# on the heights' ground). Its top end lies right beside the next tier's rim.
+	for i in range(-1, radii.size() - 1):
+		var top := 3.0 * (i + 1)
+		var lane := radii[i + 1] + 1.9
+		var a0 := i * PI * 0.5 + 0.4
+		var da := 9.4 / lane
+		var a := VOLCANO + Vector3(cos(a0), 0.0, sin(a0)) * lane + Vector3(0.0, top, 0.0)
+		var b := VOLCANO + Vector3(cos(a0 + da), 0.0, sin(a0 + da)) * lane + Vector3(0.0, top + 3.0, 0.0)
+		bridge(a, b, 3.4, &"sand_mid", false)
 	# The crater: a glowing pool (too hot to touch) inside a ring of rocks.
 	var crater := VOLCANO + Vector3(0.0, 15.0, 0.0)
 	var lava := CylinderMesh.new()
@@ -747,7 +764,7 @@ func _ember_cone() -> void:
 	add_child(pit)
 	for i in 9:
 		var a := float(i) / 9.0 * TAU
-		box(crater + Vector3(cos(a) * 5.2, 1.6, sin(a) * 5.2), Vector3(2.4, 1.6, 2.4), &"stone_dark", &"sand_mid").rotation.y = a
+		box(crater + Vector3(cos(a) * 5.4, 1.6, sin(a) * 5.4), Vector3(2.4, 1.6, 2.4), &"stone_dark", &"sand_mid").rotation.y = a
 	var glow := OmniLight3D.new()
 	glow.light_color = Palette.color(&"sunset_orange")
 	glow.light_energy = 2.0
@@ -757,7 +774,7 @@ func _ember_cone() -> void:
 	glow.position = crater + Vector3(0.0, 2.0, 0.0)
 	add_child(glow)
 	Ambient.motes(self, crater + Vector3(0.0, 5.0, 0.0), Vector3(6.0, 8.0, 6.0), Color(0.6, 0.6, 0.65, 0.6))
-	seed_at(&"w9_seed_summit", crater + Vector3(5.2, 3.2, 0.0))
+	seed_at(&"w9_seed_summit", crater + Vector3(5.4, 1.6, 0.0))
 	# The lava tube: a cracked rock behind the cone, steam rising inside, a climb to a shard.
 	var tube: Array = secret_cave(Vector3(VOLCANO.x, T2, -144.0), 0.0, Vector3(14.0, 18.0, 12.0), &"stone_dark", &"break")
 	ledge(Vector3(-4.5, 1.4, -3.0), Vector3(3.0, 1.4, 3.0), &"sunset_orange")
@@ -821,12 +838,14 @@ func _tar_crater() -> void:
 		var a := float(i) / 12.0 * TAU
 		var stick := Kit.block(self, nn + Vector3(cos(a) * 3.4, 0.8, -2.0 + sin(a) * 3.4), Vector3(0.6, 0.8, 3.0), &"bark_light", 0, &"")
 		stick.rotation.y = a
+	ladder(nn + Vector3(-10.0, 0.0, -6.0), 12.0, PI * 0.5)
 	# The east nook: a seed on a mossy stump.
 	var en := TAR + Vector3(TAR_HALF + 8.0, 0.0, 0.0)
 	box(en + Vector3(0.0, 12.0, -9.0), Vector3(16.0, 12.0, 2.0), &"stone_dark", &"moss")
 	box(en + Vector3(0.0, 12.0, 9.0), Vector3(16.0, 12.0, 2.0), &"stone_dark", &"moss")
 	box(en + Vector3(9.0, 12.0, 0.0), Vector3(2.0, 12.0, 20.0), &"stone_dark", &"moss")
 	Kit.pillar(self, en + Vector3(2.0, 1.2, 0.0), 1.6, 1.2, &"bark_mid", &"moss")
+	ladder(en + Vector3(4.0, 0.0, -8.0), 12.0, 0.0)
 	seed_at(&"w9_seed_tar_nook", en + Vector3(2.0, 1.2, 0.0))
 	npc("amberly", "Amberly", TAR + Vector3(4.0, 0.0, TAR_HALF + 3.0))
 	sign_at(TAR + Vector3(-4.0, 0.0, TAR_HALF + 3.0), "The Tar Crater. The old log turns!\nStep on from the west side.", 0.0)
@@ -941,12 +960,12 @@ func _monsters() -> void:
 	boulderkin(Vector3(100.0, T1 + 0.5, -54.0), &"sunset_orange", &"moss", &"gold")
 	critter(Mimic, Vector3(-16.0, T1 + 0.3, -42.0)).rotation.y = 0.4
 	critter(Hexwizard, TAR + Vector3(10.0, 0.0, TAR_HALF + 10.0))
-	critter(Hexwizard, Vector3(-60.0, T2, -100.0))
+	critter(Hexwizard, Vector3(-46.0, T2, -86.0))
 	critter(Armorling, Vector3(36.0, T2 + 0.5, -112.0))
 	critter(Wyrmling, VOLCANO + Vector3(0.0, 22.0, 14.0))
 	critter(Wispghost, Vector3(-90.0, T2 + 1.0, -40.0))
 	batling(Vector3(-62.0, T2 + 6.0, -46.0), false)
-	batling(Vector3(-84.0, 8.0, -20.0), true)
+	batling(Vector3(-80.0, 4.6, -21.0), true)
 	gloplets(Vector3(-2.0, T2, -84.0), 9.0, [Vector3.ZERO, Vector3(3.0, 0.0, 2.0), Vector3(-3.0, 0.0, -2.0)])
 
 

@@ -67,9 +67,27 @@ func test_trundle_carries_the_hero_round_the_lake_to_lookout_rock() -> void:
 	var t := lvl.trundle
 	var saddle := t.find_child("TrundleSaddle", true, false) as AnimatableBody3D
 	check(saddle != null, "Trundle has a saddle")
-	await ticks(2)
-	p.respawn_at(saddle.global_position + Vector3.UP * 0.6)
+	# He waits at the station: climb the station steps and walk up his tail to the saddle.
+	for i in 60:
+		await ticks(1)
+		if t.waiting == 0:
+			break
+	check_eq(t.waiting, 0, "Trundle starts waiting at the station")
+	var tail: Array[AnimatableBody3D] = []
+	for piece in t.pieces():
+		if piece.name.begins_with("Ride_Tail") or piece.name.begins_with("Ride_Back"):
+			tail.append(piece)
+	tail.sort_custom(func(a: AnimatableBody3D, b: AnimatableBody3D) -> bool: return t.to_local(a.global_position).z < t.to_local(b.global_position).z)
+	var foot := tail[0].global_transform * Vector3(0.0, 0.2, -1.0)
+	p.respawn_at(foot + Vector3.UP * 0.6)
 	await until_grounded(p)
+	for piece in tail:
+		await _walk_to(piece.global_position, 90, 0.6)
+	await _jump_to(saddle.global_position, 1, 90)
+	await _walk_to(saddle.global_position, 60, 0.4)
+	await ticks(5)
+	var rel0 := saddle.global_transform.affine_inverse() * p.global_position
+	check(absf(rel0.x) < 1.7 and absf(rel0.z) < 2.6 and rel0.y > 0.0 and rel0.y < 1.0, "walked up his tail onto the saddle while he waited (rel %s)" % str(rel0.snapped(Vector3.ONE * 0.1)))
 	var off := 0
 	var reached_rock := false
 	for i in 2400:
@@ -261,4 +279,70 @@ func test_rex_crest_follows_his_body_and_only_hops_you() -> void:
 		peak = maxf(peak, p.global_position.y)
 	check_eq(rex.hp, hp - 1, "a Plunge onto the glowing crest hurts him")
 	check(peak < crest.y + 6.0, "and the hop off is small (peak %.1f m, crest at %.1f m)" % [peak, crest.y])
+	await _done()
+
+
+## What you stand on is what you see: every moss strip on Mossback and Trundle lies on the skin
+## drawn under it (nothing pokes through, no gap you could see daylight through), at rest and
+## while Trundle walks.
+func test_dino_carpets_lie_on_their_skin() -> void:
+	await _load(&"w9_cp_lake")
+	lvl.mossback.state = HungryLongneck.S.EATING
+	lvl.mossback.set("_t", 7.4)
+	await ticks(30)
+	check(lvl.mossback.is_resting(), "Mossback resting")
+	for round_i in 3:
+		for d: Dino in [lvl.mossback.dino, lvl.trundle]:
+			var skin := d.skin_points()
+			var world := PackedVector3Array()
+			for q in skin:
+				world.append(d.global_transform * q)
+			var strips := 0
+			for piece in d.pieces():
+				if not (piece.name.begins_with("Ride_Tail") or piece.name.begins_with("Ride_Back") or piece.name.begins_with("Ride_Neck") or piece.name.begins_with("Ride_Shoulders") or piece.name.begins_with("Ride_Hips") or (piece.name.begins_with("Ride_Torso") and d == lvl.mossback.dino)):
+					continue
+				strips += 1
+				var size := ((piece.get_child(0) as CollisionShape3D).shape as BoxShape3D).size
+				var inv := piece.global_transform.affine_inverse()
+				var poke := -INF
+				var gap := INF
+				for q in world:
+					var l := inv * q
+					if absf(l.z) > size.z * 0.4 or absf(l.x) > size.x * 0.4:
+						continue
+					poke = maxf(poke, l.y + size.y * 0.5)
+					if absf(l.x) < 0.5:
+						gap = minf(gap, -size.y * 0.5 - l.y)
+				check(poke < 0.12, "%s %s: no skin pokes through (%.2f m)" % [d.species, piece.name, poke])
+				check(gap < 0.75, "%s %s: it lies on the skin (gap %.2f m)" % [d.species, piece.name, gap])
+			check(strips >= 4, "%s has moss strips (%d)" % [d.species, strips])
+		await ticks(53)
+	await _done()
+
+
+## The Hatchery's shard is a climb inside, once the float has the gate up.
+func test_hatchery_climb_reaches_the_shard() -> void:
+	await _load(&"w9_cp_locks")
+	lvl.locks.fill(1)
+	for i in 160:
+		await ticks(1)
+	check(lvl.locks.gate_is_open(), "gate open")
+	var room := Transform3D(Basis(Vector3.UP, PI * 0.5), Dinodew.HATCH)
+	p.respawn_at(room * Vector3(0.0, 0.4, 5.0))
+	await until_grounded(p)
+	for spot: Vector3 in [Vector3(-4.5, 1.2, -3.0), Vector3(-1.0, 3.2, -4.0), Vector3(3.0, 5.0, -2.5), Vector3(5.0, 7.0, 1.5)]:
+		await _walk_to(room * Vector3(spot.x, 0.0, spot.z), 30, 2.6)
+		await _jump_to(room * spot, 2, 120)
+	await ticks(20)
+	check(Progress.has_shard(&"w9_shard_hatchery"), "the Hatchery shard is collected (hero at %s)" % str(p.global_position.snapped(Vector3.ONE * 0.1)))
+	await _done()
+
+
+## Regression: StaticMerge used to free a merged mesh together with the collision it carried
+## (giant mushroom caps, tree trunks), so the capstool seed's cap was air.
+func test_mushroom_caps_stay_solid_after_merging() -> void:
+	await _load(&"w9_cp_fernfloor")
+	var q := PhysicsRayQueryParameters3D.create(Vector3(30.0, 14.0, -8.0), Vector3(30.0, 0.5, -8.0), Layers.WORLD)
+	var hit := get_world_3d().direct_space_state.intersect_ray(q)
+	check(not hit.is_empty() and (hit["position"] as Vector3).y > 9.0, "the giant mushroom cap under the seed is solid (%s)" % str(hit.get("position", "none")))
 	await _done()

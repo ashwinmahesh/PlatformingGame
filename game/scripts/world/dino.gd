@@ -511,6 +511,13 @@ func loop_length() -> float:
 	return _loop_len
 
 
+## Puts it at distance d along its loop, facing along the path (for building around a stop).
+func place_at(d: float) -> void:
+	travelled = d
+	_place_on_path(true)
+	tick(0.0)
+
+
 func _place_on_path(snap: bool) -> void:
 	var at: Array = path_at(travelled)
 	var dir := at[1] as Vector3
