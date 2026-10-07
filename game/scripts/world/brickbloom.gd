@@ -649,6 +649,7 @@ func _north_fields() -> void:
 	scatter(Vector3(0.0, 0.0, -100.0), Vector2(60.0, 30.0), 30, [&"flower_yellow", &"flower_purple", &"bush", &"q_mushrooms"] as Array[StringName], 0.0)
 	heart_bush(Vector3(-20.0, 0.0, -88.0))
 	butterflies(Vector3(-40.0, 1.0, -100.0), 18.0, 6)
+	add_capture_point("riddle", Vector3(-38.0, 9.0, -88.0), Vector3(-54.0, 1.0, -104.0))
 
 
 # --- West: the Weigh-House Green and the brickworks -----------------------------------------------
@@ -889,6 +890,7 @@ func _hooks() -> void:
 	for spec: Array in [[HOOK_CLOUD_LOW + Vector3(-4.5, 0.0, 4.5), &"candy_pink"], [HOOK_CLOUD_LOW + Vector3(4.5, 0.0, -4.5), &"slime_blue"], [HOOK_CLOUD_HIGH + Vector3(-3.0, 0.0, -3.0), &"gold"], [HOOK_CLOUD_HIGH + Vector3(3.0, 0.0, -3.0), &"candy_pink"]]:
 		_balloon(spec[0] as Vector3, spec[1] as StringName)
 	sign_post(Vector3(-2.0, 0.0, 78.0), "Balloon clouds: Vinelash (2 / G)\nfrom flower to flower!", PI * 0.75)
+	add_capture_point("balloon_clouds", Vector3(8.0, 16.0, 86.0), HOOK_CLOUD_LOW + Vector3(-6.0, 4.0, -6.0))
 
 
 # --- North-east: the Toy Box; south-west: the Pipe Garden; trees --------------------------------
