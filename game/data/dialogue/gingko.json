@@ -1,0 +1,24 @@
+{
+  "id": "gingko",
+  "name": "gingko",
+  "conversations": [
+    {
+      "when": "w9_found_spectacles",
+      "lines": [
+        {
+          "speaker": "Grandpa Gingko",
+          "text": "My spectacles! Now I can see what a hero you are. This Star Shard is yours."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Grandpa Gingko",
+          "text": "A rascally pterosaur nicked my spectacles! It nests across the Tar Crater, up on the heights. Bring them back and my brightest Star Shard is yours."
+        }
+      ]
+    }
+  ]
+}

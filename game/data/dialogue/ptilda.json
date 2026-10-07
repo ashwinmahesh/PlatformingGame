@@ -1,0 +1,24 @@
+{
+  "id": "ptilda",
+  "name": "ptilda",
+  "conversations": [
+    {
+      "when": "w9_found_fan",
+      "lines": [
+        {
+          "speaker": "Ptilda",
+          "text": "My fan! Thank you, sprout. Have a Glimmer Seed."
+        }
+      ]
+    },
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Ptilda",
+          "text": "The wind blew my feather fan off the Roost! It came down by the old fossil dig on the Cycad Shelf. Fetch it for me?"
+        }
+      ]
+    }
+  ]
+}

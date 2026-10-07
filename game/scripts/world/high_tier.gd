@@ -57,6 +57,8 @@ static func lift(parent: Node3D, base: Vector3, top_y: float, period: float = 7.
 	m.travel = Vector3(0.0, top_y - base.y, 0.0)
 	m.period = period
 	m.color_name = color
-	m.position = base + Vector3.DOWN * 0.4
+	# A MovingPlatform swings ±travel/2 round where it's placed, so the lift is placed halfway up:
+	# its top then runs from the ground at base.y to top_y (it used to sink half its travel).
+	m.position = base + Vector3.UP * (top_y - base.y) * 0.5 + Vector3.DOWN * 0.4
 	parent.add_child(m)
 	return m

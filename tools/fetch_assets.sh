@@ -32,4 +32,11 @@ song shop.mp3 "$AR/Komiku-Its_Time_For_Adventure_Vol4/Komiku_-_04_-_I_got_99_bro
 song title.mp3 "$OF/Komiku%20-%20Tale%20on%20the%20Late%20-%2001%20Tale%20on%20the%20Late%20%28Main%20Theme%29.mp3"
 song boss.wav "$OF/Juhani%20Junkala%20-%20Epic%20Boss%20Battle%20%5BSeamlessly%20Looping%5D.wav"
 song chiptune_adventures_ogg.zip "$OF/Juhani%20Junkala%20%5BChiptune%20Adventures%5D%20OGG.zip"
+# Quaternius Animated Dinosaur Bundle (CC0) from Poly Pizza: one .glb per dinosaur (World 9).
+for pair in Parasaurolophus:47b9d0bd-cddb-49be-b072-12201def24a9 TRex:34eed102-48f0-43dd-bc6f-ef7a6dfddfbb \
+            Velociraptor:c1f0c4cb-c84f-415c-8323-d8cb871a2126 Triceratops:6aa1f3ff-b9b3-4bb5-9d85-b2ffa514f0cc \
+            Stegosaurus:6f8f4ac6-f9e8-488d-97a8-220b9b2fd02a Apatosaurus:7b873860-f23f-4266-b341-5c5e6770cfa0; do
+  mkdir -p "$DL/quaternius_dinosaurs"; echo "== ${pair%%:*}"
+  curl -fsSL -A "Mozilla/5.0" -o "$DL/quaternius_dinosaurs/${pair%%:*}.glb" "https://static.poly.pizza/${pair#*:}.glb"
+done
 echo "Done. Unzip a pack over art/sourced/<pack>/ to refresh it, then re-copy what the game uses into game/assets/."

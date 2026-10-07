@@ -1,0 +1,19 @@
+{
+  "id": "tuffy",
+  "name": "tuffy",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Tuffy",
+          "text": "Psst. There's a crack in the rock behind Ember Cone, and steam puffs out of it."
+        },
+        {
+          "speaker": "Tuffy",
+          "text": "Three good whacks, a Plunge or a Fireball would open it. Bet there's something hot inside!"
+        }
+      ]
+    }
+  ]
+}

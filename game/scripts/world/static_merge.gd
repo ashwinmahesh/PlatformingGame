@@ -71,7 +71,12 @@ static func merge(level: Node3D) -> int:
 				left[id] = left[id] - 1
 	for mi in victims:
 		if left[mi.get_instance_id()] <= 0:
-			mi.queue_free()
+			# A merged mesh that carries its own collision (Whimsy mushrooms, trees, cacti keep
+			# their StaticBody as a child) stays as an empty node so the collision survives.
+			if mi.get_child_count() > 0:
+				mi.mesh = null
+			else:
+				mi.queue_free()
 	return made
 
 

@@ -88,6 +88,16 @@ const MODELS: Dictionary[String, Array] = {
 	"brixie": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.52, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"lettie": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 	"corbel": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.58, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"gingko": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.62, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	"cycadia": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.56, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"burble": ["res://assets/models/kaykit_adventurers/Barbarian.glb", 0.6, ["1H_Axe_Offhand", "Barbarian_Round_Shield", "1H_Axe", "2H_Axe"]],
+	"dozy": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.5, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"fernanda": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.52, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"ptilda": ["res://assets/models/kaykit_adventurers/Mage.glb", 0.52, ["Spellbook", "Spellbook_open", "1H_Wand", "2H_Staff"]],
+	"tuffy": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.46, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"amberly": ["res://assets/models/kaykit_adventurers/Rogue_Hooded.glb", 0.55, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
+	"bixby": ["res://assets/models/kaykit_adventurers/Knight.glb", 0.6, ["1H_Sword_Offhand", "Badge_Shield", "Rectangle_Shield", "Spike_Shield", "Round_Shield", "1H_Sword", "2H_Sword"]],
+	"pipkin": ["res://assets/models/kaykit_adventurers/Rogue.glb", 0.44, ["Knife", "Knife_Offhand", "1H_Crossbow", "2H_Crossbow", "Throwable"]],
 }
 
 ## Room for future services (plan §8.8); empty in Release 1.

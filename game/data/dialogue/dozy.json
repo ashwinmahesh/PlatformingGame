@@ -1,0 +1,19 @@
+{
+  "id": "dozy",
+  "name": "dozy",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Dozy",
+          "text": "Snoozer naps in his haystack all day. Hop up his back-plates and ring the gong on his saddle!"
+        },
+        {
+          "speaker": "Dozy",
+          "text": "He stands right up when he wakes, so hold on. A really mighty roar would wake him too."
+        }
+      ]
+    }
+  ]
+}

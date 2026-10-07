@@ -60,3 +60,17 @@ func test_sloped_bridge_walks_up() -> void:
 	await ticks(10)
 	await _walk_to(Vector3(0.0, 0.0, -42.0), 240)
 	check(p.global_position.y > 5.5, "walked up the bridge onto the high deck (y %.1f)" % p.global_position.y)
+
+
+## Regression (found while building World 9): a lift used to swing half its travel underground,
+## so it only rose halfway. Its top must run from the ground right up to top_y.
+func test_lift_runs_from_the_ground_to_the_top() -> void:
+	var m := HighTier.lift(self, Vector3(0.0, 0.0, 0.0), 20.0, 2.0)
+	var lo := INF
+	var hi := -INF
+	for i in 150:
+		await ticks(1)
+		lo = minf(lo, m.global_position.y + 0.4)
+		hi = maxf(hi, m.global_position.y + 0.4)
+	check(absf(lo) < 0.3, "the lift comes down to the ground (lowest top %.1f m)" % lo)
+	check(absf(hi - 20.0) < 0.3, "and rises all the way up (highest top %.1f m)" % hi)

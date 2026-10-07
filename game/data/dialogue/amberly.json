@@ -1,0 +1,19 @@
+{
+  "id": "amberly",
+  "name": "amberly",
+  "conversations": [
+    {
+      "when": "",
+      "lines": [
+        {
+          "speaker": "Amberly",
+          "text": "The old log over the Tar Crater turns on its stump. Get on from the west side, then whack the wheel in the middle while you ride!"
+        },
+        {
+          "speaker": "Amberly",
+          "text": "Don't fall in the tar. It's sticky."
+        }
+      ]
+    }
+  ]
+}

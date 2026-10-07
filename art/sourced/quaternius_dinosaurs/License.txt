@@ -1,0 +1,15 @@
+Animated Dinosaur Bundle by Quaternius (quaternius.com), via Poly Pizza
+Bundle page: https://poly.pizza/bundle/Animated-Dinosaur-Bundle-SmoLdBLO2K
+Model pages (each marked "Licence: CC0 1.0" on 2026-10-06):
+  Parasaurolophus  https://poly.pizza/m/KeeQrrouRK
+  T-Rex            https://poly.pizza/m/UYtneO5FpF
+  Velociraptor     https://poly.pizza/m/cnlGH2UcDd
+  Triceratops      https://poly.pizza/m/IGvrUqGrRM
+  Stegosaurus      https://poly.pizza/m/eFcNbOlpvl
+  Apatosaurus      https://poly.pizza/m/fvo0x8Zk3z
+Files: the .glb files as served by https://static.poly.pizza/<id>.glb, unmodified.
+
+License:
+CC0 1.0 Universal (CC0 1.0)
+Public Domain Dedication
+https://creativecommons.org/publicdomain/zero/1.0/
