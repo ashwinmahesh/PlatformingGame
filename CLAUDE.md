@@ -54,6 +54,11 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
   scales, gears, following a critter, a villager's riddle, timed switch runs, colour mixing,
   platforms set in sequence, creatures that react to the hero. Each is readable without a wall
   of text and has a small hint from a villager or a visual cue.
+  Ledger after Build 7 (two worlds = used up): crate-on-plate, bells in order, braziers (W1, W5),
+  critter trail (W1, W4), colour locks (W2, W4), turn bridge (W2, W9), riddle dig (W2, W8),
+  mirrors (W3, W7), water levels (W4, W9), thunder dynamo (W5, W7). One world so far: timed
+  switch run (W5), bloom-buds (W7), weight scale (W8), platforms in sequence (W8), creatures that
+  react to the hero (W9). Still free: notes by ear, gears, rotating rooms, colour mixing.
 - Vertical accessibility is a core focus:
   - every level has a full upper world (decks, rooftops, ledges) with its own paths, villagers,
     secrets, seeds and enemies, not just a few platforms;
@@ -67,7 +72,11 @@ make lint needs gdtoolkit (`pipx install "gdtoolkit==4.*"`), not installed yet.
 - Dense worlds must still hold 60 fps on the Mac Mini at 1920x1080: `make bench` checks every
   world and the hub. Build scenery through Kit (primitive meshes get sensible segment counts),
   let StaticMerge combine static scenery, chunk repeated kit pieces (ModuleBatch) with distance
-  fades, and keep lights unshadowed with distance fade.
+  fades, and keep lights unshadowed with distance fade. StaticMerge keeps a mesh's own collision
+  child (mushroom caps, trunks); anything scripted or animated is never merged.
+- Rideable creatures (World 9's Dino): what you stand on is kinematic pieces that follow the
+  creature's bones every physics tick (ridge_carpets_at), so collision is the mesh you see; test
+  that they lie on the skin and that a rider stays on while it walks.
 - Water is deep (8-12 m) in a walled basin with a bed, with things to find underwater; the sword
   works while swimming.
 

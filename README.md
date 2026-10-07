@@ -1,6 +1,6 @@
 # Sproutblade
 
-A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built in **Godot 4.7.2**. You play a little sprout with a sword. You set out from the village of Mossbrook through the Rootway's arches into seven worlds. You collect Star Shards and Glimmer Seeds, and you learn a new magic ability each time you clear a world.
+A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built in **Godot 4.7.2**. You play a little sprout with a sword. You set out from the village of Mossbrook through the Rootway's arches into nine worlds. You collect Star Shards and Glimmer Seeds, and you learn a new magic ability each time you clear a world.
 
 ![Lanternwick, the old-English town](docs/screenshots/lanternwick_overview.jpg)
 
@@ -9,8 +9,9 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 - **Small open worlds.** Every world is a sandbox you can tackle in any order. Each one has six Star Shards: three open its goal (a boss fight or a Grand Star), and the rest hide behind villagers' errands, secret rooms and puzzles.
 - **A second world up high.** Every world has a large upper tier of its own: treetop villages, cloud kingdoms, rooftop towns and cliff ledges. You get up there by ladders, spiral ramps, lifts, bounce pads and wind.
 - **Secrets and puzzles.** Every world has its own puzzles: mirrors and light beams, water levels, a turning bridge, braziers to light, colour locks, a critter to follow, a thunder dynamo, a villager's riddle, bloom-buds that open into steps. Breakable walls and bramble doors guard secret rooms, and villagers send you on errands.
+- **Dinosaurs you can ride.** In Dinodew Jungle you walk up a long-neck's tail and along her neck to the cliffs, ride a triceratops across the lake, and wake a sleepy stegosaurus to lift you to a nest.
 - **Water you can swim in.** Lakes, rivers and pools are 8–12 m deep. They have grottos and seeds at the bottom, and you can use the sword while swimming.
-- **A storybook look.** One toon shader is applied over CC0 models from Quaternius, KayKit and Kenney, with painted terrain, an ink outline and a bright palette.
+- **A storybook look.** One toon shader is applied over CC0 models from Quaternius (including its animated dinosaurs and space kit), KayKit and Kenney, with painted terrain, an ink outline and a bright palette.
 
 ### Mossbrook and the worlds
 
@@ -24,6 +25,8 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 | 5 | **Frostfang Peak**: a snowy valley with an ice slide, crystal caverns and pine heights | Boss: Avalanche Ape | The Rimwalk along the north cliffs |
 | 6 | **Lanternwick**: a walled old-English riverside town of jettied timber houses, alleys and washing lines | Grand Star | The Sweep's Run rooftops, the Sky Bridge and the Clock Tower |
 | 7 | **Planet Glorbo**: a candy-coloured alien moon, a crater round a lake of glowing goo, with dome villages and weird plants | Boss: Queen Bloomzilla | The Orbit Walk, a ring of floating decks, and the Crown Asteroid |
+| 8 | **Brickbloom Heights**: a toy-box castle kingdom with warp pipes, bricks to bonk, Hopscotch Court, a giant balance scale and a bonus room under the moat | Grand Star | The castle ramparts and keep, the Toybox Terraces and the Sky Rows to a flagpole fort |
+| 9 | **Dinodew Jungle**: a terraced prehistoric jungle with a lake, a volcano and big friendly dinosaurs you can climb and ride | Boss: Chomposaurus Rex | The Roost treehouses on the Great Cliff, Ember Cone and the Skyfern |
 
 | | |
 |---|---|
@@ -37,6 +40,8 @@ A cheerful 3D action-platformer in the spirit of Zelda and Dragon Quest, built i
 | A Lanternwick alley: a ladder, ledges and a crystal stair | The Glimmerbrook canopy from above |
 | ![Planet Glorbo](docs/screenshots/glorbo.jpg) | ![The Bloomstalk](docs/screenshots/glorbo_bloomstalk.jpg) |
 | Planet Glorbo and the Orbit Walk | The Bloomstalk: bop each bud to bloom the next step |
+| ![Brickbloom Heights](docs/screenshots/brickbloom.jpg) | ![Hopscotch Court](docs/screenshots/brickbloom_hopscotch.jpg) |
+| Brickbloom Heights | Hopscotch Court: land on the dice in order |
 
 ### Moves and magic
 
@@ -53,8 +58,8 @@ Every world teaches a magic ability once it's finished with all six Star Shards 
 | 5 | Frost Burst | Frostfang | Freezes monsters solid and water into floes you can stand on. |
 | 6 | Spring Boots | Lanternwick | A huge spring onto rooftops (once more in the air). |
 | 7 | Gravity Orb | Planet Glorbo | Drags monsters into a vortex, then pops. |
-| 8 | Star Rush | World 8 | An untouchable sprint that bowls monsters over. |
-| 9 | Mighty Roar | World 9 | Stuns every monster far around and knocks shields away. |
+| 8 | Star Rush | Brickbloom Heights | An untouchable sprint that bowls monsters over. |
+| 9 | Mighty Roar | Dinodew Jungle | Stuns every monster far around and knocks shields away. |
 
 On a gamepad, pick an ability with D-pad left/right and cast it with RT (LB and RB stay Thunderclap and Air Dash).
 

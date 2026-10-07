@@ -13,13 +13,22 @@
   errands in every world; deeper water with sword swimming; the new enemy roster (docs/bestiary.md);
   an upper tier in every world and Mossbrook (HighTier kit); World 6, Lanternwick, a dense
   old-English town built from the Medieval Village kit (TownHouse + ModuleBatch).
-- 86 automated tests green (`make test`, which fails on any FAIL line).
+- Build 7 (2026-10-06): Glide replaced by Vinelash; world abilities stored in the save and taught
+  once a world is finished with all six stars; abilities 1-9 and a gamepad picker; the Glimmer
+  Seed shop (Clover); six stars per world (errand, hidden, puzzle stars) with puzzle variety; six
+  more monsters; performance pass (StaticMerge, chunked ModuleBatch, Kit.lighten), every world at
+  60 fps; the golem gem and Ape head hit zones; lifts now rise all the way; CC0 music for every
+  world, the bosses, the title and the shop; three new worlds: Planet Glorbo (W7, Queen
+  Bloomzilla, Gravity Orb), Brickbloom Heights (W8, Grand Star, Star Rush) and Dinodew Jungle
+  (W9, rideable dinosaurs, Chomposaurus Rex, Mighty Roar).
+- 156 automated tests green (`make test`, which fails on any FAIL line).
 
 ## Needs a human
 - Play each world end to end and say what feels off (platform sizes, jump distances, boss pace),
-  especially the new upper tiers and Lanternwick's rooftops.
+  especially the new upper tiers, Lanternwick's rooftops and Worlds 7-9 (Hopscotch Court and the
+  Sky Rows jump distances, riding the dinosaurs).
 - Install gdtoolkit; install export templates for `make export-mac`.
 
 ## Backlog (next)
-- Gamepad/keyboard remapping UI; a world map; music beyond the synthesised cues.
+- Gamepad/keyboard remapping UI; a world map.
 - More ability gates in Worlds 1–2 for revisits (brambles, ice, far ledges).
